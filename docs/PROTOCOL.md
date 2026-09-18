@@ -1,5 +1,7 @@
 # Protocole opérationnel — Benchmark de scoring de pitchs VC
 
+![Roadmap visuelle du projet](PROJECT_ROADMAP.png)
+
 ## 1. Finalité du projet
 
 Construire une expérience reproductible qui compare un petit modèle local et un modèle frontier sur une même tâche : évaluer des pitchs de startups selon une grille VC, classer les dossiers et identifier le top 10 %.
