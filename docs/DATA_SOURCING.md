@@ -36,7 +36,7 @@ Attention à la date : le deck Airbnb est de 2008. Un pitch de 2008 noté avec u
 - [Annuaire officiel YC](https://www.ycombinator.com/companies) — gratuit, filtrable par industrie, région, taille d'équipe, batch. La source principale.
 - [VCBacked — 6 302 sociétés YC](https://www.vcbacked.co/yc) — utile pour parcourir hors du plafond de 1 000 résultats de l'annuaire officiel.
 
-Un one-liner YC n'est pas un pitch : c'est un point de départ (problème, secteur, client visé) à développer jusqu'à 800 mots.
+Un one-liner YC n'est pas un pitch : c'est un point de départ (problème, secteur, client visé) à développer jusqu'à 650 mots.
 
 ### Palier faible
 
@@ -68,7 +68,7 @@ Pour chacun des 37 pitchs dérivés :
 2. Noter `source_url` et la date d'accès.
 3. Extraire la **structure** : problème, client visé, approche, modèle économique.
 4. **Changer le nom**, le pays si besoin, les chiffres, les noms de fondateurs.
-5. Rédiger jusqu'à 800 mots max, au format de `pitch_text`.
+5. Rédiger jusqu'à 650 mots, au format de `pitch_text`.
 6. **Retirer ou ajouter délibérément** ce que la grille de calibration demande pour ce slot — l'information absente est un choix de conception, pas un oubli.
 7. Renseigner `source_type: "derived"` et `source_note`.
 

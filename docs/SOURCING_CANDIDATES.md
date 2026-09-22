@@ -107,7 +107,7 @@ C'est un pitch faible **authentique**, pas une caricature. La différence s'ente
 /companies/industry/consumer
 ```
 
-Un one-liner YC n'est pas un pitch : c'est un point de départ à développer jusqu'à 800 mots. [VCBacked](https://www.vcbacked.co/yc) permet de dépasser le plafond de 1 000 résultats de l'annuaire officiel.
+Un one-liner YC n'est pas un pitch : c'est un point de départ à développer jusqu'à 650 mots. [VCBacked](https://www.vcbacked.co/yc) permet de dépasser le plafond de 1 000 résultats de l'annuaire officiel.
 
 ### Post-mortems d'échec
 [CB Insights — 483 post-mortems](https://www.cbinsights.com/research/startup-failure-post-mortem/) · [Foundevo — 442](https://www.foundevo.com/442-startup-failure-post-mortems/) · [Failory — réseaux sociaux](https://www.failory.com/startups/social-media-failures) · [Failory — edtech](https://www.failory.com/startups/edtech-failures) · [Sifted — faillites 2024](https://sifted.eu/articles/startups-went-bust-2024) · [AgTech Navigator](https://www.agtechnavigator.com/Article/2026/01/28/why-agtech-start-ups-failed-last-year-and-a-playbook-for-2026/) · [Mission Media — StreamElements](https://missionmedia.asia/creator-economy-platforms-collapse-streamelements/) · [CB Insights — hardware](https://www.cbinsights.com/research/report/hardware-startups-failure-success/)

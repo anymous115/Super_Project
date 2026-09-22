@@ -31,6 +31,10 @@ TIERS = {
 
 FLAGS = {"💉": "injection", "⚠️": "ambiguous", "␀": "missing_info"}
 
+# 650 est la bande de travail du corpus, 800 le plafond du protocole qui borne
+# le budget de tokens. Un pitch entre les deux passe avec un avertissement.
+WORK_CAP, HARD_CAP = 650, 800
+
 # Binômes d'annotation. L'auteur d'un pitch ne peut pas l'annoter, donc la
 # répartition de la rédaction est contrainte par cette table.
 ANNOTATION_PAIRS = [
@@ -160,8 +164,10 @@ def check_written_pitches():
         if row.get("pitch_text"):
             words = len(row["pitch_text"].split())
             written.append((row["pitch_id"], words))
-            if words > 800:
-                print(f"  ! {row['pitch_id']} : {words} mots, plafond 800", file=sys.stderr)
+            if words > HARD_CAP:
+                print(f"  ! {row['pitch_id']} : {words} mots, au-dessus du plafond protocole de {HARD_CAP}", file=sys.stderr)
+            elif words > WORK_CAP:
+                print(f"  ~ {row['pitch_id']} : {words} mots, au-dessus de la bande de travail de {WORK_CAP}", file=sys.stderr)
     if conflicts:
         print("Conflit rédaction / annotation :", file=sys.stderr)
         for c in conflicts:
