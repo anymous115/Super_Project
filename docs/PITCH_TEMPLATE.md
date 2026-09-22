@@ -100,6 +100,25 @@ Répartition des langues dans le projet :
 
 Le bilinguisme se teste donc sur la sortie, pas sur l'entrée. Le champ `language` de `data/pitches.jsonl` vaut `en` pour les 50 lignes ; il existe pour qu'un corpus multilingue reste possible plus tard sans changer de schéma.
 
+## Circuit d'un pitch
+
+```
+ancrage source + profil calibré
+          ↓
+    brouillon rédigé          drafted_by
+          ↓
+ le propriétaire relit,       written_by
+ corrige, ajuste à la cible
+          ↓
+   review_status: validated
+          ↓
+    double annotation          par deux personnes ≠ written_by
+```
+
+`drafted_by` dit qui a produit le texte. `written_by` dit qui **répond de sa calibration** — c'est cette personne qui décide que le pitch atteint bien sa cible, et c'est pour cela qu'elle ne peut pas l'annoter ensuite.
+
+Un brouillon n'est pas un pitch. Tant que `review_status` vaut `drafted`, personne n'a vérifié qu'il atteint sa cible.
+
 ## Avant de soumettre un pitch
 
 - [ ] ≤ 800 mots
