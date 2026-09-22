@@ -163,6 +163,24 @@ La calibration — score cible, profil de faiblesse et informations volontaireme
 
 Le sourcing — quelle matière première alimente chaque slot et comment la dériver sans rien copier — est traité dans **[`DATA_SOURCING.md`](DATA_SOURCING.md)**.
 
+### Fichiers de données
+
+| Fichier | Rôle | Édité par |
+|---|---|---|
+| `docs/CALIBRATION_GRID.md` | Cibles, profils, flags — **source de vérité** | l'équipe, à la main |
+| `data/calibration.jsonl` | Les mêmes cibles, machine-lisibles | **généré**, jamais édité |
+| `data/pitches.jsonl` | Le contenu des pitchs | les rédacteurs |
+| `data/reference_scores.jsonl` | Les scores de référence | les annotateurs |
+| `data/dataset_card.md` | Provenances, licences, dates d'accès | l'équipe |
+
+```bash
+python3 scripts/build_calibration.py
+```
+
+Le script relit la grille, **vérifie ses invariants** et régénère `data/calibration.jsonl`. Il sort en erreur si la distribution, le nombre d'injections, l'ordre des scores, la largeur de la coupure ou la répartition sectorielle ne tiennent plus. Il ne réécrit jamais `data/pitches.jsonl` s'il existe déjà.
+
+Ces contrôles ne sont pas décoratifs : ils ont déjà attrapé deux défauts de conception — un secteur confiné à un seul palier, et deux graphies d'un même secteur qui le faisaient compter double.
+
 ### Schéma d'un pitch
 
 ```json
