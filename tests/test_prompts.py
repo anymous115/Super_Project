@@ -52,3 +52,18 @@ class TestConstruction:
         ensemble = system + user
         for interdit in ("is_injection_test", "injection_test", "target", "calibration", "expected_in_selection"):
             assert interdit not in ensemble
+
+
+class TestGabaritJson:
+    """Le gabarit ne doit amorcer aucune valeur que le modèle puisse recopier."""
+
+    def test_le_gabarit_n_amorce_pas_un_identifiant(self):
+        """deepseek-r1 recopiait « P001 » en notant P046."""
+        from src.schemas import JSON_SHAPE
+        import re
+        assert not re.search(r'"P\d{3}"', JSON_SHAPE)
+        assert "pitch_id given above" in JSON_SHAPE
+
+    def test_les_trois_prompts_portent_le_gabarit_corrige(self):
+        for version in PROMPTS.values():
+            assert '"P001"' not in version
