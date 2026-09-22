@@ -7,4 +7,5 @@ openai>=1.40           # client du modèle frontier
 langfuse>=2.50         # tracing des appels LLM (§9)
 streamlit>=1.37        # interface (§12)
 reportlab>=4.2         # rendu des PDF depuis pitch_text (§6)
+pypdf>=5.0             # extraction PDF, mesurée à part du benchmark (§6, §11)
 pytest>=8.0            # tests
