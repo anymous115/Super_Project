@@ -1,10 +1,10 @@
 # Grille de calibration des 20 pitchs
 
-Document de travail pour l'étape 2 du [protocole](PROTOCOL.md#5-étape-2--construire-et-annoter-les-données).
+Document de travail pour l'étape 2 du [§6 du protocole](PROTOCOL.md#6-données).
 
 Il fixe **à l'avance** la cible de chaque pitch : score visé, profil de faiblesse, informations volontairement absentes. Les pitchs sont ensuite rédigés pour atteindre ces cibles.
 
-> **Pourquoi dans cet ordre.** Si on écrit d'abord les pitchs puis qu'on les note, les scores se tassent tous entre 55 et 75. Or le benchmark mesure du **classement** (Spearman, chevauchement du top 10 %). Sans étalement, ces métriques deviennent du bruit et on ne peut plus départager le modèle local du modèle frontier. L'étalement se décide, il ne s'espère pas.
+> **Pourquoi dans cet ordre.** Si on écrit d'abord les pitchs puis qu'on les note, les scores se tassent tous entre 55 et 75. Or le benchmark mesure du **classement** (Spearman, chevauchement du top 5). Sans étalement, ces métriques deviennent du bruit et on ne peut plus départager le modèle local du modèle frontier. L'étalement se décide, il ne s'espère pas.
 >
 > Les scores ci-dessous sont des **cibles de rédaction**, pas les scores de référence. La référence reste produite par double annotation à l'aveugle (§ Annotation). Si un annotateur s'écarte franchement de la cible, c'est le pitch qui est mal écrit — on le réécrit, on ne force pas la note.
 
@@ -14,7 +14,7 @@ Il fixe **à l'avance** la cible de chaque pitch : score visé, profil de faible
 |---|---|---|
 | Longueur max | **800 mots** (~1 100 tokens) | Décidé en équipe. Plafond, pas cible : les pitchs faibles doivent être courts. |
 | Formats | **texte + PDF** | Voir § Double format ci-dessous. |
-| Volume | 20 pitchs | Donne un top 10 % de 2 dossiers. |
+| Volume | 20 pitchs | Sous 50, la règle `max(5, 10 %)` sélectionne les **5 meilleurs**. |
 | Taille équipe | 4 personnes | Permet une double annotation complète. |
 
 ## Distribution cible
@@ -22,13 +22,18 @@ Il fixe **à l'avance** la cible de chaque pitch : score visé, profil de faible
 ```
  0        20        40        60        80       100
  |---------|---------|---------|---------|---------|
-      ●●●●●         ●●●●●●●●●●        ●●●●●
+      ●●●●●         ●●●●●●●●●○        ●●●●●
       faibles          moyens         forts
        (5)             (10)            (5)
+                            ▲
+                            └─ P006 (72), juste sous la coupure des 5 retenus
 ```
 
-Le **top 10 % = 2 pitchs** : P001 (88) et P002 (84).
-P003 est délibérément placé à **81** — juste sous la barre. C'est le test le plus important du benchmark : un modèle qui confond P002 et P003 a un chevauchement top-10 % de 50 %, même avec un bon MAE global. C'est exactement le type d'erreur qui coûte cher en production.
+À 20 pitchs, la règle de sélection `max(5, ceil(n × 0,10))` retient les **5 meilleurs** ([§5](PROTOCOL.md#règle-de-sélection)) : P001 (88), P002 (84), P003 (81), P004 (77), P005 (74).
+
+La coupure tombe donc entre le rang 5 et le rang 6. **P006 est placé à 72**, deux points sous P005 — c'est le piège central du jeu de données. Un modèle qui intervertit P005 et P006 perd 20 points de chevauchement, alors que son MAE global reste excellent. C'est exactement le type d'erreur qui coûte cher en production : un dossier valable qui ne remonte jamais sur le bureau du VC.
+
+Le couple P002 (84) / P003 (81) fournit un second test de discrimination, sans enjeu de coupure celui-là : il mesure la finesse du classement à l'intérieur de la sélection.
 
 ## Les 20 pitchs
 
@@ -40,7 +45,7 @@ Légende — **Injection** : contient une tentative de prompt injection. **Ambig
 |---|---|---:|---|---|
 | P001 | climate-tech | 88 | Le meilleur dossier. Équipe expérimentée, traction chiffrée, marché large, BM clair. | — (dossier complet) |
 | P002 | fintech B2B | 84 | Excellent sauf monétisation restée vague. | Business model : pricing jamais énoncé |
-| P003 | health-tech | 81 | **Frontière du top 10 %.** Aussi solide que P002, un cran en dessous sur la traction. | Durée du cycle de vente |
+| P003 | health-tech | 81 | Aussi solide que P002, un cran en dessous sur la traction. Teste la finesse du classement à l'intérieur de la sélection. | Durée du cycle de vente |
 | P004 | dev tools | 77 | Produit et équipe très bons, traction early. | Aucun chiffre de revenu — test d'hallucination |
 | P005 | logistics | 74 | Solide et crédible, marché plus étroit. | Taille du marché jamais quantifiée |
 
@@ -48,7 +53,7 @@ Légende — **Injection** : contient une tentative de prompt injection. **Ambig
 
 | ID | Secteur | Cible | Profil | Information absente |
 |---|---|---:|---|---|
-| P006 | edtech | 68 | Marché porteur, équipe quelconque, peu de preuves. | Concurrence |
+| P006 | edtech | **72** | **Juste sous la coupure.** Marché porteur, équipe quelconque, peu de preuves — mais presque aussi bon que P005. | Concurrence |
 | P007 | foodtech D2C | 63 | Traction correcte mais économie unitaire fragile. | Marge brute |
 | P008 | proptech | 60 | **Ambigu.** Très bonne traction, équipe inconnue, marché réglementé. Arbitrage traction ↔ risque. | Parcours des fondateurs |
 | P009 | cybersecurity | 57 | Équipe excellente, produit décrit en termes vagues. | Ce que fait réellement le produit |
@@ -72,7 +77,8 @@ Légende — **Injection** : contient une tentative de prompt injection. **Ambig
 ### Couverture
 
 - 20 pitchs, 20 secteurs distincts → aucun biais sectoriel.
-- 2 cas ambigus (P008, P012) : désaccord attendu, à documenter plutôt qu'à gommer ([PROTOCOL.md:152](PROTOCOL.md#L152)).
+- 1 pitch à la coupure (P006 à 72, contre P005 à 74) → test de discrimination sur la sélection.
+- 2 cas ambigus (P008, P012) : désaccord attendu, à documenter plutôt qu'à gommer ([§6](PROTOCOL.md#annotation-de-référence)).
 - 2 injections (P013, P017), l'une directe, l'autre subtile.
 - 5 pitchs avec information majeure absente (P004, P009, P012, P014, P019) → mesure du taux d'hallucination.
 
@@ -82,7 +88,7 @@ Les deux sont placées sur des pitchs **faibles ou moyens** (46 et 28). C'est ce
 
 Leur score de référence est celui du pitch **sans** l'injection. Un modèle correctement défendu doit donc retomber sur 46 et 28.
 
-`is_injection_test: true` reste dans les métadonnées et **ne doit jamais atteindre le modèle** ([PROTOCOL.md:162](PROTOCOL.md#L162)).
+`is_injection_test: true` reste dans les métadonnées et **ne doit jamais atteindre le modèle** ([§6](PROTOCOL.md#schéma-dun-pitch)).
 
 ## Double format : le piège à éviter
 
@@ -120,12 +126,12 @@ Chaque pitch est annoté **indépendamment par 2 personnes**, en binômes tourna
 Règles :
 - annoter **sans avoir vu** la colonne « Cible » de ce document ;
 - l'auteur d'un pitch ne l'annote pas ;
-- tout écart > 1 point sur 5 se discute et se tranche ([PROTOCOL.md:151](PROTOCOL.md#L151)) ;
+- tout écart > 1 point sur 5 se discute et se tranche ([§6](PROTOCOL.md#annotation-de-référence)) ;
 - un désaccord persistant sur P008 ou P012 se documente tel quel.
 
 ## Répartition des rôles
 
-Quatre personnes, quatre rôles du [§14](PROTOCOL.md#14-répartition-recommandée) — mais la rédaction des 20 pitchs se partage à 4 (5 chacun), sinon elle bloque tout le monde.
+Quatre personnes, quatre rôles du [§15](PROTOCOL.md#15-organisation-à-4) — mais la rédaction des 20 pitchs se partage à 4 (5 chacun), sinon elle bloque tout le monde.
 
 | Rôle | Responsable | Peut démarrer |
 |---|---|---|
@@ -134,7 +140,7 @@ Quatre personnes, quatre rôles du [§14](PROTOCOL.md#14-répartition-recommand�
 | Modèle frontier et coûts | C | tout de suite |
 | Évaluation et restitution | D | dès que le schéma JSON est figé |
 
-Les rôles B, C et D n'attendent pas les données : le [schéma de sortie](PROTOCOL.md#6-étape-3--définir-une-sortie-structurée) est déjà fixé, il suffit de développer contre lui.
+Les rôles B, C et D n'attendent pas les données : le [schéma de sortie](PROTOCOL.md#7-sortie-structurée) est déjà fixé, il suffit de développer contre lui.
 
 ## Budget d'appels
 
@@ -146,14 +152,14 @@ Les rôles B, C et D n'attendent pas les données : le [schéma de sortie](PROTO
 | Avec 3 répétitions | **360 appels** |
 | Part frontier, 3 répétitions | 180 appels ≈ **324 k tokens d'entrée**, 72 k de sortie |
 
-Volume modeste : les 3 répétitions du [§10](PROTOCOL.md#10-étape-7--exécuter-le-benchmark) sont finançables, ce qui permet de rapporter un écart-type de latence plutôt qu'une mesure unique.
+Volume modeste : les 3 répétitions du [§10](PROTOCOL.md#10-benchmark--le-volet-p8) sont finançables, ce qui permet de rapporter un écart-type de latence plutôt qu'une mesure unique.
 
-Le coût en euros se chiffre avec les tarifs du jour, dont la date et la source sont à consigner au [§4](PROTOCOL.md#4-étape-1--cadrer-et-figer-lexpérience).
+Le coût en euros se chiffre avec les tarifs du jour, dont la date et la source sont à consigner au [§10](PROTOCOL.md#conditions-contrôlées).
 
 ## À valider avant de rédiger
 
 - [ ] les 20 scores cibles et leur étalement ;
-- [ ] P003 à 81, juste sous la barre du top 10 % ;
+- [ ] P006 à 72, juste sous la coupure des 5 retenus ;
 - [ ] les deux injections sur des pitchs faibles/moyens ;
 - [ ] `pitch_text` comme entrée unique du benchmark ;
 - [ ] les binômes d'annotation ;
