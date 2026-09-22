@@ -21,7 +21,7 @@ Il fixe **à l'avance** la cible de chaque pitch : score visé, profil de faible
 | Paramètre | Valeur | Raison |
 |---|---|---|
 | Volume | **50 pitchs** | Point de croisement exact de la règle de sélection. |
-| Longueur max | 800 mots (~1 100 tokens) | Plafond, pas cible : les pitchs faibles doivent être courts. |
+| Longueur | bande de travail **650 mots**, plafond protocole 800 (~1 100 tokens) | Aucun des deux n'est une cible : les pitchs faibles doivent être courts. |
 | Formats | texte + PDF | `pitch_text` est l'entrée unique du benchmark. |
 | Équipe | 4 personnes | 100 annotations à produire — voir § Annotation. |
 

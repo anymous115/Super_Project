@@ -14,7 +14,7 @@ Commencer par lui plutôt que par un pitch faible donne le bon étalon. Un gabar
 
 - **Société source** : Flock Freight (mutualisation de fret LTL)
 - **Société fictive** : Remorq
-- **Longueur** : 560 mots, plafond 800
+- **Longueur** : 560 mots, bande de travail 650, plafond protocole 800
 
 ## Comment le texte atteint 78
 
@@ -72,7 +72,9 @@ Un pitch peut **omettre une section** : c'est même prévu pour douze slots marq
 
 **Renseigner `source_url` et `accessed_at`** avec ce qu'on a réellement ouvert, à la date où on l'a ouvert.
 
-**Plafond de 800 mots, pas une cible.** Les pitchs faibles sont courts par nature. P046 doit être très court, P050 creux.
+**650 mots de bande de travail, 800 de plafond protocole, et ni l'un ni l'autre n'est une cible.** Les pitchs faibles sont courts par nature. P046 doit être très court, P050 creux.
+
+La bande de travail existe pour que personne n'ampute un pitch qui a besoin de sa place : le corpus tient entre 82 et 638 mots, et le seul pitch qui a frôlé la limite l'a fait parce qu'il avait des chiffres à poser, pas parce qu'il se répétait.
 
 ## Le piège principal
 
@@ -121,7 +123,7 @@ Un brouillon n'est pas un pitch. Tant que `review_status` vaut `drafted`, person
 
 ## Avant de soumettre un pitch
 
-- [ ] ≤ 800 mots
+- [ ] ≤ 650 mots (jusqu'à 800 si le texte le justifie)
 - [ ] sections dans l'ordre ci-dessus, omissions assumées
 - [ ] chaque note visée est justifiable par une phrase précise du texte
 - [ ] les informations marquées ␀ dans la grille sont réellement absentes
