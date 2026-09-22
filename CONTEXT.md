@@ -39,7 +39,7 @@ Les deux canaux de la v1 couvrent le cas d'usage réel. Les autres sont document
 - 50 pitchs fictifs annotés en double, en texte et en PDF ;
 - grille de notation VC explicite et pondérée ;
 - sélection adaptative `min(50, max(5, 10 %))` ;
-- modèle local `deepseek-r1:8b` via Ollama ;
+- modèles comparés : `deepseek-r1:8b` en local, `gpt-6-astra` en frontier ;
 - restitution bilingue français / anglais ;
 - pipeline de scoring commun aux deux modèles ;
 - sorties structurées validées avec Pydantic ;
