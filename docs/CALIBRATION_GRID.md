@@ -175,6 +175,42 @@ pitch_text (JSONL)  ──►  LES DEUX MODÈLES        ← le benchmark, entré
 - Les PDF sont générés depuis ce même texte, avec des mises en page variées.
 - L'extraction PDF se mesure à part et va dans le rapport, pas dans le tableau qualité/coût/latence.
 
+## Répartition de la rédaction
+
+> **Cette répartition n'est pas libre.** L'auteur d'un pitch ne peut pas l'annoter, et les binômes d'annotation sont fixés ci-dessous. On ne peut donc pas découper 50 pitchs en quatre parts arbitraires : chaque bloc doit revenir aux deux personnes qui ne l'annotent pas.
+
+| Rédacteur | Pitchs | Nombre | Annoté par |
+|---|---|---:|---|
+| **A** | P010–P014 · P027–P030 · P043–P046 | 13 | C+D · B+D · B+C |
+| **B** | P015–P018 · P019–P022 · P035–P038 | 12 | C+D · A+C · A+D |
+| **C** | P001–P004 · P031–P034 · P039–P042 | 12 | A+B · B+D · A+D |
+| **D** | P005, P007–P009 · P023–P026 · P047–P050 | 12 | A+B · A+C · B+C |
+| — | **P006** | 1 | déjà rédigé, sert de [gabarit](PITCH_TEMPLATE.md) |
+
+`scripts/build_calibration.py` **refuse de générer** si un auteur se retrouve annotateur de son propre pitch. La contrainte est vérifiée, pas seulement écrite.
+
+Chacun a donc environ un quart de la rédaction et la moitié de l'annotation — 12 à 13 pitchs à écrire, 25 à annoter.
+
+### Correspondance A/B/C/D
+
+Dans `data/team.json`, lu par `build_calibration.py` pour afficher l'avancement de chacun.
+
+| Lettre | Personne | Rôle | À rédiger |
+|---|---|---|---:|
+| **A** | Amdy | Données et annotation | 13 |
+| **B** | Gabin | Pipeline et modèle local | 12 |
+| **C** | Alessandro | Modèle frontier et coûts | 12 |
+| **D** | Mathisse | Évaluation et interface | 12 |
+
+> **Proposition, pas décision.** Les lettres portent aussi les rôles, donc cette correspondance répartit le travail autant que la rédaction. Elle s'appuie sur ce que chacun a déjà produit :
+>
+> - **Amdy** a construit la calibration, le sourcing et le gabarit — les données lui reviennent naturellement, et c'est le seul à avoir 13 pitchs.
+> - **Mathisse** a écrit le brief produit, les critères de succès, la spécification Streamlit et le bilinguisme — l'évaluation et l'interface prolongent son travail.
+> - **Gabin** a produit le prototype initial — le pipeline et le modèle local suivent.
+> - **Alessandro** n'a pas encore de commits : le volet frontier et coûts est le rôle le plus autonome, celui qui demande le moins de contexte accumulé pour démarrer.
+>
+> Un échange de lettres dans `data/team.json` suffit à tout réattribuer — la contrainte auteur ≠ annotateur reste vérifiée dans tous les cas.
+
 ## Annotation à 4
 
 > ⚠️ **C'est ici que se joue la faisabilité du passage à 50.**
