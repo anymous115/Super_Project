@@ -63,6 +63,23 @@ python3 scripts/show_pitch.py P005 P006  # lit un pitch
 
 Le générateur refuse de produire si la distribution, le nombre d'injections, l'ordre des scores, la largeur de la coupure, la répartition sectorielle ou la règle auteur ≠ annotateur ne tiennent plus.
 
+## Annotation
+
+La référence ne vient pas des cibles de calibration : elle vient de la double annotation à l'aveugle (§6). 50 pitchs × 2 annotateurs = **100 annotations, 25 par personne**.
+
+```bash
+python3 scripts/annotate.py --who A --status    # ce qu'il me reste
+python3 scripts/annotate.py --who A             # annoter, à l'aveugle
+python3 scripts/build_reference.py --report     # l'état de la fusion
+python3 scripts/build_reference.py              # produit data/reference_scores.jsonl
+```
+
+`annotate.py` ne lit jamais `calibration.jsonl` : ni cible, ni rang, ni palier, ni drapeau. Le total pondéré n'apparaît qu'après la saisie des cinq notes, pour qu'il n'ancre pas la recommandation.
+
+Pour la même raison, **`show_pitch.py` masque la cible par défaut** — il faut `--reveal` pour la voir.
+
+`build_reference.py` refuse de produire tant qu'un pitch n'a pas ses deux annotations, ou tant qu'un écart supérieur à 1 point sur 5 n'a pas été tranché et consigné. Une référence qui moyenne un désaccord de 3 points n'est pas une référence.
+
 ## Pipeline
 
 ```bash
