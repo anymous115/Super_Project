@@ -2,6 +2,10 @@
 
 Six pitchs rédigés. Cette fiche existe pour qu'on **vérifie** au lieu de redériver : pour chaque critère, la note visée et la phrase du texte censée la justifier.
 
+> **Révision du 22 septembre.** Le [rapport de contrôle](VALIDATION_BATCH1_REPORT.md) a relevé que quatre justifications de cette fiche étaient des appréciations et non des faits du texte. Corrigé : pour P002 et P003, une phrase a été **ajoutée aux pitchs** pour ancrer la note d'équipe ; pour P006, c'est la formulation de la fiche qui était floue, la preuve existait.
+>
+> C'était un vrai défaut. Une note dont la justification n'est pas dans le texte fait diverger les annotateurs — exactement l'instabilité que la double annotation doit éviter.
+
 **La question à se poser n'est pas « quelle note je mettrais ? »** mais « la phrase citée soutient-elle bien cette note ? ». Compter 5 minutes par pitch.
 
 Si une justification ne tient pas, c'est le **texte** qu'on corrige, pas la note — la cible vient de [`CALIBRATION_GRID.md`](CALIBRATION_GRID.md) et ne bouge pas.
@@ -24,7 +28,7 @@ Grille : équipe 20 · marché 25 · produit 15 · traction 25 · business model
 
 | Critère | Note | Ce qui doit la justifier |
 |---|:-:|---|
-| Équipe | 4 | Huit ans d'infrastructure de paiement, responsable du règlement sur dix-neuf pays ; le second a passé deux produits en approbation réglementaire. Solide et pertinent — sans le relief qui ferait un 5. |
+| Équipe | 4 | Huit ans d'infrastructure de paiement, règlement sur dix-neuf pays, deux produits passés en approbation. **Plafonné par le texte lui-même** : « Neither of us has founded a company before, and neither has issued a regulated instrument. » |
 | Marché | 5 | 40 000 Md$ de flux B2B transfrontaliers, segment chiffré à 40 000 sociétés cibles avec un seuil explicite. |
 | Produit | 5 | Dix jours contre douze mois. Le client garde sa marque et sa politique de trésorerie. « They never touch a blockchain primitive. » |
 | Traction | 4 | 9 clients, 2,1 Md$ réglés contre 310 M$ l'an passé, NRR 164 %, zéro écart de réserve sur 14 attestations. Volume fort, base de clients encore étroite. |
@@ -34,7 +38,7 @@ Grille : équipe 20 · marché 25 · produit 15 · traction 25 · business model
 
 | Critère | Note | Ce qui doit la justifier |
 |---|:-:|---|
-| Équipe | 4 | Direction des opérations cliniques d'un groupe de 40 sites, et la conduite d'une équipe grounding/retrieval. Pertinent des deux côtés, sans exploit. |
+| Équipe | 4 | Direction des opérations cliniques d'un groupe de 40 sites, et la conduite d'une équipe grounding/retrieval. **Plafonné par le texte lui-même** : « Neither founder has built a company past this stage. » |
 | Marché | 5 | 12 Md$, segment de 31 000 organisations avec un critère de taille justifié — « assez grandes pour sentir le coût, assez petites pour décider sans comité ». |
 | Produit | 4 | Intégration au niveau de la prescription plutôt que du rendez-vous, certifié sur trois EHR. **Mais le texte plafonne lui-même** : « We are not alone in this category and we do not claim to be. » |
 | Traction | 4 | 61 organisations, 840 praticiens, no-show de 17,4 % à 11,9 %, 74 % des messages résolus sans humain, NRR 121 %. |
@@ -65,9 +69,9 @@ Grille : équipe 20 · marché 25 · produit 15 · traction 25 · business model
 | Critère | Note | Ce qui doit la justifier |
 |---|:-:|---|
 | Équipe | **5** | Neuf ans à diriger 1 200 départs quotidiens chez un top-5 européen ; optimisation d'itinéraires sur onze pays ; dix-huit mois de travail commun avant création. |
-| Marché | 4 | 38 Md€ chiffrés, 14 Md€ adressables avec justification du découpage. Marché mature et disputé. |
+| Marché | 4 | 38 Md€ chiffrés, 14 Md€ adressables avec justification du découpage. Le texte décrit des réseaux historiques qui « dominent le segment » et plusieurs plateformes concurrentes — marché occupé, pas vierge. |
 | Produit | **3** | « We do not claim an unassailable technology » — l'avance vient de la densité du carnet, pas de la technologie. |
-| Traction | 4 | 4,1 M€ facturés, +11 %/mois, rétention 71 %, remplissage 84 % contre 63 % sectoriel. Volume absolu modeste. |
+| Traction | 4 | 4,1 M€ facturés, +11 %/mois, rétention 71 %, remplissage 84 % contre 63 % sectoriel. Rapporté au marché adressable de 14 Md€ que le texte annonce lui-même, le volume reste très faible — c'est de l'arithmétique sur les chiffres du pitch, pas une appréciation. |
 | Business model | 3 | « That margin is thin » — 6,2 points nets, non démontrés au-delà de trois corridors. |
 
 ---
