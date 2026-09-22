@@ -222,6 +222,7 @@ Le sixième risque change de nature par rapport à la version précédente : le 
 - [x] La V1 est bilingue français / anglais, l'anglais par défaut.
 - [x] **Le corpus des 50 pitchs est rédigé en anglais.** Le bilinguisme porte sur la restitution, pas sur l'entrée : un corpus mélangé ajouterait une variable non contrôlée.
 - [x] La V1 utilise Ollama local avec `deepseek-r1:8b` comme modèle initial.
+- [x] **Le modèle frontier du benchmark est `gpt-6-astra`.** Choisi sur l'axe qualité et non sur le prix — l'écart entre candidats représente ~14 $ sur tout le benchmark. Aucun modèle Anthropic n'est éligible puisque Claude rédige le corpus.
 - [x] Le score total est recalculé dans le code.
 
 ### Modifiées — à revalider

@@ -516,7 +516,7 @@ Réunion courte, et rien ne démarre avant que ces cinq points soient figés :
 
 1. la grille et ses pondérations ;
 2. la règle de sélection `max(5, 10 %)` et les deux métriques de classement ;
-3. le modèle frontier exact et sa version — le local est fixé à `deepseek-r1:8b` ;
+3. ~~le modèle frontier~~ — **décidé** : `gpt-6-astra`, local `deepseek-r1:8b`. Voir la configuration dans le [README](../README.md#configuration-de-lexpérience) ;
 4. la validation de `CALIBRATION_GRID.md` et la répartition des 5 pitchs par personne ;
 5. les deux canaux d'ingestion de la v1.
 
