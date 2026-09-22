@@ -24,7 +24,7 @@ Le notebook `08_quality_vs_cost_benchmark.ipynb` garde son nom pour conserver le
 
 - ingestion Telegram et email, avec un événement normalisé commun ;
 - extraction du contenu depuis texte, PDF et lien ;
-- 20 pitchs fictifs annotés en double ;
+- 50 pitchs fictifs annotés en double ;
 - grille de notation VC explicite et pondérée ;
 - pipeline de scoring commun aux deux modèles ;
 - sorties structurées validées avec Pydantic ;
@@ -147,13 +147,17 @@ Les deux régimes se rejoignent exactement à n = 50, où 10 % font 5. La règle
 
 En cas d'égalité, départager sur la traction, puis le marché, puis l'identifiant du pitch, pour que le résultat reste déterministe.
 
-> **Ce que ça change pour l'évaluation.** Avec 20 pitchs, la sélection porte sur 5 dossiers et non 2. Une erreur coûte 20 points de chevauchement au lieu de 50 : la métrique devient assez stable pour porter une conclusion.
+> **Ce que ça change pour l'évaluation.** Le jeu de données compte 50 pitchs, donc les deux régimes de la règle donnent le même résultat : 5 dossiers retenus. C'est le seul volume où la règle est démontrable des deux côtés au lieu d'être seulement énoncée.
 >
-> On rapporte deux niveaux : le **Spearman sur les 20 pitchs** comme métrique de classement principale, et le **chevauchement du top 5** comme métrique produit — celle qui dit si le bon dossier atterrit sur le bureau du VC.
+> Une erreur de sélection coûte 20 points de chevauchement, ce qui rend la métrique assez stable pour porter une conclusion.
+>
+> On rapporte deux niveaux : le **Spearman sur les 50 pitchs** comme métrique de classement principale, et le **chevauchement du top 5** comme métrique produit — celle qui dit si le bon dossier atterrit sur le bureau du VC.
 
 ## 6. Données
 
-Le jeu de données est constitué de **20 pitchs entièrement fictifs**, en texte et en PDF.
+Le jeu de données est constitué de **50 pitchs entièrement fictifs**, en texte et en PDF.
+
+Le volume est choisi pour tomber exactement sur le point de bascule de la règle de sélection : à n = 50, les 5 fixes et les 10 % donnent le même nombre.
 
 La calibration — score cible, profil de faiblesse et informations volontairement absentes de chaque pitch — est fixée **avant rédaction** dans **[`CALIBRATION_GRID.md`](CALIBRATION_GRID.md)**. Ce document fait autorité sur la distribution, les deux cas ambigus, les deux injections et la répartition de l'annotation.
 
@@ -270,13 +274,15 @@ Les appels sont tracés avec **Langfuse** : prompt, version, entrée, sortie, la
 | Local (Ollama) | ✓ | ✓ | ✓ |
 | Frontier | ✓ | ✓ | ✓ |
 
-20 pitchs × 2 modèles × 3 prompts = **120 appels** par répétition, **360 appels** sur 3 répétitions.
+50 pitchs × 2 modèles × 3 prompts = **300 appels** par répétition, **900 appels** sur 3 répétitions.
 
-À 800 mots par pitch, un appel pèse environ 1 800 tokens d'entrée et 400 de sortie. La part frontier sur 3 répétitions représente ~324 k tokens d'entrée : le volume reste modeste, les 3 répétitions sont finançables, ce qui permet de rapporter un écart-type de latence plutôt qu'une mesure unique.
+À 800 mots par pitch, un appel pèse environ 1 800 tokens d'entrée et 400 de sortie. La part frontier sur 3 répétitions représente ~810 k tokens d'entrée. À chiffrer avec les tarifs du jour avant de lancer la matrice complète.
+
+Si le budget se tend, réduire d'abord le nombre de répétitions, pas le nombre de pitchs : une passe unique sur 50 pitchs vaut mieux que trois passes sur 20.
 
 ### Conditions contrôlées
 
-- mêmes 20 pitchs, même ordre de passage ;
+- mêmes 50 pitchs, même ordre de passage ;
 - température à 0 ;
 - versions de modèles figées et notées précisément ;
 - machine de mesure locale documentée ;
@@ -291,7 +297,7 @@ Date et source des tarifs utilisés pour le modèle payant à consigner dans le 
 ### Qualité du scoring
 
 - MAE par critère et MAE sur le score total ;
-- corrélation de rang de **Spearman** sur les 20 pitchs — métrique de classement principale ;
+- corrélation de rang de **Spearman** sur les 50 pitchs — métrique de classement principale ;
 - chevauchement du **top 5** — métrique produit : le bon dossier remonte-t-il ?
 - accord de recommandation (`reject` / `review` / `shortlist`) ;
 - taux de JSON valide ;
@@ -380,7 +386,7 @@ Ne jamais committer `.env`, une clé API, un token ou un pitch confidentiel.
 Figer la grille, la règle de sélection, les deux modèles et leurs versions exactes, la machine de mesure. Créer les issues.
 
 ### Phase 2 — Données
-Rédiger les 20 pitchs selon `CALIBRATION_GRID.md`, double annotation, réconciliation, rendu des PDF, dataset card, gel de `data-v1`.
+Rédiger les 50 pitchs selon `CALIBRATION_GRID.md`, double annotation (100 évaluations, 25 par personne), réconciliation, rendu des PDF, dataset card, gel de `data-v1`.
 
 ### Phase 3 — Pipeline
 Schémas Pydantic, pipeline de scoring, connexion Ollama puis frontier, Langfuse, tests essentiels.
@@ -426,7 +432,9 @@ docs/final-delivery
 | Modèle frontier et coûts | Appels hébergés, tokens, coûts, Langfuse, budget | tout de suite |
 | Évaluation et interface | Métriques, notebook, figures, Streamlit, rapport | dès le schéma figé |
 
-La rédaction des 20 pitchs se partage à 4 — **5 chacun** — sinon une seule personne bloque toute l'équipe.
+La rédaction des 50 pitchs se partage à 4 — **12 à 13 chacun** — sinon une seule personne bloque toute l'équipe.
+
+L'annotation représente **100 évaluations, soit 25 par personne**. C'est le poste le plus lourd du projet : à prendre en compte dans le planning avant de s'engager sur 50 pitchs.
 
 Les rôles pipeline, frontier et évaluation n'attendent pas les données : le schéma de sortie est figé au §7, il suffit de développer contre lui avec 2 ou 3 pitchs factices.
 
@@ -435,7 +443,7 @@ Chaque Pull Request précise ce qui change, comment le vérifier, les résultats
 ## 16. Definition of Done
 
 - [ ] la grille, les poids et la règle de sélection sont figés ;
-- [ ] 20 pitchs fictifs et leurs scores de référence sont versionnés ;
+- [ ] 50 pitchs fictifs et leurs scores de référence sont versionnés ;
 - [ ] les données ont une provenance et une dataset card ;
 - [ ] les sorties respectent un schéma Pydantic validé ;
 - [ ] le score total est recalculé dans le code ;
@@ -460,13 +468,13 @@ Chaque Pull Request précise ce qui change, comment le vérifier, les résultats
 2. **Méthode — 2 min** : données, grille, modèles, prompts.
 3. **Démonstration — 2 min** : un PDF envoyé sur Telegram, noté, classé, affiché.
 4. **Résultats — 2 min** : qualité, classement, latence, coût.
-5. **Sécurité et limites — 1 min** : injection, hallucinations, 20 pitchs fictifs.
+5. **Sécurité et limites — 1 min** : injection, hallucinations, 50 pitchs fictifs.
 6. **Recommandation — 1 min** : local, frontier ou hybride.
 7. **Questions — 1 min**.
 
 La recommandation doit être conditionnelle et défendue : le local s'il atteint une qualité suffisante avec un avantage net de coût ou de confidentialité ; le frontier si son gain justifie son prix ; un système hybride si le local peut filtrer les cas évidents et le frontier réévaluer la zone frontière du classement.
 
-Ne jamais conclure sur la seule qualité ou le seul coût. Expliquer les compromis, les limites d'un échantillon de 20 pitchs fictifs et les risques d'un usage réel.
+Ne jamais conclure sur la seule qualité ou le seul coût. Expliquer les compromis, les limites d'un échantillon de 50 pitchs fictifs et les risques d'un usage réel.
 
 ## 18. Première action
 

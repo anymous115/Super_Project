@@ -36,7 +36,7 @@ Les deux canaux de la v1 couvrent le cas d'usage réel. Les autres sont document
 
 ## Scope du MVP
 
-- 20 pitchs fictifs annotés en double, en texte et en PDF ;
+- 50 pitchs fictifs annotés en double, en texte et en PDF ;
 - grille de notation VC explicite et pondérée ;
 - règle de sélection `max(5, 10 %)` ;
 - pipeline de scoring commun aux deux modèles ;

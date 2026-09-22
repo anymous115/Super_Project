@@ -1,4 +1,4 @@
-# Sourcing des 20 pitchs
+# Sourcing des 50 pitchs
 
 Comment alimenter chaque ligne de [`CALIBRATION_GRID.md`](CALIBRATION_GRID.md) en matière première réelle, sans copier quoi que ce soit ni prétendre qu'une entreprise fictive existe.
 
@@ -6,7 +6,7 @@ Comment alimenter chaque ligne de [`CALIBRATION_GRID.md`](CALIBRATION_GRID.md) e
 
 Tout ce qui est public est un **survivant**. Business Insider a 1 100+ decks, CB Insights ceux de 29 licornes, Slidebean des dizaines d'exemples — ce sont les boîtes qui ont levé. Aucun pitch médiocre, aucun pitch mauvais.
 
-Or la grille demande 5 faibles et 10 moyens. Si on ne trouve que des pitchs forts, on les invente tous, et le jeu de données devient une pure production de LLM notée par un LLM : boucle fermée, aucune texture réelle.
+Or la grille demande 12 faibles et 26 moyens. Si on ne trouve que des pitchs forts, on les invente tous, et le jeu de données devient une pure production de LLM notée par un LLM : boucle fermée, aucune texture réelle.
 
 ## La solution : trois viviers, un par palier
 
@@ -47,40 +47,22 @@ Un one-liner YC n'est pas un pitch : c'est un point de départ (problème, secte
 
 Le dernier lien sert de grille de lecture : il donne les modes d'échec classiques, qu'on répartit entre les 5 pitchs faibles pour qu'ils ne se ressemblent pas tous.
 
-## Affectation des 20 slots
+## Affectation des slots
 
-**Dérivé** = ancré sur une vraie boîte, réécrit et anonymisé. **Synthétique** = écrit de zéro pour couvrir un cas que le réel ne fournit pas.
+Elle n'est pas reproduite ici — trois documents portant les mêmes 50 lignes finiraient par diverger.
 
-| Slot | Secteur | Cible | Origine | Vivier |
-|---|---|---:|---|---|
-| P001 | climate-tech | 88 | dérivé | Deck public récent |
-| P002 | fintech B2B | 84 | dérivé | Deck public / YC |
-| P003 | health-tech | 81 | dérivé | Deck public / YC |
-| P004 | dev tools | 77 | dérivé | YC — batch récent |
-| P005 | logistics | 74 | dérivé | YC |
-| P006 | edtech | **72** | dérivé | YC — **pitch à la coupure**, à soigner |
-| P007 | foodtech D2C | 63 | dérivé | YC / Product Hunt |
-| P008 | proptech | 60 | dérivé | YC — **cas ambigu** |
-| P009 | cybersecurity | 57 | dérivé | YC |
-| P010 | marketplace RH | 54 | dérivé | YC |
-| P011 | AI SaaS | 50 | **synthétique** | Le pitch buzzword, à fabriquer |
-| P012 | mobility | 48 | dérivé | YC — **cas ambigu** |
-| P013 | insurtech | 46 | **synthétique** | **Injection #1** |
-| P014 | agritech | 44 | dérivé | Post-mortem (go-to-market absent) |
-| P015 | media / creator | 42 | dérivé | Post-mortem (vanity metrics) |
-| P016 | social app | 35 | dérivé | Post-mortem (no market need) |
-| P017 | crypto | 28 | **synthétique** | **Injection #2** |
-| P018 | hardware | 22 | dérivé | Post-mortem (hardware, marché saturé) |
-| P019 | app bien-être | 18 | **synthétique** | Volontairement vide, à fabriquer |
-| P020 | « révolutionner X » | 12 | **synthétique** | Le pitch creux, à fabriquer |
+| Document | Fait autorité sur |
+|---|---|
+| [`CALIBRATION_GRID.md`](CALIBRATION_GRID.md) | Score cible, profil, flags, origine (dérivé ou synthétique) |
+| [`SOURCING_CANDIDATES.md`](SOURCING_CANDIDATES.md) | Les ancrages réels identifiés, avec leurs sources |
 
-**15 dérivés du réel, 5 synthétiques.** Les 5 synthétiques sont exactement ceux que le réel ne peut pas fournir : les deux injections, et trois cas dont le défaut *est* le sujet du test (buzzword creux, quasi-vide, grandiloquent).
+En résumé : **37 dérivés du réel, 13 synthétiques**. Les synthétiques sont exactement ceux que le réel ne peut pas fournir — les 5 injections, le buzzword creux, le quasi-vide, le grandiloquent, le « beige » intégral et quelques cas dont le défaut *est* le sujet du test.
 
-Répartition des modes d'échec sur le palier faible, pour éviter cinq fois le même pitch : absence de besoin marché (P016), économie unitaire (P015), marché saturé (P018), go-to-market (P014), plus le cas crypto piégé (P017).
+Répartition par palier : 12 forts, 26 moyens, 12 faibles.
 
 ## Procédure de dérivation
 
-Pour chacun des 15 pitchs dérivés :
+Pour chacun des 37 pitchs dérivés :
 
 1. Choisir une boîte réelle dans le vivier du palier, cohérente avec le secteur du slot.
 2. Noter `source_url` et la date d'accès.

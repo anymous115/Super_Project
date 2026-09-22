@@ -73,7 +73,7 @@ Un benchmark portant sur deux tâches — une subjective, une objective — est 
 
 L'appel séparé se défend mieux : l'extraction étant plus facile, elle peut tourner sur le modèle local même si le scoring part sur le frontier. C'est un scénario hybride concret et chiffrable.
 
-Le jeu de données existant suffit : les 20 pitchs portent déjà les champs à extraire. Il faut y ajouter une annotation de référence — **beaucoup plus rapide que l'annotation de scoring**, puisqu'il s'agit de relever des faits, pas de porter un jugement.
+Le jeu de données existant suffit : les 50 pitchs portent déjà les champs à extraire. Il faut y ajouter une annotation de référence — **beaucoup plus rapide que l'annotation de scoring**, puisqu'il s'agit de relever des faits, pas de porter un jugement.
 
 ### Décision
 
