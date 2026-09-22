@@ -40,8 +40,25 @@ Recalculé sur le corpus réel par `python3 scripts/estimate_cost.py`. L'estimat
 - température 0 ;
 - mêmes 50 pitchs, même ordre de passage ;
 - un appel d'échauffement local exclu des mesures ;
-- 3 répétitions par configuration ;
-- machine de mesure locale à documenter avant la première série.
+- 3 répétitions par configuration.
+
+### Machine de mesure
+
+Exigée par le §10. La latence est l'un des trois axes du benchmark : une latence sans machine ne veut rien dire, et une fois la série lancée il est trop tard pour la documenter.
+
+| | |
+|---|---|
+| Machine | MacBook Pro `Mac16,1` |
+| Processeur | Apple M4, 10 cœurs, arm64 |
+| Mémoire | 16 Go unifiés |
+| Système | macOS 26.5.1 (25F80) |
+| Ollama | 0.34.0 |
+
+**Toute la série locale tourne sur cette machine.** Changer de machine en cours de benchmark invalide les latences déjà mesurées — il faudrait tout reprendre, ou rapporter deux séries séparément.
+
+> ⏱️ **Ordre de grandeur relevé.** Un appel sur le plus court pitch du corpus (82 mots) a pris **14,6 s** avec `llama2` sur cette machine. `deepseek-r1:8b` est un modèle de raisonnement : il produit ses tokens de réflexion avant la réponse, donc il sera plus lent, et les pitchs longs font sept fois la taille de celui-là.
+>
+> La part locale de la matrice complète — 450 appels — représente donc plusieurs heures, pas plusieurs minutes. À lancer en tâche de fond, et à ne pas découvrir la veille du rendu.
 
 ## Jeu de données
 
@@ -57,9 +74,16 @@ Recalculé sur le corpus réel par `python3 scripts/estimate_cost.py`. L'estimat
 | `docs/PITCH_TEMPLATE.md` | Le gabarit de rédaction |
 
 ```bash
-python3 scripts/build_calibration.py     # régénère et vérifie les invariants
-python3 scripts/show_pitch.py P005 P006  # lit un pitch
+python3 scripts/build_calibration.py      # régénère et vérifie les invariants
+python3 scripts/show_pitch.py P005 P006   # lit un pitch, cible masquée
+python3 scripts/build_dataset_card.py     # régénère data/dataset_card.md
+python3 scripts/render_pdfs.py            # rend les 50 PDF
+python3 scripts/estimate_cost.py          # recalcule le budget depuis le corpus
 ```
+
+La [dataset card](data/dataset_card.md) est **générée** depuis les données : ses chiffres ne peuvent pas diverger du corpus qu'ils décrivent.
+
+Les PDF sont rendus **depuis `pitch_text`**, en trois mises en page — serif, deux colonnes, sans-serif — parce qu'un corpus où tous les PDF sortent du même gabarit ne teste pas l'extraction, il teste un gabarit. `pitch_text` reste l'entrée unique du benchmark ; l'extraction se mesure à part (§6).
 
 Le générateur refuse de produire si la distribution, le nombre d'injections, l'ordre des scores, la largeur de la coupure, la répartition sectorielle ou la règle auteur ≠ annotateur ne tiennent plus.
 
