@@ -127,9 +127,12 @@ def parse_output(raw: str) -> ParseResult:
         return ParseResult(None, False, False, f"schéma non respecté : {exc}")
 
 
+# Le placeholder ne doit pas être un identifiant plausible : avec "P001",
+# deepseek-r1 recopiait P001 en notant P046. L'identifiant vient du message
+# utilisateur, pas du gabarit.
 JSON_SHAPE = json.dumps(
     {
-        "pitch_id": "P001",
+        "pitch_id": "<the pitch_id given above>",
         "scores": {c: 0 for c in CRITERIA},
         "total_score": 0,
         "strengths": ["..."],
