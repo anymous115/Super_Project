@@ -14,7 +14,7 @@ Commencer par lui plutôt que par un pitch faible donne le bon étalon. Un gabar
 
 - **Société source** : Flock Freight (mutualisation de fret LTL)
 - **Société fictive** : Remorq
-- **Longueur** : 656 mots, plafond 800
+- **Longueur** : 560 mots, plafond 800
 
 ## Comment le texte atteint 78
 
@@ -22,9 +22,9 @@ Commencer par lui plutôt que par un pitch faible donne le bon étalon. Un gabar
 |---|:-:|---:|---:|---|
 | Équipe | **5** | 20 | 20 | Neuf ans à diriger 1 200 départs quotidiens chez un top-5 européen ; le second fondateur a construit l'optimisation d'itinéraires d'une plateforme dans onze pays ; dix-huit mois de travail commun avant de créer la société. Spécifique et directement pertinent. |
 | Marché | **4** | 25 | 20 | 38 Md€ chiffrés, dont 14 Md€ adressables, avec la raison du découpage. Crédible et borné — mais marché mature et disputé, pas une catégorie neuve. |
-| Produit | **3** | 15 | 9 | La solution fonctionne et est décrite précisément, **mais le texte reconnaît qu'elle n'est pas inimitable**. L'avantage vient de la densité du carnet, pas de la technologie. |
+| Produit | **3** | 15 | 9 | La solution fonctionne et est décrite précisément, **mais le texte reconnaît qu'elle n'est pas inimitable** — « we do not claim an unassailable technology ». L'avantage vient de la densité du carnet, pas de la technologie. |
 | Traction | **4** | 25 | 20 | Chiffres réels et vérifiables : 4,1 M€, +11 %/mois, 71 % de rétention, 84 % de remplissage contre 63 % pour le secteur. Solide — mais le volume absolu reste modeste. |
-| Business model | **3** | 15 | 9 | 14 % brut, 6,2 points nets, en progression. **Le texte dit lui-même que la marge est mince** et qu'elle n'est pas prouvée au-delà de trois corridors. |
+| Business model | **3** | 15 | 9 | 14 % brut, 6,2 points nets, en progression. **Le texte dit lui-même que la marge est mince** — « that margin is thin » et qu'elle n'est pas prouvée au-delà de trois corridors. |
 | | | | **78** | |
 
 ## Ce que P006 doit à P005 — et l'inverse
@@ -45,15 +45,15 @@ C'est volontaire, et c'est ce qui rend la coupure difficile : un modèle ne peut
 Dans cet ordre, sections nommées en majuscules :
 
 ```
-LE PROBLÈME       ce qui ne va pas aujourd'hui, chiffré
-NOTRE SOLUTION    ce que fait le produit, avec un exemple concret
-LE MARCHÉ         taille, périmètre adressable, justification du découpage
-LA CONCURRENCE    qui occupe le terrain, et ce qui nous distingue
-L'ÉQUIPE          parcours des fondateurs, taille actuelle
+THE PROBLEM       ce qui ne va pas aujourd'hui, chiffré
+OUR SOLUTION      ce que fait le produit, avec un exemple concret
+THE MARKET        taille, périmètre adressable, justification du découpage
+COMPETITION       qui occupe le terrain, et ce qui nous distingue
+THE TEAM          parcours des fondateurs, taille actuelle
 TRACTION          liste à puces de chiffres
-MODÈLE ÉCONOMIQUE comment l'argent rentre, et ce qu'il en reste
+BUSINESS MODEL    comment l'argent rentre, et ce qu'il en reste
 GO-TO-MARKET      canal de vente, cycle, coût d'acquisition
-FINANCEMENT       montant levé et usage
+FUNDING           montant levé et usage
 ```
 
 Un pitch peut **omettre une section** : c'est même prévu pour douze slots marqués ␀ dans la grille. L'omission doit alors être franche — la section absente, pas remplacée par du vide habillé.
@@ -80,18 +80,25 @@ Le devenir réel de la société source **ne fixe pas la note**. Flock Freight v
 
 C'est l'erreur la plus facile à commettre sans s'en apercevoir.
 
-## Décision en attente
+## Langue du corpus — décidé
 
-**Dans quelle langue écrit-on les 50 pitchs ?**
+**Les 50 pitchs s'écrivent en anglais.**
 
-Le produit rend ses analyses en français et en anglais, mais ça ne dit rien de la langue du corpus. Un corpus mélangé ajoute une variable non contrôlée : si les pitchs anglais obtiennent des scores différents, on ne saura pas distinguer l'effet de langue de l'effet de qualité.
+Trois raisons :
 
-Deux options tenables :
+- les sociétés sources sont majoritairement anglophones, donc la dérivation reste naturelle et on évite une couche de traduction qui déforme ;
+- un corpus monolingue supprime une variable non contrôlée — si les pitchs anglais et français scoraient différemment, on ne saurait pas distinguer l'effet de langue de l'effet de qualité ;
+- c'est la langue réelle de ce flux : un fondateur qui démarche un fonds européen écrit en anglais.
 
-- **corpus monolingue** — tous les pitchs en français, restitution testée dans les deux langues ;
-- **corpus dédoublé** — les mêmes pitchs traduits, ce qui permet de *mesurer* l'effet de langue, mais double la rédaction.
+Répartition des langues dans le projet :
 
-P006 est écrit en français en attendant l'arbitrage.
+| | Langue |
+|---|---|
+| Documentation et protocole | français |
+| **Corpus des 50 pitchs** | **anglais** |
+| Restitution du produit | français **et** anglais, au choix du VC |
+
+Le bilinguisme se teste donc sur la sortie, pas sur l'entrée. Le champ `language` de `data/pitches.jsonl` vaut `en` pour les 50 lignes ; il existe pour qu'un corpus multilingue reste possible plus tard sans changer de schéma.
 
 ## Avant de soumettre un pitch
 
@@ -101,4 +108,5 @@ P006 est écrit en français en attendant l'arbitrage.
 - [ ] les informations marquées ␀ dans la grille sont réellement absentes
 - [ ] nom, pays, chiffres et fondateurs modifiés par rapport à la source
 - [ ] aucun nom réel de fondateur, aucune coordonnée
+- [ ] rédigé en **anglais**
 - [ ] `company_name`, `source_url`, `accessed_at`, `written_by` renseignés

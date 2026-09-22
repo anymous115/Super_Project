@@ -166,6 +166,8 @@ Le jeu de données est constitué de **50 pitchs entièrement fictifs**, en text
 
 Le volume est choisi pour tomber exactement sur le point de bascule de la règle de sélection : à n = 50, les 5 fixes et les 10 % donnent le même nombre.
 
+Les pitchs sont rédigés **en anglais**. La documentation reste en français et la restitution du produit est bilingue : le bilinguisme se teste sur la sortie, jamais sur l'entrée. Le gabarit de rédaction est dans [`PITCH_TEMPLATE.md`](PITCH_TEMPLATE.md).
+
 La calibration — score cible, profil de faiblesse et informations volontairement absentes de chaque pitch — est fixée **avant rédaction** dans **[`CALIBRATION_GRID.md`](CALIBRATION_GRID.md)**. Ce document fait autorité sur la distribution, les deux cas ambigus, les deux injections et la répartition de l'annotation.
 
 Le sourcing — quelle matière première alimente chaque slot et comment la dériver sans rien copier — est traité dans **[`DATA_SOURCING.md`](DATA_SOURCING.md)**.
@@ -195,6 +197,7 @@ Ces contrôles ne sont pas décoratifs : ils ont déjà attrapé deux défauts d
   "pitch_id": "P001",
   "company_name": "Nom fictif",
   "sector": "climate-tech",
+  "language": "en",
   "pitch_text": "Contenu structuré du pitch, 800 mots maximum",
   "source_type": "synthetic",
   "source_note": "Dérivé d'une vraie boîte, reformulé et anonymisé",

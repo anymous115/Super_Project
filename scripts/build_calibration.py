@@ -190,6 +190,7 @@ def main():
                     "pitch_id": row["pitch_id"],
                     "company_name": None,
                     "sector": row["sector"],
+                    "language": "en",
                     "pitch_text": None,
                     "source_type": row["origin"],
                     "source_url": None,
