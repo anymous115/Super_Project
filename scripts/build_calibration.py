@@ -174,13 +174,14 @@ def check_written_pitches():
         row = json.loads(line)
         author = row.get("written_by")
         if author and author != "template":
-            done = bool(row.get("pitch_text"))
-            total, fini = load.get(author, (0, 0))
-            load[author] = (total + 1, fini + done)
+            draft = bool(row.get("pitch_text"))
+            valid = row.get("review_status") == "validated"
+            total, d, v = load.get(author, (0, 0, 0))
+            load[author] = (total + 1, d + draft, v + valid)
     for letter in sorted(load):
-        total, fini = load[letter]
+        total, d, v = load[letter]
         who = team.get(letter, "?")
-        print(f"  {letter} {who:<12s} {fini}/{total} rédigés")
+        print(f"  {letter} {who:<12s} {d}/{total} brouillons · {v}/{total} validés")
 
     if written:
         print(f"rédigés   — {len(written)}/50 "
@@ -234,6 +235,7 @@ def main():
                     "is_injection_test": "injection" in row["flags"],
                     "review_status": "pending",
                     "written_by": None,
+                    "drafted_by": None,
                 }, ensure_ascii=False) + "\n")
 
     by_tier = {t: sum(r["tier"] == t for r in rows) for t in EXPECTED["tiers"]}
