@@ -10,7 +10,7 @@ Le benchmark du P8 n'est pas abandonné pour autant : il porte sur le moteur de 
 
 Le problème traité est concret. Un fonds reçoit des centaines de pitchs par mois, par des canaux dispersés — email, Telegram, DM sur les réseaux. La plupart ne seront jamais lus. L'outil centralise ce flux entrant, applique la même grille d'évaluation à tous les dossiers, et fait remonter le haut du panier avec une justification traçable.
 
-Le nombre de dossiers remontés suit la règle `max(5, ceil(n × 0,10))` : les 5 meilleurs tant que le volume reste sous 50 pitchs, puis le top 10 % au-delà. Les deux régimes se rejoignent exactement à 50.
+Le nombre de dossiers remontés suit une **sélection adaptative** : `min(50, max(5, ceil(n × 0,10)))`. Les 5 meilleurs sous 50 pitchs, puis le top 10 %, plafonné à 50 dossiers. Les régimes se rejoignent exactement à 50.
 
 Le tri reste une aide à la décision. Il ne remplace ni la due diligence ni le jugement de l'investisseur.
 
@@ -38,7 +38,9 @@ Les deux canaux de la v1 couvrent le cas d'usage réel. Les autres sont document
 
 - 50 pitchs fictifs annotés en double, en texte et en PDF ;
 - grille de notation VC explicite et pondérée ;
-- règle de sélection `max(5, 10 %)` ;
+- sélection adaptative `min(50, max(5, 10 %))` ;
+- modèle local `deepseek-r1:8b` via Ollama ;
+- restitution bilingue français / anglais ;
 - pipeline de scoring commun aux deux modèles ;
 - sorties structurées validées avec Pydantic ;
 - prompts versionnés V0 / V1 / V2, avec défense contre le prompt injection ;

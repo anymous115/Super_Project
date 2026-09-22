@@ -137,13 +137,20 @@ Règles indispensables :
 Le nombre de dossiers remontés au VC dépend du volume reçu :
 
 ```text
-nombre_retenu = max(5, ceil(nombre_de_pitchs × 0,10))
+nombre_retenu = min(50, max(5, ceil(nombre_de_pitchs × 0,10)))
 ```
 
-- **Sous 50 pitchs** : les 5 meilleurs. Un strict 10 % en donnerait trop peu — sur 20 soumissions, 2 dossiers ne remplissent pas une session de revue.
-- **Au-delà de 50 pitchs** : le top 10 %, qui suit la montée du volume.
+Trois régimes :
 
-Les deux régimes se rejoignent exactement à n = 50, où 10 % font 5. La règle est donc continue : aucun effet de seuil, aucun cas particulier à coder.
+| Volume reçu | Retenus | Pourquoi |
+|---|---|---|
+| **≤ 50 pitchs** | 5 | Un strict 10 % en donnerait trop peu — sur 20 soumissions, 2 dossiers ne remplissent pas une session de revue. |
+| **50 à 500** | 10 % | Suit la montée du volume. |
+| **> 500** | 50 | Plafond : au-delà, la liste redevient le problème qu'elle était censée résoudre. |
+
+Les régimes se rejoignent exactement à n = 50, où 10 % font 5. La règle est donc continue : aucun effet de seuil, aucun cas particulier à coder.
+
+Le plafond de 50 vient de la « sélection adaptative » proposée par @MathisseSteckler. Il corrige un angle mort de la règle initiale : sans lui, un fonds recevant 2 000 pitchs se voit remonter 200 dossiers, ce qui ne trie plus rien.
 
 En cas d'égalité, départager sur la traction, puis le marché, puis l'identifiant du pitch, pour que le résultat reste déterministe.
 
@@ -302,6 +309,7 @@ Si le budget se tend, réduire d'abord le nombre de répétitions, pas le nombre
 
 - mêmes 50 pitchs, même ordre de passage ;
 - température à 0 ;
+- modèle local **`deepseek-r1:8b`** via Ollama, décidé en phase 1 ;
 - versions de modèles figées et notées précisément ;
 - machine de mesure locale documentée ;
 - un appel d'échauffement local, exclu des mesures ;
@@ -351,7 +359,8 @@ Une fois le pipeline validé dans le notebook :
 - une fiche détaillée : scores par critère, forces, risques, informations manquantes, extraits justificatifs ;
 - un formulaire de dépôt manuel, pour la démonstration ;
 - des messages clairs en cas de file vide, d'erreur LLM ou de pitch illisible ;
-- un avertissement permanent : aide au tri, pas décision d'investissement.
+- un avertissement permanent : aide au tri, pas décision d'investissement ;
+- une restitution **bilingue français / anglais**, la langue étant un paramètre du VC.
 
 L'interface appelle **les mêmes fonctions que le notebook**. La logique n'est jamais dupliquée dans `app.py`.
 
@@ -419,6 +428,10 @@ Adaptateur Telegram, adaptateur email, extraction PDF, interface Streamlit, parc
 Tableaux et graphiques, recommandation, notebook et README finalisés, répétition de la démonstration, PR fusionnées, release `v1.0`.
 
 > **Ordre volontaire.** L'ingestion vient en phase 5, après le benchmark. Un connecteur Telegram qui alimente un moteur de scoring non validé ne démontre rien, et c'est le benchmark qui est évalué par le cours.
+
+## 14 bis. Cadrage produit
+
+Le brief de phase 1 — persona, problème utilisateur, proposition de valeur, entrées et sorties du MVP — est consigné dans [`phases/01_cadrage/README.md`](../phases/01_cadrage/README.md).
 
 ## 15. Organisation à 4
 
@@ -500,7 +513,7 @@ Réunion courte, et rien ne démarre avant que ces cinq points soient figés :
 
 1. la grille et ses pondérations ;
 2. la règle de sélection `max(5, 10 %)` et les deux métriques de classement ;
-3. les deux modèles exacts et leurs versions ;
+3. le modèle frontier exact et sa version — le local est fixé à `deepseek-r1:8b` ;
 4. la validation de `CALIBRATION_GRID.md` et la répartition des 5 pitchs par personne ;
 5. les deux canaux d'ingestion de la v1.
 
