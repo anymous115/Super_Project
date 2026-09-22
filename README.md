@@ -31,7 +31,9 @@ Aucun modèle Anthropic n'est éligible : les pitchs du corpus sont rédigés pa
 
 **Source :** [OpenAI — API pricing](https://developers.openai.com/api/docs/pricing) · **Consultée le 22 septembre 2026**
 
-Coût estimé de la part frontier : **~17 $** pour 450 appels (810 k tokens d'entrée, 180 k de sortie), hors cache et outils externes.
+Coût estimé de la part frontier : **~14 $** pour 450 appels (501 k tokens d'entrée, 180 k de sortie), hors cache et outils externes.
+
+Recalculé sur le corpus réel par `python3 scripts/estimate_cost.py`. L'estimation précédente de ~17 $ partait du plafond de 800 mots par pitch ; le corpus en fait **475 en moyenne**, et une entrée pèse 897 à 1 287 tokens selon la version de prompt, pas 1 800.
 
 ### Conditions de mesure
 
@@ -60,3 +62,36 @@ python3 scripts/show_pitch.py P005 P006  # lit un pitch
 ```
 
 Le générateur refuse de produire si la distribution, le nombre d'injections, l'ordre des scores, la largeur de la coupure, la répartition sectorielle ou la règle auteur ≠ annotateur ne tiennent plus.
+
+## Pipeline
+
+```bash
+python3 -m venv .venv && source .venv/bin/activate
+pip install -r requirements.txt
+cp .env.example .env          # puis remplir les clés — le .env n'est jamais committé
+pytest                        # 53 tests, aucun appel de modèle
+```
+
+| Module | Rôle |
+|---|---|
+| `src/config.py` | Grille, poids, règle de sélection, modèles, tarifs — les constantes figées du §10 |
+| `src/schemas.py` | Validation Pydantic des sorties, et recalcul du total |
+| `src/prompts.py` | V0 / V1 / V2, avec l'empreinte de chaque version |
+| `src/score_pitch.py` | Un appel : prompt, modèle, mesure, validation, enregistrement |
+| `src/benchmark.py` | La matrice 2 × 3 × 50 × 3, reprenable |
+| `src/metrics.py` | MAE, Spearman, chevauchement du top 5, latences, coûts |
+
+```bash
+python3 -m src.benchmark --models local --prompts V0 --limit 3 --repetitions 1
+python3 -m src.benchmark                 # la matrice complète, 900 appels
+python3 -m src.benchmark --summary       # agrège dans results/benchmark_summary.csv
+python3 scripts/estimate_cost.py         # recalcule le budget depuis le corpus
+```
+
+Trois propriétés à ne pas perdre de vue :
+
+**Le total est recalculé dans le code.** Le modèle annonce un total, on le garde dans `total_reported` pour mesurer s'il sait compter, mais le score qui fait foi est `total_computed`.
+
+**La série est reprenable.** Chaque appel est écrit dans `results/raw_runs.jsonl` dès qu'il revient, et un relancement saute ce qui est déjà mesuré. Une coupure ne coûte pas la série.
+
+**Le benchmark tourne, mais ne peut pas encore être noté.** `src/benchmark.py --summary` exige `data/reference_scores.jsonl`, produit par la double annotation. Les cibles de `calibration.jsonl` ne sont pas la référence : elles ont servi à garantir l'étalement des scores avant rédaction, pas à dire la vérité.

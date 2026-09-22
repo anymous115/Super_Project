@@ -1,0 +1,17 @@
+# Secrets — jamais committés (§9 du protocole)
+.env
+*.key
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+*.egg-info/
+.pytest_cache/
+
+# Notebook
+.ipynb_checkpoints/
+
+# macOS
+.DS_Store

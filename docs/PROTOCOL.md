@@ -304,7 +304,9 @@ Les appels sont tracés avec **Langfuse** : prompt, version, entrée, sortie, la
 
 50 pitchs × 2 modèles × 3 prompts = **300 appels** par répétition, **900 appels** sur 3 répétitions.
 
-À 800 mots par pitch, un appel pèse environ 1 800 tokens d'entrée et 400 de sortie. La part frontier sur 3 répétitions représente ~810 k tokens d'entrée. À chiffrer avec les tarifs du jour avant de lancer la matrice complète.
+Un appel pèse **897 à 1 287 tokens d'entrée** selon la version de prompt, et environ 400 de sortie. La part frontier sur 3 répétitions représente **~501 k tokens d'entrée et ~180 k de sortie**, soit **~14 $** aux tarifs consignés dans le README.
+
+Ces chiffres sont recalculés depuis le corpus par `scripts/estimate_cost.py`, pas écrits à la main. La première estimation partait du plafond de 800 mots par pitch et annonçait 1 800 tokens par appel pour ~810 k au total ; le corpus fait 475 mots en moyenne, et l'écart valait mieux qu'un arrondi dans une étude dont le coût est l'un des deux axes.
 
 Si le budget se tend, réduire d'abord le nombre de répétitions, pas le nombre de pitchs : une passe unique sur 50 pitchs vaut mieux que trois passes sur 20.
 
