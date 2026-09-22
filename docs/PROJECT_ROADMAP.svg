@@ -1,0 +1,146 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1800" height="1000" viewBox="0 0 1800 1000" role="img" aria-labelledby="title desc">
+  <title id="title">Roadmap — VC Startup Opportunity Finder</title>
+  <desc id="desc">Six phases, du cadrage produit à la livraison du MVP.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#03172f"/>
+      <stop offset="0.55" stop-color="#07152d"/>
+      <stop offset="1" stop-color="#020b1c"/>
+    </linearGradient>
+    <linearGradient id="titleGradient" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#f8fafc"/>
+      <stop offset="0.32" stop-color="#58e6ff"/>
+      <stop offset="1" stop-color="#22d3ee"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="50%" cy="40%" r="70%">
+      <stop offset="0" stop-color="#0ea5e9" stop-opacity=".22"/>
+      <stop offset="1" stop-color="#0ea5e9" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="10" stdDeviation="14" flood-color="#000814" flood-opacity=".65"/>
+    </filter>
+    <filter id="softGlow" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="5" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <style>
+      .sans { font-family: Inter, Arial, Helvetica, sans-serif; }
+      .phase { font: 700 20px Inter, Arial, sans-serif; letter-spacing: .4px; }
+      .item { font: 500 20px Inter, Arial, sans-serif; fill: #e6f3ff; }
+      .num { font: 800 28px Inter, Arial, sans-serif; fill: #031426; text-anchor: middle; }
+      .arrow { fill: none; stroke: #d7f8ff; stroke-width: 4; stroke-linecap: round; stroke-linejoin: round; }
+    </style>
+  </defs>
+
+  <rect width="1800" height="1000" fill="url(#bg)"/>
+  <ellipse cx="900" cy="380" rx="810" ry="520" fill="url(#glow)"/>
+  <path d="M0 835 Q280 735 520 840 T1010 820 T1450 835 T1800 760 V1000 H0Z" fill="#061126" opacity=".95"/>
+  <path d="M0 905 Q250 820 470 900 T900 885 T1320 900 T1800 820" fill="none" stroke="#164e77" stroke-width="3" opacity=".55"/>
+  <path d="M0 935 Q250 860 470 930 T900 915 T1320 930 T1800 850" fill="none" stroke="#21d4fd" stroke-width="5" opacity=".85" filter="url(#softGlow)"/>
+
+  <text x="900" y="76" class="sans" font-size="52" font-weight="850" text-anchor="middle" fill="url(#titleGradient)">ROADMAP — VC STARTUP OPPORTUNITY FINDER</text>
+  <text x="900" y="132" class="sans" font-size="34" font-weight="400" text-anchor="middle" fill="#c9ddf5">Du cadrage produit à un MVP fonctionnel</text>
+
+  <!-- Phase panels -->
+  <g filter="url(#shadow)">
+    <rect x="82" y="210" width="256" height="535" rx="24" fill="#073044" fill-opacity=".62" stroke="#27e7e1" stroke-width="3"/>
+    <rect x="358" y="210" width="256" height="535" rx="24" fill="#072b4b" fill-opacity=".65" stroke="#36a9ff" stroke-width="3"/>
+    <rect x="634" y="210" width="256" height="535" rx="24" fill="#251657" fill-opacity=".62" stroke="#a66cff" stroke-width="3"/>
+    <rect x="910" y="210" width="256" height="535" rx="24" fill="#433411" fill-opacity=".55" stroke="#ffc43d" stroke-width="3"/>
+    <rect x="1186" y="210" width="256" height="535" rx="24" fill="#082d4d" fill-opacity=".65" stroke="#35c8ff" stroke-width="3"/>
+    <rect x="1462" y="210" width="256" height="535" rx="24" fill="#073c31" fill-opacity=".58" stroke="#43ed91" stroke-width="3"/>
+  </g>
+
+  <!-- Connectors -->
+  <g class="arrow">
+    <path d="M338 475 H354 M347 468 L354 475 L347 482"/>
+    <path d="M614 475 H630 M623 468 L630 475 L623 482"/>
+    <path d="M890 475 H906 M899 468 L906 475 L899 482"/>
+    <path d="M1166 475 H1182 M1175 468 L1182 475 L1175 482"/>
+    <path d="M1442 475 H1458 M1451 468 L1458 475 L1451 482"/>
+  </g>
+
+  <!-- Phase 1 -->
+  <g class="sans">
+    <text x="210" y="253" class="phase" text-anchor="middle" fill="#4ff5eb">PHASE 1 — CADRAGE</text>
+    <circle cx="210" cy="315" r="27" fill="#54eee8"/><text x="210" y="325" class="num">1</text>
+    <circle cx="210" cy="415" r="48" fill="none" stroke="#4ff5eb" stroke-width="9"/>
+    <circle cx="210" cy="415" r="27" fill="none" stroke="#4ff5eb" stroke-width="8"/>
+    <circle cx="210" cy="415" r="7" fill="#4ff5eb"/>
+    <path d="M214 410 L254 370 M237 371 H254 V388" stroke="#4ff5eb" stroke-width="9" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+    <text x="108" y="525" class="item">• Persona VC</text>
+    <text x="108" y="570" class="item">• Entrées &amp; sorties</text>
+    <text x="108" y="615" class="item">• Critères de succès</text>
+  </g>
+
+  <!-- Phase 2 -->
+  <g class="sans">
+    <text x="486" y="253" class="phase" text-anchor="middle" fill="#64c4ff">PHASE 2 — DONNÉES</text>
+    <circle cx="486" cy="315" r="27" fill="#72c8ff"/><text x="486" y="325" class="num">2</text>
+    <ellipse cx="486" cy="385" rx="55" ry="20" fill="#4babf2"/>
+    <path d="M431 385 V455 C431 466 456 475 486 475 C516 475 541 466 541 455 V385" fill="#1770b7" stroke="#72c8ff" stroke-width="4"/>
+    <path d="M431 417 C431 428 456 437 486 437 C516 437 541 428 541 417 M431 447 C431 458 456 467 486 467 C516 467 541 458 541 447" fill="none" stroke="#9bddff" stroke-width="4"/>
+    <text x="384" y="525" class="item">• 60 idées</text>
+    <text x="384" y="570" class="item">• 6 domaines</text>
+    <text x="384" y="615" class="item">• Validation humaine</text>
+  </g>
+
+  <!-- Phase 3 -->
+  <g class="sans">
+    <text x="762" y="253" class="phase" text-anchor="middle" fill="#c08aff">PHASE 3 — NOTEBOOK</text>
+    <circle cx="762" cy="315" r="27" fill="#bd83ff"/><text x="762" y="325" class="num">3</text>
+    <rect x="706" y="365" width="112" height="112" rx="16" fill="#2b205b" stroke="#ba7cff" stroke-width="6"/>
+    <path d="M742 397 L722 421 L742 445 M782 397 L802 421 L782 445 M771 390 L753 452" fill="none" stroke="#d7b5ff" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+    <text x="660" y="525" class="item">• Filtrage</text>
+    <text x="660" y="570" class="item">• Prompts structurés</text>
+    <text x="660" y="615" class="item">• Top 5 expliqué</text>
+  </g>
+
+  <!-- Phase 4 -->
+  <g class="sans">
+    <text x="1038" y="253" class="phase" text-anchor="middle" fill="#ffd05b">PHASE 4 — ÉVALUATION</text>
+    <circle cx="1038" cy="315" r="27" fill="#ffd05b"/><text x="1038" y="325" class="num">4</text>
+    <path d="M978 465 V390 M1010 465 V365 M1042 465 V410" stroke="#ffc33d" stroke-width="18" stroke-linecap="round"/>
+    <circle cx="1085" cy="424" r="38" fill="#4c3b11" stroke="#ffe088" stroke-width="6"/>
+    <path d="M1068 425 L1081 438 L1105 408" fill="none" stroke="#ffe088" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+    <text x="936" y="525" class="item">• 12 requêtes test</text>
+    <text x="936" y="570" class="item">• Precision@5</text>
+    <text x="936" y="615" class="item">• Groundedness</text>
+  </g>
+
+  <!-- Phase 5 -->
+  <g class="sans">
+    <text x="1314" y="253" class="phase" text-anchor="middle" fill="#61d7ff">PHASE 5 — INTERFACE</text>
+    <circle cx="1314" cy="315" r="27" fill="#68d7ff"/><text x="1314" y="325" class="num">5</text>
+    <rect x="1253" y="370" width="122" height="100" rx="12" fill="#0b456d" stroke="#65dcff" stroke-width="6"/>
+    <path d="M1253 397 H1375" stroke="#65dcff" stroke-width="6"/>
+    <circle cx="1271" cy="384" r="5" fill="#65dcff"/><circle cx="1287" cy="384" r="5" fill="#65dcff"/><circle cx="1303" cy="384" r="5" fill="#65dcff"/>
+    <rect x="1270" y="414" width="34" height="37" rx="4" fill="#62d8ff"/><path d="M1319 420 H1355 M1319 434 H1355 M1319 448 H1342" stroke="#a8eaff" stroke-width="5" stroke-linecap="round"/>
+    <text x="1212" y="525" class="item">• Streamlit</text>
+    <text x="1212" y="570" class="item">• Filtres VC</text>
+    <text x="1212" y="615" class="item">• Cartes de résultats</text>
+  </g>
+
+  <!-- Phase 6 -->
+  <g class="sans">
+    <text x="1590" y="253" class="phase" text-anchor="middle" fill="#72f2aa">PHASE 6 — LIVRAISON</text>
+    <circle cx="1590" cy="315" r="27" fill="#75efa9"/><text x="1590" y="325" class="num">6</text>
+    <path d="M1560 446 C1570 403 1602 375 1641 367 C1634 406 1607 438 1564 450 Z" fill="none" stroke="#7af5ae" stroke-width="7"/>
+    <circle cx="1607" cy="400" r="11" fill="#7af5ae"/>
+    <path d="M1565 429 L1539 428 L1523 451 L1558 452 M1582 447 L1581 473 L1558 489 L1557 454 M1550 458 L1529 478" fill="none" stroke="#7af5ae" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+    <text x="1488" y="525" class="item">• Tests</text>
+    <text x="1488" y="570" class="item">• Documentation</text>
+    <text x="1488" y="615" class="item">• Démo &amp; v1.0</text>
+  </g>
+
+  <!-- Objective banner -->
+  <rect x="255" y="790" width="1290" height="105" rx="28" fill="#061b36" fill-opacity=".92" stroke="#35d9ff" stroke-width="3" filter="url(#shadow)"/>
+  <circle cx="335" cy="842" r="28" fill="none" stroke="#43e7ff" stroke-width="7"/>
+  <circle cx="335" cy="842" r="13" fill="none" stroke="#43e7ff" stroke-width="6"/>
+  <path d="M338 839 L367 810 M354 811 H368 V825" fill="none" stroke="#43e7ff" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+  <text x="405" y="855" class="sans" font-size="28" font-weight="500" fill="#ecf8ff"><tspan font-weight="800" fill="#4adfff">OBJECTIF :</tspan><tspan> recommander les idées les plus pertinentes selon la thèse du VC</tspan></text>
+
+  <g fill="#55e9ff" filter="url(#softGlow)">
+    <circle cx="160" cy="920" r="7"/><circle cx="486" cy="925" r="7"/><circle cx="762" cy="915" r="7"/><circle cx="1038" cy="922" r="7"/><circle cx="1314" cy="915" r="7"/><circle cx="1640" cy="875" r="7"/>
+  </g>
+</svg>
