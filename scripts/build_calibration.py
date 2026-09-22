@@ -167,6 +167,21 @@ def check_written_pitches():
         for c in conflicts:
             print(f"  - {c}", file=sys.stderr)
         sys.exit(1)
+    team_file = DATA / "team.json"
+    team = json.loads(team_file.read_text(encoding="utf-8")) if team_file.exists() else {}
+    load = {}
+    for line in path.read_text(encoding="utf-8").splitlines():
+        row = json.loads(line)
+        author = row.get("written_by")
+        if author and author != "template":
+            done = bool(row.get("pitch_text"))
+            total, fini = load.get(author, (0, 0))
+            load[author] = (total + 1, fini + done)
+    for letter in sorted(load):
+        total, fini = load[letter]
+        who = team.get(letter, "?")
+        print(f"  {letter} {who:<12s} {fini}/{total} rédigés")
+
     if written:
         print(f"rédigés   — {len(written)}/50 "
               f"({', '.join(f'{i} {w}m' for i, w in written[:5])}"

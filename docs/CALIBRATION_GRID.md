@@ -193,14 +193,23 @@ Chacun a donc environ un quart de la rédaction et la moitié de l'annotation �
 
 ### Correspondance A/B/C/D
 
-À renseigner par l'équipe avant de démarrer :
+Dans `data/team.json`, lu par `build_calibration.py` pour afficher l'avancement de chacun.
 
-| Lettre | Personne |
-|---|---|
-| A | |
-| B | |
-| C | |
-| D | |
+| Lettre | Personne | Rôle | À rédiger |
+|---|---|---|---:|
+| **A** | Amdy | Données et annotation | 13 |
+| **B** | Gabin | Pipeline et modèle local | 12 |
+| **C** | Alessandro | Modèle frontier et coûts | 12 |
+| **D** | Mathisse | Évaluation et interface | 12 |
+
+> **Proposition, pas décision.** Les lettres portent aussi les rôles, donc cette correspondance répartit le travail autant que la rédaction. Elle s'appuie sur ce que chacun a déjà produit :
+>
+> - **Amdy** a construit la calibration, le sourcing et le gabarit — les données lui reviennent naturellement, et c'est le seul à avoir 13 pitchs.
+> - **Mathisse** a écrit le brief produit, les critères de succès, la spécification Streamlit et le bilinguisme — l'évaluation et l'interface prolongent son travail.
+> - **Gabin** a produit le prototype initial — le pipeline et le modèle local suivent.
+> - **Alessandro** n'a pas encore de commits : le volet frontier et coûts est le rôle le plus autonome, celui qui demande le moins de contexte accumulé pour démarrer.
+>
+> Un échange de lettres dans `data/team.json` suffit à tout réattribuer — la contrainte auteur ≠ annotateur reste vérifiée dans tous les cas.
 
 ## Annotation à 4
 
