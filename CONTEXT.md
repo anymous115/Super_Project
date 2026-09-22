@@ -1,24 +1,24 @@
 # Contexte du projet
 
-C'est le capstone pour le cours "Prompt & Context Engineering" (9 projets au choix). Le projet choisi est le **P8 — Quality-vs-cost benchmark**, dont l'objectif de base est de comparer un modèle local léger vs un modèle frontier sur une tâche donnée, et d'en sortir un tableau qualité/coût/latence + une recommandation.
+Ce dépôt contient le capstone du cours « Prompt & Context Engineering ». Il part du sujet **P8 — Quality-vs-cost benchmark**, mais le périmètre a été modifié avec l'accord du professeur afin de privilégier la création d'un produit fonctionnel.
 
-## Adaptation
+## Nouvelle orientation
 
-Au lieu de la tâche de démo du cours (classifier finance/sport/tech), le projet s'applique à un vrai cas d'usage — un bot d'évaluation de pitchs pour VCs :
+Le projet devient un **VC Startup Opportunity Finder** : un outil qui aide un investisseur à découvrir les meilleures idées de startups selon son domaine et sa thèse d'investissement.
 
-- Des porteurs de projet uploadent leur deck (le bot a de la latitude sur comment il le traite/extrait).
-- Le bot note chaque pitch selon une grille façon VC.
-- Il sélectionne le top 10% des meilleurs pitchs.
-- Une analyse est envoyée directement aux VCs enregistrés sur le site.
+Le VC choisit un secteur et peut préciser des préférences comme le stade, la géographie, le ticket, le business model ou des mots-clés. Le produit filtre un catalogue d'idées, analyse les opportunités compatibles, les classe et fournit un top 5 expliqué avec scores, raisons, risques et questions à vérifier.
 
-Le P8 rentre dans cette histoire au niveau du scoring : l'évaluation des pitchs tourne sur un modèle local et un modèle frontier, pour mesurer lequel est le plus fiable/rapide/cheap, et recommander lequel utiliser en prod.
+La comparaison entre un modèle local et un modèle frontier n'est plus l'objectif principal. Le modèle est évalué comme composant du produit : pertinence des recommandations, respect des filtres, groundedness, qualité des explications, latence et coût.
 
-## Scope décidé
+## Scope du MVP
 
-On fait d'abord le capstone — notebook + données seed, dans le cadre du cours. Le vrai site déployé (inscription VC, upload de deck, etc.) pourra venir après, pas maintenant.
+- dataset seed de 60 idées fictives et validées, réparties sur 6 domaines ;
+- moteur hybride de filtrage, analyse et classement ;
+- prompts versionnés et sorties structurées avec Pydantic ;
+- top 5 personnalisé et explicable ;
+- évaluation sur 12 requêtes de référence ;
+- tracing avec Langfuse ;
+- prototype complet dans `08_quality_vs_cost_benchmark.ipynb` ;
+- interface Streamlit une fois le pipeline validé.
 
-## Ce qui reste ouvert
-
-- La grille de notation (critères VC : équipe, marché, produit, traction, business model — pondérations à fixer).
-- Le seuil du top 10% : relatif au lot soumis, ou score absolu ?
-- Les données seed : génération de 15-20 pitchs fictifs avec scores de référence, ou utilisation d'exemples réels (anonymisés) ?
+Le produit est une aide à l'exploration et ne remplace pas la due diligence ou la décision finale du VC. Le protocole détaillé se trouve dans `docs/PROTOCOL.md`.
