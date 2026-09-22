@@ -42,6 +42,8 @@ Le notebook `08_quality_vs_cost_benchmark.ipynb` garde son nom pour conserver le
 - décision d'investissement automatisée sans validation humaine ;
 - scraping de plateformes privées ou contournement de leurs conditions d'utilisation.
 
+Les features envisagées au-delà du MVP — notamment l'**extraction de profil structuré** depuis le pitch — sont décrites dans [`BACKLOG.md`](BACKLOG.md).
+
 ## 3. Parcours utilisateur
 
 ### Côté fondateur
