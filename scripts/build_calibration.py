@@ -134,6 +134,25 @@ def validate(rows):
     return errors
 
 
+def check_written_pitches():
+    """Contrôle les pitchs déjà rédigés. Avertit sans bloquer."""
+    path = DATA / "pitches.jsonl"
+    if not path.exists():
+        return
+    written = []
+    for line in path.read_text(encoding="utf-8").splitlines():
+        row = json.loads(line)
+        if row.get("pitch_text"):
+            words = len(row["pitch_text"].split())
+            written.append((row["pitch_id"], words))
+            if words > 800:
+                print(f"  ! {row['pitch_id']} : {words} mots, plafond 800", file=sys.stderr)
+    if written:
+        print(f"rédigés   — {len(written)}/50 "
+              f"({', '.join(f'{i} {w}m' for i, w in written[:5])}"
+              f"{'…' if len(written) > 5 else ''})")
+
+
 def main():
     if not GRID.exists():
         sys.exit(f"introuvable : {GRID}")
@@ -146,6 +165,8 @@ def main():
         for error in errors:
             print(f"  - {error}", file=sys.stderr)
         sys.exit(1)
+
+    check_written_pitches()
 
     DATA.mkdir(exist_ok=True)
 
@@ -169,6 +190,7 @@ def main():
                     "pitch_id": row["pitch_id"],
                     "company_name": None,
                     "sector": row["sector"],
+                    "language": "en",
                     "pitch_text": None,
                     "source_type": row["origin"],
                     "source_url": None,

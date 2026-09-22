@@ -220,6 +220,7 @@ Le sixième risque change de nature par rapport à la version précédente : le 
 - [x] Le persona principal est un VC Associate / Analyst en fonds seed ou early stage.
 - [x] La sélection contient jusqu'à 5 résultats pour 50 candidates ou moins, puis le top 10 % plafonné à 50.
 - [x] La V1 est bilingue français / anglais, l'anglais par défaut.
+- [x] **Le corpus des 50 pitchs est rédigé en anglais.** Le bilinguisme porte sur la restitution, pas sur l'entrée : un corpus mélangé ajouterait une variable non contrôlée.
 - [x] La V1 utilise Ollama local avec `deepseek-r1:8b` comme modèle initial.
 - [x] Le score total est recalculé dans le code.
 
