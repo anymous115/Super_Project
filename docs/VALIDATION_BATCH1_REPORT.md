@@ -208,3 +208,47 @@ n'a pas :
 
 Après ces décisions seulement, les six `review_status` pourront être passés de
 `drafted` à `validated`, puis le générateur pourra être relancé.
+
+---
+
+# Décision — 22 septembre 2026
+
+**Lot 1 validé.** Les six `review_status` passent à `validated`.
+
+## P005 contre P006 : confirmé
+
+La grille tape juste. Un point d'écart traduit correctement deux dossiers qui plafonnent au même niveau d'excellence pour des raisons **diamétralement opposées** — et c'est cette opposition, pas l'écart, qui fait la valeur du couple.
+
+Ce qui les sépare est le grand classique du capital-risque : **risque technologique contre risque d'exécution**.
+
+### Driftwatch — 79
+
+**L'atout.** Le produit est un *painkiller* absolu : 87 % de bruit en moins pour une équipe cyber, sous 1 % d'overhead. La barrière à l'entrée n'est pas l'équipe, c'est la complexité de l'ingénierie eBPF, déjà franchie.
+
+**Le risque.** L'équipe n'a pas le pedigree de ses acheteurs. C'est un risque de go-to-market : il faudra prouver qu'on comprend la culture et les processus d'achat de la cybersécurité d'entreprise, impitoyables envers les outsiders.
+
+**Pourquoi le point décisif.** Le logiciel a un coût marginal nul. Si la vente se débloque, 79 % de marge brute autorisent une croissance que la logistique ne connaîtra jamais.
+
+### Remorq — 78
+
+**L'atout.** L'équipe est intouchable — 1 200 départs par jour pendant neuf ans, donc la connaissance de chaque friction du monde réel. La phrase distinguant volume facturé et contribution nette hurle la crédibilité : le genre de fondateurs à qui on confie son argent.
+
+**Le risque.** Le secteur est structurellement hostile. Une marge nette de 6,2 % sur un produit non défendable technologiquement signifie que la seule douve est l'excellence opérationnelle et la densité du réseau. Chaque corridor sera un combat.
+
+**Pourquoi un point en dessous.** Ils iront loin parce qu'ils savent exécuter, mais le modèle exige beaucoup de capital et de complexité physique pour générer du cash, et reste plus fragile face à un choc macroéconomique.
+
+### Verdict
+
+À qualité d'exécution présumée égale, **l'économie des bits l'emporte d'une courte tête sur l'économie des atomes**. Remorq est la meilleure version possible d'une société de logistique ; Driftwatch joue sur un terrain où la physique financière est plus clémente.
+
+**L'écart d'un point ne sanctionne pas le talent, mais la dureté de l'arène.**
+
+> C'est le raisonnement qu'un annotateur doit pouvoir reconstruire à la lecture des deux textes. Si un annotateur classe Remorq devant, ce n'est pas une erreur en soi — mais il doit pouvoir dire pourquoi, et l'écart se documente.
+
+## Modèle frontier : `gpt-6-astra`
+
+Choisi sur l'axe qualité, pas sur le prix : l'écart entre candidats représente environ 14 $ sur tout le benchmark, un arrondi. Une étude *quality-vs-cost* compare un petit local à un plafond de qualité ; retenir le frontier le moins cher écraserait l'axe mesuré, et une conclusion « le local suffit » ne tiendrait pas.
+
+`gemini-3.1-pro-preview` écarté pour une seconde raison : son statut *Preview* le rend modifiable en cours d'expérience, ce qui casse la reproductibilité exigée au §10.
+
+Configuration complète dans le [README](../README.md#configuration-de-lexpérience).
