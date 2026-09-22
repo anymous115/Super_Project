@@ -1,148 +1,122 @@
-# Candidats de sourcing — 50 pitchs
+# Candidats de sourcing — les 37 pitchs dérivés
 
-Matière première identifiée pour chaque slot de [`CALIBRATION_GRID.md`](CALIBRATION_GRID.md). Ce sont des **ancrages**, pas des obligations : un autre cas qui colle mieux au profil le remplace.
+Matière première identifiée pour chaque slot dérivé de [`CALIBRATION_GRID.md`](CALIBRATION_GRID.md). Les 13 slots synthétiques ne figurent pas ici : il n'y a rien à sourcer.
 
-La seule contrainte est de respecter la cible de score et le profil de faiblesse du slot. Le devenir réel de la société source **ne fixe jamais la note** — voir § dernier.
+Ce sont des **ancrages**, pas des obligations. Un autre cas qui colle mieux au profil le remplace. La seule contrainte est de respecter la cible de score et le profil du slot.
 
-## Où chaque palier se source
+> **Une société = un slot.** Les alternatives sont indiquées pour que deux rédacteurs ne partent pas de la même boîte. Le premier qui prend note son choix dans `data/pitches.jsonl`.
 
-| Palier | Slots | Vivier |
-|---|---|---|
-| Fort (12) | P001–P012 | Decks publics de sociétés financées |
-| Moyen (26) | P013–P038 | Annuaire YC par industrie + quelques échecs récents |
-| Faible (12) | P039–P050 | **Post-mortems d'échec** |
+## Pourquoi trois viviers
 
-Le palier faible est le seul qu'aucune bibliothèque de decks ne peut fournir : tout ce qui est publié est un survivant. Les post-mortems le débloquent, et ils sont **entièrement défrichés ci-dessous**.
+Tout ce qui est publié est un **survivant** : on ne publie pas le deck d'une société qui n'a jamais levé. Les bibliothèques de decks ne contiennent donc, par construction, aucun mauvais pitch — elles ne couvrent que 12 slots sur 50.
 
----
-
-## Palier faible — défriché
-
-**La technique** : on lit pourquoi la société est morte, puis on écrit le pitch **tel qu'il aurait été présenté avant l'échec**, faiblesses déjà lisibles pour qui sait lire. Pitch faible authentique, pas caricature.
-
-### P039 — media / creator, cible 38, vanity metrics
-
-| Ancrage | Ce qu'il apporte |
-|---|---|
-| **StreamElements** | **Le meilleur du jeu.** 23 millions de créateurs servis, 111 M$ levés, jamais rentable. Revenus adossés à Twitch, puis dilution des budgets pub vers Shorts, TikTok et la TV connectée. |
-| Flip | Livestream shopping, 232 M$ levés, arrêt. |
-
-Chiffres d'audience spectaculaires, aucune économie derrière : exactement le profil. Un bon modèle doit refuser de compter l'audience comme de la traction.
-
-[Mission Media](https://missionmedia.asia/creator-economy-platforms-collapse-streamelements/) · [Marketing Brew](https://www.marketingbrew.com/stories/2023/09/26/creator-economy-startups-are-facing-a-judgment-day) · [Every](https://every.to/napkin-math/what-happened-to-the-creator-economy)
-
-### P041 — social app, cible 34
-
-**Crowdmix** : seule une bêta est sortie, l'app officielle jamais ; argent parti en frais de structure, aucune vision claire. **Friendster** : liens entre utilisateurs structurellement plus faibles que ceux de Facebook, refonte ratée en 2009.
-
-Crowdmix colle mieux : idée sympathique, exécution absente.
-
-[Failory — 25 échecs de réseaux sociaux](https://www.failory.com/startups/social-media-failures) · [Indie Hackers](https://www.indiehackers.com/post/10-social-media-startups-that-failed-and-what-to-learn-from-their-failures-44c0493eed)
-
-### P042 — proptech, cible 32
-
-| Ancrage | Ce qu'il apporte |
-|---|---|
-| **Masteos** (France) | 40 M€ en Série A en 2022, plans d'expansion, redressement judiciaire en janvier 2024. Marché retourné, hypothèses jamais révisées. Exemple européen. |
-| Casai (Mexique) | 28 M$ levés, licenciements 2022, arrêt au Brésil début 2023. |
-| Reali, EasyKnock | Arrêts invoquant l'environnement de taux. |
-
-[Sifted — les faillites de 2024](https://sifted.eu/articles/startups-went-bust-2024) · [TechCrunch](https://techcrunch.com/2024/01/08/another-proptech-startup-crashes-and-burns-citing-current-interest-rate-environment/) · [Bisnow](https://www.bisnow.com/national/news/proptech/from-boom-to-bust-how-2023-became-proptechs-most-turbulent-year-122169)
-
-### P043 — edtech, cible 30, croissance par vente agressive
-
-**Byju's** : jusqu'à 22 Md$ de valorisation, effondrement sous méthodes de vente agressives sur des formations coûteuses. **Edukoya** (Nigeria) : arrêt en 2025, rentabilité faible et soutien investisseur en berne.
-
-Contexte utile au pitch : l'investissement edtech mondial est passé de 16,7 Md$ en 2021 à moins de 3 Md$ en 2025, avec plus de 2 000 fermetures en cinq ans.
-
-[Failory — échecs edtech](https://www.failory.com/startups/edtech-failures) · [Rest of World](https://restofworld.org/2026/edtech-funding-collapse-k12-startups-ai-workforce/)
-
-### P045 — hardware, cible 25
-
-**Juicero** : presse à jus connectée à 700 $, cas d'école du produit que personne ne voulait. **Jawbone** : ~930 M$ levés sur dix ans, jamais de part de marché tenable, arrêt en 2017. **Treehouse Logic** : les fondateurs écrivent eux-mêmes qu'ils avaient la techno mais aucun modèle résolvant un vrai point de douleur de façon scalable.
-
-Treehouse Logic est le plus exploitable — la faiblesse y est formulée par les fondateurs.
-
-[CB Insights — hardware](https://www.cbinsights.com/research/report/hardware-startups-failure-success/) · [MacroFab](https://www.macrofab.com/blog/why-hardware-startups-fail)
-
-### P047 — agritech, cible 19, coûts intenables
-
-**FarmWise**, **Guardian Agriculture** : matériel testé en conditions réelles, les essais ne se convertissent jamais en commandes. **Vertical Future**, **Jones Food Co** : ferme verticale, coûts énergétiques intenables. **Ynsect** : protéine d'insecte, retour sur investissement long et incertain.
-
-Le mode d'échec a un nom — *cost-adoption mismatch* : la techno marche, l'agriculteur ne peut ni payer ni changer ses habitudes.
-
-[AgTech Navigator](https://www.agtechnavigator.com/Article/2026/01/28/why-agtech-start-ups-failed-last-year-and-a-playbook-for-2026/) · [Farming Future Food](https://farmingfuturefood.com/misaligned-business-models-not-technology-behind-recent-ag-tech-shutdowns/)
-
-### P048 — mobility, cible 16, modèle déjà démenti
-
-**Bird / Circ** : arrêt du scooter-sharing dans plusieurs villes du Moyen-Orient, ~100 licenciements, jusqu'à 10 000 trottinettes envoyées au recyclage. **Bolt Mobility** : arrêt invoquant les difficultés de levée.
-
-Profil recherché : un pitch qui propose un modèle dont d'autres ont déjà prouvé qu'il ne tient pas.
-
-[TechCrunch — Bird/Circ](https://techcrunch.com/?p=1997313) · [Sifted](https://sifted.eu/articles/startups-went-bust-2024)
-
-### P040 — cybersecurity, cible 36
-
-Une société de cybersécurité a cessé ses activités et licencié ~300 personnes après avoir vendu son activité et sa technologie à Tufin. Profil : menace réelle et bien décrite, solution jamais expliquée.
-
-Note de contexte à ne pas ignorer en rédigeant : 2025 a été la meilleure année d'investissement cyber depuis 2021, avec 14 Md$ levés. Un pitch cyber faible ne l'est donc pas à cause du marché — la faiblesse doit venir du dossier lui-même.
-
-[TechCrunch — licenciements 2025](https://techcrunch.com/2025/12/22/tech-layoffs-2025-list/)
-
-### P044, P046, P049, P050 — synthétiques
-
-Rien à sourcer. P044 et P049 portent des injections, P046 est volontairement quasi vide, P050 est le pitch creux. Le contenu est fabriqué parce que le défaut *est* le sujet du test.
+| Palier | Slots | Vivier | Logique |
+|---|---|---|---|
+| Fort | 12 | Levées récentes documentées | Le biais de survivant est ici ce qu'on cherche |
+| Moyen | 17 | Annuaire YC + levées modestes + échecs récents | Variance naturelle |
+| Faible | 8 | **Post-mortems d'échec** | La seule source de mauvais pitchs qui existe |
 
 ---
 
-## Palier moyen — ancrages partiels + annuaire YC
+## Table maître
 
-Sept slots ont déjà un ancrage issu de la recherche :
+### Palier fort — P001 à P012
 
-| Slot | Secteur | Cible | Ancrage |
-|---|---|---:|---|
-| P016 | health-tech | 64 | **Forward Health** — 650 M$ levés, 1 Md$ de valorisation, CarePods à 1 M$ pièce déployés sur 5 sites seulement, arrêt fin 2024. Impressionnant en façade, question du remboursement jamais traitée. |
-| P019 | agritech | 60 | *Cost-adoption mismatch* : techno qui marche, go-to-market absent. |
-| P020 | fintech B2B | 59 | **Solid** (81 M$, Chapter 11 en avril 2025, litige avec l'investisseur principal) · **Stenn** (900 M$ de valorisation, administration en décembre 2024) · **Tally**. |
-| P021 | media / creator | 58 | **Spotter** — 1,7 Md$ de valorisation en 2022, objectifs manqués dès 2025. Audience massive adossée à une seule plateforme. |
-| P026 | edtech | 52 | **Edukoya** — bons résultats pédagogiques, rentabilité jamais atteinte. |
-| P032 | foodtech D2C | 46 | **MyGlamm / POPxo / Moms Co** — marque connue, effondrement par intégrations ratées après rachats. Contexte : 60 % des D2C ayant levé une Série A entre 2019 et 2021 ont fermé ou levé en *down round* (étude Carta sur 8 000+ sociétés). |
-| P035 | climate-tech | 43 | Une climate-tech britannique arrêtée quelques mois après avoir annoncé une expansion majeure, ~200 personnes licenciées. |
+| Slot | Secteur | Cible | Ancrage principal | Alternative |
+|---|---|---:|---|---|
+| P001 | climate-tech | 92 | **Tulum Energy** — 27 M$, hydrogène turquoise par pyrolyse du méthane | DePoly |
+| P002 | fintech B2B | 88 | **Agora** — 50 M$ Série A, infrastructure stablecoin en marque blanche | Natural (30 M$, paiements pour agents IA) |
+| P003 | health-tech | 85 | **Hello Patient** — 22,5 M$ Série A, IA conversationnelle pour la communication patient | Doctolib |
+| P004 | dev tools | 82 | **Embedder** — YC S2025, agent de code firmware, 20+ plateformes MCU/SoC | annuaire YC dev tools (462 sociétés) |
+| P005 | cybersecurity | 79 | **Upwind Security** — 180 M$ Série A, visibilité cloud à l'exécution | — |
+| **P006** | logistics | **78** | **Flock Freight** — 215 M$ Série D, valorisation 1 Md$, mutualisation de camions LTL | Augment (85 M$, logistique autonome) |
+| P007 | AI SaaS | 76 | annuaire YC — chercher un dossier solide, marché encombré | — |
+| P008 | proptech | 75 | **EliseAI** — opérations immobilières pilotées par IA | Mews, Property Finder |
+| P009 | marketplace | 73 | annuaire YC `/industry/marketplace` | — |
+| P010 | foodtech D2C | 72 | **Olipop** — 50 M$ Série C menée par J.P. Morgan, valorisation 1,85 Md$ | ByHeart |
+| P011 | HR / future of work | 71 | **Ashby** — 50 M$ Série D, plateforme de recrutement analytique | Darwinbox (140 M$) |
+| P012 | mobility | 70 | **Donut Lab** — 25 M€ seed, composants de mobilité électrique | — |
 
-### Les 19 autres slots moyens
+> **P006 mérite un traitement à part.** C'est le premier recalé, à un point du dernier retenu. Il doit être **franchement bon**, pas un dossier moyen déguisé — d'où un ancrage pris dans le même vivier que le palier fort. Si ce pitch est bâclé, le test central du jeu de données ne teste rien.
 
-À chercher dans l'[annuaire YC](https://www.ycombinator.com/companies), qui expose une page par industrie :
+### Palier moyen — 17 slots dérivés
+
+| Slot | Secteur | Cible | Ancrage | Ce qu'il apporte |
+|---|---|---:|---|---|
+| P013 | foodtech D2C | 68 | **ByHeart** — 72,2 M$, nutrition infantile, transparence des ingrédients | Traction réelle, marges D2C tendues |
+| P014 | HR | 66 | **Zelt** — 5,7 M€, unifie paie, onboarding, matériel et avantages | Marché porteur, différenciation faible |
+| P015 ⚠️ | climate-tech | 65 | **DePoly** — 23 M$, recyclage chimique du PET | Techno crédible, économie contestable |
+| P016 | health-tech | 64 | **Forward Health** — 650 M$ levés, valo 1 Md$, CarePods à 1 M$ pièce sur 5 sites, arrêt fin 2024 | Impressionnant en façade, remboursement jamais traité |
+| P017 ⚠️ | cybersecurity | 62 | **Zip Security** — seed puis Série A, cyber accessible aux PME | Équipe forte, produit décrit vaguement |
+| P018 | dev tools | 61 | annuaire YC `/industry/developer-tools` | Communauté active, monétisation embryonnaire |
+| P019 | agritech | 60 | **Guardian Agriculture** — matériel fonctionnel, essais sans commandes | Techno qui marche, go-to-market absent |
+| P020 | fintech B2B | 59 | **Solid** — 81 M$, Chapter 11 en avril 2025 | Croissance réelle, dépendance à un partenaire |
+| P021 | media / creator | 58 | **Spotter** — valo 1,7 Md$ en 2022, objectifs manqués en 2025 | Audience massive sur une seule plateforme |
+| P022 | logistics | 57 | **Octup** — 12 M$ seed, plateforme IA pour prestataires 3PL | Opérations solides, marché étroit |
+| P024 ⚠️ | proptech | 54 | **Vantaca** — logiciel de gestion immobilière | Bonne traction, équipe inconnue, secteur réglementé |
+| P026 | edtech | 52 | **Edukoya** — arrêt 2025, rentabilité jamais atteinte | Bons résultats, économie absente |
+| P030 | social app | 48 | annuaire YC `/industry/consumer` | Engagement réel, aucun modèle |
+| P032 | foodtech D2C | 46 | **MyGlamm / POPxo / Moms Co** — effondrement par intégrations ratées | Marque connue, exécution défaillante |
+| P033 ⚠️ | hardware | 45 | **Jawbone** — le pitch d'avant l'échec | Techno réelle, demande jamais démontrée |
+| P035 | climate-tech | 43 | Climate-tech britannique arrêtée peu après une annonce d'expansion, ~200 licenciements | Sujet porteur, exécution absente |
+| P037 | agritech | 41 | **Vertical Future** — ferme verticale, coûts énergétiques intenables | Produit testé, l'agriculteur ne peut pas payer |
+
+### Palier faible — 8 slots dérivés
+
+| Slot | Secteur | Cible | Ancrage | Mode d'échec |
+|---|---|---:|---|---|
+| P039 | media / creator | 38 | **StreamElements** — 23 M de créateurs, 111 M$ levés, jamais rentable | Vanity metrics |
+| P040 | cybersecurity | 36 | Société cyber ayant cédé activité et techno à Tufin, ~300 licenciements | Menace réelle, solution jamais expliquée |
+| P041 | social app | 34 | **Crowdmix** — bêta seule sortie, argent parti en frais de structure | Exécution absente |
+| P042 | proptech | 32 | **Masteos** — 40 M€ Série A en 2022, redressement judiciaire en janvier 2024 | Marché retourné, hypothèses non révisées |
+| P043 | edtech | 30 | **Byju's** — jusqu'à 22 Md$ de valorisation, vente agressive | Croissance achetée |
+| P045 | hardware | 25 | **Juicero** — presse à jus connectée à 700 $ | Aucune demande |
+| P047 | agritech | 19 | **FarmWise** — essais jamais convertis en commandes | Coûts intenables |
+| P048 | mobility | 16 | **Bird / Circ** — ~100 licenciements, jusqu'à 10 000 trottinettes recyclées | Modèle déjà démenti |
+
+---
+
+## La technique du palier faible
+
+Un post-mortem raconte la fin ; on a besoin du début.
+
+**On lit pourquoi la société est morte, puis on écrit le pitch tel qu'il aurait été présenté avant l'échec**, avec les faiblesses déjà lisibles pour qui sait lire.
+
+StreamElements l'illustre : 23 millions de créateurs servis, 111 M$ levés, revenus adossés à une seule plateforme puis dilution des budgets publicitaires. Le pitch dérivé affiche donc des chiffres d'audience spectaculaires et aucune économie derrière — et on demande au modèle de refuser de compter l'audience comme de la traction.
+
+C'est un pitch faible **authentique**, pas une caricature. La différence s'entend, et c'est ce qu'on veut faire détecter.
+
+## Sources
+
+### Palier fort et levées récentes
+[Tech.eu — plus grandes seed européennes 2025](https://tech.eu/2026/01/23/from-idea-to-impact-europes-15-largest-tech-seed-rounds-in-2025/) · [TechCrunch — Natural](https://techcrunch.com/2026/07/20/natural-raises-30m-to-reinvent-payments-for-ai-agents-and-take-on-stripe/) · [Crunchbase — santé/IA](https://news.crunchbase.com/health-wellness-biotech/ai-healthcare-funding-rises-2025/) · [Pinpoint — financement cyber 2025](https://pinpointsearchgroup.com/2025-cyber-security-vendor-funding-report/) · [Crunchbase — proptech](https://news.crunchbase.com/real-estate-property-tech/rebound-ai-fintech-data-eoy-2025/) · [People Matters — HR tech 2025](https://me.peoplemattersglobal.com/article/funding-investment/the-world-invests-in-the-future-of-work-2025s-top-hr-tech-funding-45364) · [Vestbee — foodtech 2025](https://www.vestbee.com/insights/articles/the-state-of-foodtech-in-2025-investment-opportunities-and-key-risks)
+
+### Bibliothèques de decks
+[CB Insights — 29 licornes](https://www.cbinsights.com/research/billion-dollar-startup-pitch-decks/) · [Business Insider — 1 100+ decks](https://finance.yahoo.com/news/pitch-deck-library-search-over-150726372.html) · [Slidebean](https://slidebean.com/pitch-deck-examples) · [Cirrus Insight](https://www.cirrusinsight.com/blog/startup-pitch-decks)
+
+> **Attention à la date.** Un deck de 2008 noté avec une grille de 2026 récolte un score artificiellement bas : montants, repères de marché et standards de traction ont bougé. Privilégier le récent, ou réactualiser les ordres de grandeur en rédigeant.
+
+### Annuaire YC
+[ycombinator.com/companies](https://www.ycombinator.com/companies), une page par industrie :
 
 ```
-https://www.ycombinator.com/companies/industry/<secteur>
+/companies/industry/developer-tools     462 sociétés
+/companies/industry/health-tech
+/companies/industry/proptech
+/companies/industry/hr-tech
+/companies/industry/consumer
 ```
 
-par exemple `/industry/proptech`, `/industry/fintech`, `/industry/healthcare`.
+Un one-liner YC n'est pas un pitch : c'est un point de départ à développer jusqu'à 800 mots. [VCBacked](https://www.vcbacked.co/yc) permet de dépasser le plafond de 1 000 résultats de l'annuaire officiel.
 
-6 300+ sociétés, dont l'immense majorité n'est ni un échec ni une licorne : c'est exactement la variance qu'il faut pour un palier moyen. Un one-liner YC n'est pas un pitch — c'est un point de départ (problème, client visé, secteur) à développer jusqu'à 800 mots.
-
-[VCBacked — 6 302 sociétés YC](https://www.vcbacked.co/yc) pour parcourir au-delà du plafond de 1 000 résultats de l'annuaire officiel.
-
----
-
-## Palier fort — P001 à P012
-
-Decks publics de sociétés financées : c'est le seul palier où le biais de survivant ne gêne pas, il est même recherché.
-
-- [CB Insights — decks de 29 licornes](https://www.cbinsights.com/research/billion-dollar-startup-pitch-decks/)
-- [Business Insider — 1 100+ decks](https://finance.yahoo.com/news/pitch-deck-library-search-over-150726372.html)
-- [Slidebean](https://slidebean.com/pitch-deck-examples)
-- [Cirrus Insight — 60+ decks récents](https://www.cirrusinsight.com/blog/startup-pitch-decks)
-
-**Attention à la date.** Un deck de 2008 noté avec une grille de 2026 récolte un score artificiellement bas : les montants, les repères de marché et les standards de traction ont bougé. Privilégier les decks récents, ou réactualiser les ordres de grandeur en rédigeant.
-
-**P006 (78) mérite un traitement à part.** C'est le premier recalé, à un point du dernier retenu. Il doit être franchement bon — pas un dossier moyen déguisé. Le choisir dans le même vivier que le palier fort, pas dans le moyen.
+### Post-mortems d'échec
+[CB Insights — 483 post-mortems](https://www.cbinsights.com/research/startup-failure-post-mortem/) · [Foundevo — 442](https://www.foundevo.com/442-startup-failure-post-mortems/) · [Failory — réseaux sociaux](https://www.failory.com/startups/social-media-failures) · [Failory — edtech](https://www.failory.com/startups/edtech-failures) · [Sifted — faillites 2024](https://sifted.eu/articles/startups-went-bust-2024) · [AgTech Navigator](https://www.agtechnavigator.com/Article/2026/01/28/why-agtech-start-ups-failed-last-year-and-a-playbook-for-2026/) · [Mission Media — StreamElements](https://missionmedia.asia/creator-economy-platforms-collapse-streamelements/) · [CB Insights — hardware](https://www.cbinsights.com/research/report/hardware-startups-failure-success/)
 
 ---
 
 ## Rappel : la source ne fixe pas la note
 
-StreamElements a levé 111 M$ et Forward Health 650 M$ : leurs pitchs n'étaient sûrement pas mauvais. Byju's a atteint 22 Md$ de valorisation.
+Byju's a valu 22 Md$, StreamElements a levé 111 M$, Forward Health 650 M$. Leurs pitchs n'étaient sûrement pas mauvais.
 
 Le post-mortem sert à **écrire un pitch faible crédible**, pas à justifier un score. La note de référence vient uniquement de la double annotation à l'aveugle, sur le texte et rien d'autre.
 
@@ -150,10 +124,10 @@ C'est la règle la plus facile à enfreindre sans s'en rendre compte : on conna�
 
 ## Ce qui reste à faire
 
-- [ ] **P001–P012** — 12 decks publics récents, dont **P006 à soigner**
-- [ ] **P013–P038** — 19 sociétés à choisir dans l'annuaire YC (7 slots déjà ancrés)
-- [ ] **P039–P050** — confirmer les ancrages ci-dessus et relever les URL
-- [ ] Renseigner `source_url` et la date d'accès pour chaque pitch dérivé
+- [ ] **4 slots sans ancrage nommé** — P007 (AI SaaS), P009 (marketplace), P018 (dev tools), P030 (social app) : à choisir dans l'annuaire YC par industrie
+- [ ] Confirmer les 33 ancrages ci-dessus, ou les remplacer
+- [ ] Renseigner `source_url` et `accessed_at` dans `data/pitches.jsonl`
+- [ ] Renseigner `written_by` — 12 à 13 pitchs par personne
 - [ ] Initialiser `data/dataset_card.md`
 
-12 slots sont synthétiques : P023, P025, P027, P028, P029, P031, P034, P036, P038, P044, P046, P049, P050 — rien à sourcer, uniquement à rédiger.
+Les 13 slots synthétiques n'ont rien à sourcer : P023, P025, P027, P028, P029, P031, P034, P036, P038, P044, P046, P049, P050.
