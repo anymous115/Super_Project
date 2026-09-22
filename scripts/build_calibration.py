@@ -31,6 +31,18 @@ TIERS = {
 
 FLAGS = {"💉": "injection", "⚠️": "ambiguous", "␀": "missing_info"}
 
+# Binômes d'annotation. L'auteur d'un pitch ne peut pas l'annoter, donc la
+# répartition de la rédaction est contrainte par cette table.
+ANNOTATION_PAIRS = [
+    (("A", "B"), range(1, 10)),
+    (("C", "D"), range(10, 19)),
+    (("A", "C"), range(19, 27)),
+    (("B", "D"), range(27, 35)),
+    (("A", "D"), range(35, 43)),
+    (("B", "C"), range(43, 51)),
+]
+ANNOTATORS = {f"P{n:03d}": pair for pair, rng in ANNOTATION_PAIRS for n in rng}
+
 # Attendu par la grille, vérifié après parsing.
 EXPECTED = {
     "total": 50,
@@ -139,14 +151,22 @@ def check_written_pitches():
     path = DATA / "pitches.jsonl"
     if not path.exists():
         return
-    written = []
+    written, conflicts = [], []
     for line in path.read_text(encoding="utf-8").splitlines():
         row = json.loads(line)
+        author = row.get("written_by")
+        if author and author in ANNOTATORS.get(row["pitch_id"], ()):
+            conflicts.append(f"{row['pitch_id']} : {author} écrit ET annote")
         if row.get("pitch_text"):
             words = len(row["pitch_text"].split())
             written.append((row["pitch_id"], words))
             if words > 800:
                 print(f"  ! {row['pitch_id']} : {words} mots, plafond 800", file=sys.stderr)
+    if conflicts:
+        print("Conflit rédaction / annotation :", file=sys.stderr)
+        for c in conflicts:
+            print(f"  - {c}", file=sys.stderr)
+        sys.exit(1)
     if written:
         print(f"rédigés   — {len(written)}/50 "
               f"({', '.join(f'{i} {w}m' for i, w in written[:5])}"
