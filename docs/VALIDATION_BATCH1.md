@@ -71,10 +71,16 @@ Grille : équipe 20 · marché 25 · produit 15 · traction 25 · business model
 | Équipe | **5** | Neuf ans à diriger 1 200 départs quotidiens chez un top-5 européen ; optimisation d'itinéraires sur onze pays ; dix-huit mois de travail commun avant création. |
 | Marché | 4 | 38 Md€ chiffrés, 14 Md€ adressables avec justification du découpage. Le texte décrit des réseaux historiques qui « dominent le segment » et plusieurs plateformes concurrentes — marché occupé, pas vierge. |
 | Produit | **3** | « We do not claim an unassailable technology » — l'avance vient de la densité du carnet, pas de la technologie. |
-| Traction | 4 | 4,1 M€ facturés, +11 %/mois, rétention 71 %, remplissage 84 % contre 63 % sectoriel. Rapporté au marché adressable de 14 Md€ que le texte annonce lui-même, le volume reste très faible — c'est de l'arithmétique sur les chiffres du pitch, pas une appréciation. |
-| Business model | 3 | « That margin is thin » — 6,2 points nets, non démontrés au-delà de trois corridors. |
+| Traction | 4 | 34 M€ facturés, +7 %/mois, 890 chargeurs, rétention 86 %, remplissage 84 % contre 63 % sectoriel. Solide, sans le relief d'un 5 : la croissance a ralenti avec l'échelle. |
+| Business model | 3 | 14 % brut soit 4,8 M€, 6,2 points nets soit 2,1 M€ — le texte donne les deux et le produit. « Structurally thin: we are a pass-through. » Non démontré au-delà de trois corridors. |
 
 ---
+
+> **Révision du 22 septembre, seconde passe.** La relecture humaine a trouvé ce que le contrôle mécanique ne pouvait pas voir : P006 annonçait 4,1 M€ de **volume facturé**, soit 254 k€ de revenu net après un take rate de 6,2 points, face aux ~2,2 M$ de marge brute de P005. Un facteur 9, pas « un cheveu ».
+>
+> Les deux pitchs étaient donc incomparables en échelle, ce qui parasitait le seul test qu'ils devaient porter. P006 est remis à 34 M€ de volume, soit 2,1 M€ nets — comparable à P005. Les cibles n'ont pas bougé ; c'est le texte qui a changé.
+>
+> L'ambiguïté GMV / revenu net est trop bonne pour être perdue : elle devient le test propre de **P028**.
 
 ## Le point qui décide de tout : P005 contre P006
 

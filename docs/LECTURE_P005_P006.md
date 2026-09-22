@@ -108,18 +108,20 @@ We are fourteen people today, six of them in operations — this business does n
 TRACTION
 
 - 31 months of operation
-- €4.1M billed volume over the last twelve months
-- 11% month-on-month growth over the last six months
-- 240 active shippers, 38 of them billing more than €5,000 per month
-- 12-month retention: 71%
+- €34M billed volume over the last twelve months
+- 7% month-on-month growth over the last six months
+- 890 active shippers, 140 of them billing more than €15,000 per month
+- 12-month retention: 86%
 - average load factor: 84%, against an industry average of 63%
-- 2,300 partner carriers
+- 4,100 partner carriers
 
 BUSINESS MODEL
 
-We collect what the shipper pays and remit to the carrier. Gross take rate is 14%. After direct operating costs — support, claims handling, cargo insurance — 6.2 points remain, up from 4.8 a year ago.
+We collect what the shipper pays and remit to the carrier. Gross take rate is 14%, which on last year's volume is €4.8M. After direct operating costs — support, claims handling, cargo insurance — 6.2 points remain, or €2.1M, up from 4.8 points a year ago.
 
-That margin is thin. It improves as density grows, since the cost of processing a shipment falls when matching gets easier. We have not yet shown that it holds beyond our three main corridors.
+We report billed volume and net contribution separately because they are not the same number and we would rather you did not have to work that out yourself.
+
+That margin is structurally thin: we are a pass-through, and our revenue is a narrow slice of a large one. It improves as density grows, since the cost of processing a shipment falls when matching gets easier. We have not yet shown that it holds beyond our three main corridors.
 
 GO-TO-MARKET
 
@@ -127,6 +129,6 @@ Direct sales to supply chain directors at mid-sized manufacturers. Average cycle
 
 FUNDING
 
-We are raising €6M to open three additional corridors, grow the operations team to fifteen, and industrialise the matching engine, which today is manually supervised beyond three stops.
+We are raising €12M to open three additional corridors, grow the operations team to fifteen, and industrialise the matching engine, which today is manually supervised beyond three stops.
 ```
 
