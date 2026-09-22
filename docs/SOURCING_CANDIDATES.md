@@ -124,10 +124,13 @@ C'est la règle la plus facile à enfreindre sans s'en rendre compte : on conna�
 
 ## Ce qui reste à faire
 
-- [ ] **4 slots sans ancrage nommé** — P007 (AI SaaS), P009 (marketplace), P018 (dev tools), P030 (social app) : à choisir dans l'annuaire YC par industrie
-- [ ] Confirmer les 33 ancrages ci-dessus, ou les remplacer
-- [ ] Renseigner `source_url` et `accessed_at` dans `data/pitches.jsonl`
-- [ ] Renseigner `written_by` — 12 à 13 pitchs par personne
+- [x] **4 slots sans ancrage nommé** — P007 automatisation du support, P009 pièces détachées industrielles, P018 outil de build open source, P030 application sociale de groupe : choisis dans l'annuaire YC par industrie
+- [x] Confirmer les 33 ancrages ci-dessus, ou les remplacer — tous conservés
+- [x] Renseigner `source_url` et `accessed_at` dans `data/pitches.jsonl` — **37/37 dérivés**
+- [x] Renseigner `written_by` — 13 · 12 · 12 · 12
 - [ ] Initialiser `data/dataset_card.md`
+- [ ] Valider humainement les 44 pitchs encore en `drafted`
+
+> Les 50 pitchs sont rédigés. Ce qui reste sur ce document est clos ; la suite se joue dans l'annotation.
 
 Les 13 slots synthétiques n'ont rien à sourcer : P023, P025, P027, P028, P029, P031, P034, P036, P038, P044, P046, P049, P050.
