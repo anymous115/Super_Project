@@ -46,3 +46,15 @@ def test_export_contient_progression_et_prochaines_actions(tmp_path):
     assert payload["current_phase"] == 1
     assert payload["next_actions"]
     assert payload["next_actions"][0]["action"]
+
+
+def test_notebook_avec_todo_n_est_pas_considere_final(tmp_path):
+    (tmp_path / "08_quality_vs_cost_benchmark.ipynb").write_text(
+        '{"cells": [{"source": ["src.benchmark\\n# TODO"]}]}', encoding="utf-8"
+    )
+
+    snapshot = collect_project_status(tmp_path)
+
+    notebook_task = snapshot.phases[5].tasks[0]
+    assert notebook_task.progress == 0
+    assert notebook_task.state == "À faire"
