@@ -206,6 +206,10 @@ Ces contrôles ne sont pas décoratifs : ils ont déjà attrapé deux défauts d
 
 `pitch_text` est l'**entrée de référence du moteur**. Les PDF sont rendus à partir de ce même texte, en trois mises en page, et servent à tester l'extraction : le texte qu'on en tire doit redonner `pitch_text` à peu près à l'identique. Un écart de score entre un pitch lu en texte et le même pitch lu en PDF signale alors un défaut d'extraction, pas un changement de jugement du modèle.
 
+`scripts/check_extraction.py` compare, pour chaque PDF, la suite de mots extraite à celle de `pitch_text`. Mesure du 23 septembre 2026 : **fidélité de 1,000 sur les 50 PDF** et les trois mises en page, deux colonnes comprises.
+
+L'extraction (`src/extract.py`) ne devine jamais : un PDF vide, corrompu, protégé, trop long ou sans couche texte (scanné, donc sans OCR), un lien mort ou un service qui n'expose rien sans navigateur (DocSend, Notion, Drive) produisent chacun un code d'erreur que l'interface peut afficher. Les liens ne sont suivis que vers des adresses publiques en `http(s)`, redirections comprises : un pitch ne doit pas pouvoir faire interroger le réseau interne du fonds, à commencer par le serveur Ollama.
+
 ### Provenance
 
 Le §5.2 de la proposition produit est conservé : toute idée ou tout pitch dérivé d'une source publique porte son URL, sa date d'accès et ses conditions de réutilisation, consignées dans `data/dataset_card.md`. Aucun pitch synthétique n'est jamais présenté comme une entreprise réelle.
