@@ -192,8 +192,10 @@ def annotate_one(model: str, pitch: dict, api_key: str) -> dict:
             text = raw["choices"][0]["message"]["content"] or ""
             parsed = validate(extract_json(text))
         except urllib.error.HTTPError as exc:
-            last_error = f"HTTP {exc.code} : {exc.read().decode('utf-8', 'replace')[:300]}"
-            if exc.code in (400, 401, 403, 404) or "limit: 0" in last_error:
+            body = exc.read().decode("utf-8", "replace")
+            last_error = f"HTTP {exc.code} : {body[:300]}"
+            # Quota du jour épuisé : réessayer ne fait qu'attendre demain.
+            if exc.code in (400, 401, 403, 404) or "limit: 0" in body or "PerDay" in body:
                 raise SystemExit(f"{pitch['pitch_id']} — {last_error}")
             time.sleep(min(60, 10 * 2 ** (attempt - 1)))   # 429 / 5xx : on attend et on reprend
             continue
