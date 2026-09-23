@@ -162,6 +162,8 @@ def collect_project_status(root: Optional[Path] = None) -> ProjectSnapshot:
     for annotator in "ABCD":
         annotations.extend(_jsonl(root / f"data/annotations/{annotator}.jsonl"))
     reconciliations = _jsonl(root / "data/annotations/reconciliation.jsonl")
+    # Référence IA validée par échantillon humain (docs/AI_REFERENCE.md).
+    ai_notes = [row for path in sorted((root / "data/annotations/ai").glob("*.jsonl")) for row in _jsonl(path)]
     references = _jsonl(root / "data/reference_scores.jsonl")
 
     modules = (
@@ -219,8 +221,9 @@ def collect_project_status(root: Optional[Path] = None) -> ProjectSnapshot:
             TaskProgress("Validation humaine", _ratio(validated, 50), f"{validated}/50 validés", "Relire et valider les pitchs drafted", 1),
             TaskProgress("Provenance documentée", _ratio(sourced, max(37, len(derived))), f"{sourced}/{max(37, len(derived))} sources dérivées", "Compléter les URL de provenance", 1),
             TaskProgress("PDF générés", _ratio(pdfs, 50), f"{pdfs}/50 PDF", "Générer les PDF manquants", 2),
-            TaskProgress("Double annotation", _ratio(len(annotations), 100), f"{len(annotations)}/100 annotations", "Lancer scripts/annotate.py pour A, B, C et D", 1),
-            TaskProgress("Référence réconciliée", _ratio(len(references), 50), f"{len(references)}/50 références · {len(reconciliations)} arbitrages", "Réconcilier puis lancer scripts/build_reference.py", 1),
+            TaskProgress("Notes de l'IA tierce", _ratio(len(ai_notes), 50), f"{len(ai_notes)}/50 pitchs notés par Gemini", "Lancer scripts/annotate_ai.py", 1),
+            TaskProgress("Échantillon humain", _ratio(len(annotations), 24), f"{len(annotations)}/24 annotations de validation", "A, C et D : 8 pitchs chacun, voir docs/AI_REFERENCE.md", 1),
+            TaskProgress("Référence validée", _ratio(len(references), 50), f"{len(references)}/50 références", "Lancer scripts/build_ai_reference.py, puis taguer data-v1", 1),
         )),
         PhaseProgress(3, "Pipeline", (
             TaskProgress("Modules du pipeline", _ratio(module_count, len(modules)), f"{module_count}/{len(modules)} modules", "Implémenter les modules manquants", 2),
@@ -253,6 +256,7 @@ def collect_project_status(root: Optional[Path] = None) -> ProjectSnapshot:
         "validated_pitches": validated,
         "pdfs": pdfs,
         "annotations": len(annotations),
+        "ai_notes": len(ai_notes),
         "references": len(references),
         "benchmark_runs": len(runs),
         "valid_runs": valid_runs,
