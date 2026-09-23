@@ -9,3 +9,6 @@ streamlit>=1.37        # interface (§12)
 reportlab>=4.2         # rendu des PDF depuis pitch_text (§6)
 pypdf>=5.0             # extraction PDF, mesurée à part du benchmark (§6, §11)
 pytest>=8.0            # tests
+ipykernel>=6.29        # kernel Python du notebook dans VS Code
+pandas>=2.2            # tableaux et analyse exploratoire du corpus
+matplotlib>=3.9        # graphiques du notebook et de la présentation

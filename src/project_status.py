@@ -198,7 +198,11 @@ def collect_project_status(root: Optional[Path] = None) -> ProjectSnapshot:
     notebook_ready = False
     if notebook.exists():
         notebook_text = notebook.read_text(encoding="utf-8")
-        notebook_ready = "benchmark_task.jsonl" not in notebook_text and "src.benchmark" in notebook_text
+        notebook_ready = (
+            "benchmark_task.jsonl" not in notebook_text
+            and "src.benchmark" in notebook_text
+            and "TODO" not in notebook_text
+        )
 
     presentation_count = len(list(root.glob("*.pptx"))) + len(list((root / "docs").glob("*.pptx")))
     tags = set(_git(root, "tag", "--list").splitlines())
@@ -232,7 +236,7 @@ def collect_project_status(root: Optional[Path] = None) -> ProjectSnapshot:
             TaskProgress("Interface VC Streamlit", float(product_app), "app.py présent" if product_app else "app.py absent", "Construire l'interface produit dans app.py", 3),
         )),
         PhaseProgress(6, "Livraison", (
-            TaskProgress("Notebook final", float(notebook_ready), "Notebook relié au pipeline" if notebook_ready else "Notebook starter encore détecté", "Réécrire le notebook avec le pipeline réel", 3),
+            TaskProgress("Notebook final", float(notebook_ready), "Notebook relié au pipeline" if notebook_ready else "Notebook structuré, cellules TODO restantes", "Compléter puis exécuter les cellules TODO du notebook", 3),
             TaskProgress("Présentation", float(presentation_count > 0), f"{presentation_count} présentation(s)", "Créer la présentation finale", 4),
             TaskProgress("Release v1.0", float("v1.0" in tags), "Tag v1.0 présent" if "v1.0" in tags else "Tag v1.0 absent", "Tester la démo puis créer le tag v1.0", 4),
         )),
