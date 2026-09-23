@@ -16,16 +16,17 @@ Le tri reste une aide à la décision. Il ne remplace ni la due diligence ni le 
 
 ## Moteur de scoring
 
-Le scoring tourne sur **`deepseek-r1:8b` en local, via Ollama**.
+Le scoring tourne sur **`qwen2.5:14b` en local, via Ollama**, derrière un **filtre anti-injection** qui s'applique avant le modèle.
 
 | | |
 |---|---|
 | **Coût** | Aucun coût d'API : le modèle tourne sur la machine du fonds. |
 | **Confidentialité** | Un pitch n'est jamais envoyé à un service tiers. C'est un argument réel pour un fonds, qui reçoit des informations non publiques. |
-| **Débit** | ~3,5 min par pitch avec le prompt de production (V2) sur un MacBook Pro M4, soit ~400 pitchs par jour en continu. Un fonds en reçoit quelques centaines par mois : le tri se fait en tâche de fond, pas en temps réel. |
-| **Limites connues** | Le modèle se trompe parfois en calculant le total : le code le recalcule. Il entoure son JSON d'un bloc markdown : le code le retire. Il hésite parfois sur l'identifiant du pitch : c'est l'identifiant de l'appel qui fait foi. |
+| **Débit** | ~1 min par pitch sur un MacBook Pro M4, soit ~1 400 pitchs par jour en continu. Un fonds en reçoit quelques centaines par mois : le tri se fait en tâche de fond. |
+| **Sécurité** | Un pitch qui tente de dicter sa note sort du classement automatique et part en revue humaine. Sur le corpus : 5 pièges sur 5 écartés, 0 pitch sain signalé à tort. |
+| **Limites connues** | Le modèle surnote les pitchs moyens et faibles, et tasse les notes entre 60 et 85 : il ordonne correctement l'ensemble, mais départage mal les bons dossiers entre eux. |
 
-Le choix se fait sur le coût et la confidentialité, **pas sur la puissance** : un modèle de 8 milliards de paramètres ne rivalise pas avec un modèle frontier en finesse de jugement. Les bornes d'exécution et les mesures réelles sont dans le [README](README.md#moteur-de-scoring).
+Le choix se fait sur le coût et la confidentialité, **pas sur la puissance**. Il a été mesuré, pas supposé : trois modèles locaux ont été essayés sur les 50 pitchs (détail dans le [README](README.md#moteur-de-scoring)).
 
 ## Ingestion multi-canal
 
@@ -46,7 +47,7 @@ Les deux canaux de la v1 couvrent le cas d'usage réel. Les autres sont document
 - 50 pitchs fictifs calibrés, en texte et en PDF ;
 - grille de notation VC explicite et pondérée ;
 - sélection adaptative `min(50, max(5, 10 %))` ;
-- moteur de scoring sur `deepseek-r1:8b` en local ;
+- moteur de scoring sur `qwen2.5:14b` en local, derrière un filtre anti-injection ;
 - sorties structurées validées avec Pydantic, total recalculé dans le code ;
 - prompts versionnés V0 / V1 / V2, avec défense contre le prompt injection : V2 est le prompt de production ;
 - contrôles du moteur : sortie valide, latence, injections contenues, cohérence avec la calibration ;
@@ -76,6 +77,8 @@ Les apports techniques de cette proposition sont conservés : validation Pydanti
 - **le temps de calcul** : la série locale prenait ~16 h en trois répétitions, et encore ~5,5 h en une seule ;
 - **la référence** : 100 annotations à l'aveugle par une équipe de non-investisseurs, dont un membre absent. Le relais par une IA tierce (Gemini) a buté sur les quotas gratuits ;
 - **la valeur produit** : l'effort partait dans la mesure plutôt que dans ce que l'investisseur utilise.
+
+Le même jour, le modèle local a changé. `deepseek-r1:8b`, un modèle de raisonnement, ne répondait pas sur 14 pitchs sur 18 : il épuisait son budget en réflexion. `qwen2.5:7b` puis `qwen2.5:14b` ont été mesurés sur les 50 pitchs. Le 14b a été retenu, et le filtre anti-injection ajouté parce qu'il plaçait un pitch piégé premier à 100/100.
 
 Ce qui avait été construit pour le benchmark reste dans le dépôt et sert le produit : la grille, les prompts versionnés, la validation, les bornes du modèle local, les métriques. Le protocole a été mis à jour en conséquence.
 
