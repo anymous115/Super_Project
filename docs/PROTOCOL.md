@@ -12,11 +12,9 @@ La question centrale du projet :
 
 > **Comment transformer un flux désordonné de pitchs en un classement fiable, explicable et défendable devant un investisseur ?**
 
-Et, puisque ce classement tourne sur un LLM, la question du cours qui en découle :
+> **Changement du 23 septembre 2026.** Le projet devait aussi répondre à la question du cours P8 : *quel modèle fait tourner ce scoring en production ?*, en comparant un modèle local à un modèle frontier. Cette comparaison a été retirée, avec l'accord du professeur (voir [`CONTEXT.md`](../CONTEXT.md#historique-des-décisions)). Le scoring tourne sur un seul modèle, `deepseek-r1:8b` en local, et les sections qui suivent ont été mises à jour en conséquence.
 
-> **Quel modèle fait tourner ce scoring en production, compte tenu de sa qualité, de sa latence et de son coût ?**
-
-Le notebook `08_quality_vs_cost_benchmark.ipynb` garde son nom pour conserver le lien avec le projet 8. Il devient le livrable technique principal.
+Le notebook `08_quality_vs_cost_benchmark.ipynb` garde son nom pour conserver le lien avec le projet 8. Il déroule le pipeline de bout en bout.
 
 ## 2. Périmètre du MVP
 
@@ -24,18 +22,19 @@ Le notebook `08_quality_vs_cost_benchmark.ipynb` garde son nom pour conserver le
 
 - ingestion Telegram et email, avec un événement normalisé commun ;
 - extraction du contenu depuis texte, PDF et lien ;
-- 50 pitchs fictifs annotés en double ;
+- 50 pitchs fictifs calibrés ;
 - grille de notation VC explicite et pondérée ;
-- pipeline de scoring commun aux deux modèles ;
+- moteur de scoring sur `deepseek-r1:8b` en local ;
 - sorties structurées validées avec Pydantic ;
-- prompts versionnés V0 / V1 / V2 avec défense contre le prompt injection ;
-- benchmark qualité / coût / latence et recommandation défendue ;
+- prompts versionnés V0 / V1 / V2 avec défense contre le prompt injection, V2 en production ;
+- contrôles du moteur (§11) ;
 - tracing des appels LLM avec Langfuse ;
 - interface Streamlit affichant la file de pitchs triée ;
 - notebook exécutable de bout en bout.
 
 ### Hors périmètre
 
+- comparaison de modèles local / frontier (retirée le 23 septembre 2026) ;
 - connecteurs Instagram, X et LinkedIn (documentés, non construits) ;
 - comptes VC, authentification, paiement, base de production ;
 - traitement de decks réels ou confidentiels ;
@@ -130,7 +129,7 @@ Règles indispensables :
 - une information absente ne doit jamais être inventée ;
 - l'absence d'information est signalée dans `missing_information` ;
 - chaque note est justifiée par des extraits du pitch ;
-- la même grille s'applique à tous les modèles et à tous les prompts.
+- la même grille s'applique à tous les pitchs et à toutes les versions de prompt.
 
 ### Règle de sélection
 
@@ -154,11 +153,7 @@ Le plafond de 50 vient de la « sélection adaptative » proposée par @Mathisse
 
 En cas d'égalité, départager sur la traction, puis le marché, puis l'identifiant du pitch, pour que le résultat reste déterministe.
 
-> **Ce que ça change pour l'évaluation.** Le jeu de données compte 50 pitchs, donc les deux régimes de la règle donnent le même résultat : 5 dossiers retenus. C'est le seul volume où la règle est démontrable des deux côtés au lieu d'être seulement énoncée.
->
-> Une erreur de sélection coûte 20 points de chevauchement, ce qui rend la métrique assez stable pour porter une conclusion.
->
-> On rapporte deux niveaux : le **Spearman sur les 50 pitchs** comme métrique de classement principale, et le **chevauchement du top 5** comme métrique produit — celle qui dit si le bon dossier atterrit sur le bureau du VC.
+> **Ce que ça change pour la démonstration.** Le jeu de données compte 50 pitchs, donc les deux régimes de la règle donnent le même résultat : 5 dossiers retenus. C'est le seul volume où la règle est démontrable des deux côtés au lieu d'être seulement énoncée.
 
 ## 6. Données
 
@@ -168,7 +163,7 @@ Le volume est choisi pour tomber exactement sur le point de bascule de la règle
 
 Les pitchs sont rédigés **en anglais**. La documentation reste en français et la restitution du produit est bilingue : le bilinguisme se teste sur la sortie, jamais sur l'entrée. Le gabarit de rédaction est dans [`PITCH_TEMPLATE.md`](PITCH_TEMPLATE.md).
 
-La calibration — score cible, profil de faiblesse et informations volontairement absentes de chaque pitch — est fixée **avant rédaction** dans **[`CALIBRATION_GRID.md`](CALIBRATION_GRID.md)**. Ce document fait autorité sur la distribution, les deux cas ambigus, les deux injections et la répartition de l'annotation.
+La calibration — score cible, profil de faiblesse et informations volontairement absentes de chaque pitch — est fixée **avant rédaction** dans **[`CALIBRATION_GRID.md`](CALIBRATION_GRID.md)**. Ce document fait autorité sur la distribution, les cas ambigus et les injections.
 
 Le sourcing — quelle matière première alimente chaque slot et comment la dériver sans rien copier — est traité dans **[`DATA_SOURCING.md`](DATA_SOURCING.md)**.
 
@@ -179,7 +174,6 @@ Le sourcing — quelle matière première alimente chaque slot et comment la dé
 | `docs/CALIBRATION_GRID.md` | Cibles, profils, flags — **source de vérité** | l'équipe, à la main |
 | `data/calibration.jsonl` | Les mêmes cibles, machine-lisibles | **généré**, jamais édité |
 | `data/pitches.jsonl` | Le contenu des pitchs | les rédacteurs |
-| `data/reference_scores.jsonl` | Les scores de référence | les annotateurs |
 | `data/dataset_card.md` | Provenances, licences, dates d'accès | l'équipe |
 
 ```bash
@@ -210,9 +204,7 @@ Ces contrôles ne sont pas décoratifs : ils ont déjà attrapé deux défauts d
 
 ### Double format
 
-`pitch_text` est l'**entrée unique du benchmark** : les deux modèles reçoivent exactement la même chaîne de caractères. Les PDF sont rendus à partir de ce même texte et servent à la démonstration. La qualité de l'extraction PDF est mesurée séparément et ne rentre pas dans le tableau qualité / coût / latence.
-
-Sans cette règle, on ne compare plus deux modèles mais deux entrées différentes, et le benchmark ne veut plus rien dire.
+`pitch_text` est l'**entrée de référence du moteur**. Les PDF sont rendus à partir de ce même texte, en trois mises en page, et servent à tester l'extraction : le texte qu'on en tire doit redonner `pitch_text` à peu près à l'identique. Un écart de score entre un pitch lu en texte et le même pitch lu en PDF signale alors un défaut d'extraction, pas un changement de jugement du modèle.
 
 ### Provenance
 
@@ -220,16 +212,13 @@ Le §5.2 de la proposition produit est conservé : toute idée ou tout pitch dé
 
 ### Annotation de référence
 
-1. Deux membres évaluent chaque pitch séparément, **sans avoir vu les scores cibles**.
-2. Tout écart supérieur à 1 point sur 5 se discute et se tranche.
-3. Les cas réellement ambigus sont documentés, pas gommés.
-4. L'auteur d'un pitch ne l'annote pas.
+Une double annotation à l'aveugle (100 évaluations) devait fournir la référence de la comparaison de modèles. Elle a été abandonnée avec cette comparaison. Les outils restent dans le dépôt, et la variante par IA tierce est documentée dans [`AI_REFERENCE.md`](AI_REFERENCE.md), sans être poursuivie.
 
-Les binômes tournants sont définis dans `CALIBRATION_GRID.md`.
+Sans référence annotée, la cohérence du moteur se contrôle contre les **cibles de calibration** (§11). Ce sont les intentions d'écriture de l'équipe, pas une vérité : un écart signale un pitch à relire, pas forcément une erreur du modèle.
 
 ## 7. Sortie structurée
 
-Les deux modèles produisent exactement le même objet, validé par un schéma **Pydantic** dans `src/schemas.py` :
+Le moteur produit l'objet suivant, validé par un schéma **Pydantic** dans `src/schemas.py` :
 
 ```json
 {
@@ -249,7 +238,7 @@ Les deux modèles produisent exactement le même objet, validé par un schéma *
 
 La validation vérifie la présence de tous les champs, des notes entières de 0 à 5, une recommandation parmi les trois valeurs autorisées, et l'absence de texte autour du JSON.
 
-Une sortie invalide est **enregistrée comme échec**. Elle n'est jamais corrigée silencieusement à la main : le taux de JSON valide est lui-même une métrique de comparaison entre les modèles.
+Une sortie invalide est **enregistrée comme échec**. Elle n'est jamais corrigée à la main. Le seul nettoyage automatique consiste à retirer un bloc markdown autour du JSON, et il est tracé : `valid_json` indique si la sortie brute était valide, `valid_json_cleaned` si elle l'est après nettoyage.
 
 ## 8. Prompts
 
@@ -271,7 +260,7 @@ Cette défense n'est pas un exercice théorique : le système reçoit du contenu
 
 Des exemples few-shot peuvent être ajoutés, uniquement si leur bénéfice est mesuré.
 
-Une modification de prompt n'est retenue que si les métriques s'améliorent ou si un risque documenté est réduit.
+Une modification de prompt n'est retenue que si les contrôles du §11 s'améliorent ou si un risque documenté est réduit. **V2 est le prompt de production.** V0 et V1 restent dans le code comme étapes documentées.
 
 ## 9. Pipeline et tracing
 
@@ -293,69 +282,56 @@ input_tokens, output_tokens, estimated_cost, error
 
 Les appels sont tracés avec **Langfuse** : prompt, version, entrée, sortie, latence et erreur. Les clés restent dans `.env`, jamais committées ; `.env.example` ne contient que les noms de variables et des valeurs factices.
 
-## 10. Benchmark — le volet P8
+## 10. Moteur de scoring
 
-### Matrice
+Le scoring tourne sur **`deepseek-r1:8b`**, exécuté en local par Ollama, avec le prompt **V2**.
 
-| Modèle | V0 | V1 | V2 |
-|---|:---:|:---:|:---:|
-| Local (Ollama) | ✓ | ✓ | ✓ |
-| Frontier | ✓ | ✓ | ✓ |
+### Pourquoi ce modèle
 
-50 pitchs × 2 modèles × 3 prompts = **300 appels**, en **une passe**. S'y ajoute un **test de stabilité** : 3 passes en V2 sur 10 pitchs (`STABILITY_SAMPLE` dans `src/config.py`), soit 40 appels de plus.
+- **aucun coût d'API** : le modèle tourne sur la machine du fonds ;
+- **confidentialité** : un pitch n'est jamais envoyé à un service tiers ;
+- **déjà intégré et borné** : les défauts révélés par les premiers appels réels sont corrigés dans le code (voir le README).
 
-> **Changement du 23 septembre 2026.** Le protocole prévoyait 3 répétitions de toute la matrice, soit 900 appels. À température 0, répéter 50 pitchs trois fois mesure surtout ce qu'on sait déjà, pour environ 16 h de calcul local et un coût frontier triplé. On applique la règle ci-dessous (réduire les répétitions, pas les pitchs) et on mesure la stabilité là où elle compte : sur le prompt de production, avec des pitchs des trois paliers et deux injections. Les passes de stabilité sont agrégées à part, pour ne pas peser plus lourd dans les métriques de qualité ni dans le coût par pitch.
+Ce choix ne repose pas sur la puissance du modèle. Un modèle de 8 milliards de paramètres juge moins finement qu'un modèle frontier. C'est acceptable pour un outil qui trie et justifie, et dont chaque note renvoie au texte du pitch, mais ce n'est pas démontré par une comparaison : c'est une limite à dire en présentation.
 
-Un appel pèse **897 à 1 287 tokens d'entrée** selon la version de prompt, et environ 400 de sortie hors raisonnement. La part frontier en une passe représente **~168 k tokens d'entrée et ~60 k de sortie**, soit **~5 $** aux tarifs consignés dans le README, davantage si le modèle facture un raisonnement.
+### Conditions d'exécution
 
-Ces chiffres sont recalculés depuis le corpus par `scripts/estimate_cost.py`, pas écrits à la main. La première estimation partait du plafond de 800 mots par pitch et annonçait 1 800 tokens par appel pour ~810 k au total ; le corpus fait 475 mots en moyenne, et l'écart valait mieux qu'un arrondi dans une étude dont le coût est l'un des deux axes.
-
-Si le budget se tend, réduire d'abord le nombre de répétitions, pas le nombre de pitchs : une passe unique sur 50 pitchs vaut mieux que trois passes sur 20.
-
-### Conditions contrôlées
-
-- mêmes 50 pitchs, même ordre de passage ;
 - température à 0 ;
-- modèle local **`deepseek-r1:8b`** via Ollama, décidé en phase 1 ;
-- versions de modèles figées et notées précisément ;
-- machine de mesure locale documentée ;
-- un appel d'échauffement local, exclu des mesures ;
-- aucun changement de code pendant une série ;
-- sauvegarde immédiate de chaque réponse, aucune correction manuelle.
+- fenêtre de contexte de 8 192 tokens, génération plafonnée à 4 096 tokens, 600 s au plus par appel ;
+- un appel d'échauffement au démarrage, non enregistré ;
+- sauvegarde immédiate de chaque réponse, aucune correction manuelle ;
+- machine documentée dans le README, puisque la latence en dépend.
 
-Date et source des tarifs utilisés pour le modèle payant à consigner dans le README.
+### Débit
 
-## 11. Métriques
+~206 s par pitch en V2 sur un MacBook Pro M4, soit ~400 pitchs par jour en continu. Un fonds en reçoit quelques centaines par mois : le scoring se fait en tâche de fond, et le fondateur reçoit un accusé de réception immédiat, pas son score.
 
-### Qualité du scoring
+## 11. Contrôles du moteur
 
-- MAE par critère et MAE sur le score total ;
-- corrélation de rang de **Spearman** sur les 50 pitchs — métrique de classement principale ;
-- chevauchement du **top 5** — métrique produit : le bon dossier remonte-t-il ?
-- accord de recommandation (`reject` / `review` / `shortlist`) ;
-- taux de JSON valide ;
-- taux d'hallucination : affirmations non soutenues par le pitch.
+Ce qui se vérifie sans référence annotée, sur un passage des 50 pitchs en V2.
 
-### Performance et coût
+### Fiabilité
 
-- latence médiane et p95 par pitch ;
-- tokens d'entrée et de sortie ;
-- coût total du benchmark ;
-- coût projeté pour 100, 1 000 et 10 000 pitchs.
+- taux de sortie valide, brute et après retrait du bloc markdown ;
+- taux de réponses coupées par la borne de génération ;
+- écart entre le total annoncé par le modèle et le total recalculé ;
+- latence médiane et p95.
 
 ### Sécurité
 
-- taux de réussite des injections, avant et après la défense V2 ;
-- conservation d'une sortie valide pendant l'attaque ;
-- **variation de score provoquée par l'injection** — la mesure la plus lisible, puisque les deux pitchs piégés sont calibrés bas.
+- les **5 pitchs piégés** sont calibrés bas : aucun ne doit être retenu dans la sélection, et chaque tentative doit apparaître dans `risks` ;
+- la sortie reste valide pendant l'attaque.
+
+### Cohérence
+
+- corrélation de **Spearman** entre les scores du moteur et les cibles de calibration ;
+- présence des 5 pitchs les mieux calibrés dans la sélection du moteur.
+
+Ces deux mesures comparent le moteur aux **intentions d'écriture** de l'équipe, pas à une vérité. Elles servent à repérer les écarts francs à relire, pas à affirmer que le moteur « note juste ».
 
 ### Cas d'erreur à couvrir
 
 Pitch vide ou illisible · PDF corrompu · lien mort · modèle indisponible · sortie non parsable · pitch hors sujet · contenu malveillant.
-
-### Contrôle LLM-as-judge
-
-Il ne remplace pas les métriques déterministes. Sur un échantillon anonymisé, présenté dans un ordre aléatoire et sans nom de modèle, il évalue la fidélité au pitch, la qualité du raisonnement et l'utilité pour un VC. Une vérification humaine sur le même échantillon mesure l'accord avec le juge.
 
 ## 12. Interface Streamlit
 
@@ -384,7 +360,6 @@ Super_Project/
 ├── app.py
 ├── data/
 │   ├── pitches.jsonl
-│   ├── reference_scores.jsonl
 │   ├── pdfs/
 │   └── dataset_card.md
 ├── src/
@@ -397,12 +372,10 @@ Super_Project/
 │   │   └── email.py
 │   ├── extract.py
 │   ├── score_pitch.py
-│   ├── benchmark.py
+│   ├── benchmark.py        # passage sur le corpus
 │   └── metrics.py
 ├── results/
-│   ├── raw_runs.jsonl
-│   ├── benchmark_summary.csv
-│   └── figures/
+│   └── raw_runs.jsonl
 ├── tests/
 └── docs/
     ├── PROTOCOL.md
@@ -416,25 +389,25 @@ Ne jamais committer `.env`, une clé API, un token ou un pitch confidentiel.
 
 ## 14. Roadmap
 
-### Phase 1 — Cadrage
-Figer la grille, la règle de sélection, les deux modèles et leurs versions exactes, la machine de mesure. Créer les issues.
+### Phase 1 — Cadrage ✅
+Figer la grille, la règle de sélection, le modèle et sa machine.
 
 ### Phase 2 — Données
-Rédiger les 50 pitchs selon `CALIBRATION_GRID.md`, double annotation (100 évaluations, 25 par personne), réconciliation, rendu des PDF, dataset card, gel de `data-v1`.
+Rédiger les 50 pitchs selon `CALIBRATION_GRID.md`, rendre les PDF, écrire la dataset card, geler `data-v1`. La double annotation prévue ici a été abandonnée avec la comparaison de modèles.
 
 ### Phase 3 — Pipeline
-Schémas Pydantic, pipeline de scoring, connexion Ollama puis frontier, Langfuse, tests essentiels.
+Schémas Pydantic, pipeline de scoring, connexion Ollama, bornes du modèle local, Langfuse, tests.
 
-### Phase 4 — Expériences
-Mesurer V0, concevoir et mesurer V1, ajouter la défense et mesurer V2, geler les résultats.
+### Phase 4 — Moteur
+Scorer les 50 pitchs en V2, exécuter les contrôles du §11, consigner les résultats.
 
 ### Phase 5 — Ingestion et interface
 Adaptateur Telegram, adaptateur email, extraction PDF, interface Streamlit, parcours complet et cas d'erreur.
 
 ### Phase 6 — Livraison
-Tableaux et graphiques, recommandation, notebook et README finalisés, répétition de la démonstration, PR fusionnées, release `v1.0`.
+Notebook et README finalisés, répétition de la démonstration, PR fusionnées, release `v1.0`.
 
-> **Ordre volontaire.** L'ingestion vient en phase 5, après le benchmark. Un connecteur Telegram qui alimente un moteur de scoring non validé ne démontre rien, et c'est le benchmark qui est évalué par le cours.
+> **Ordre des phases 4 et 5.** Le passage sur les 50 pitchs tourne en tâche de fond (~2 h 50) pendant que l'ingestion et l'interface se construisent. Il fournit aussi la file de pitchs scorés que l'interface affiche en démonstration.
 
 ## 14 bis. Cadrage produit
 
@@ -454,48 +427,41 @@ Branches :
 data/pitches-and-labels
 feature/scoring-schema
 feature/local-runner
-feature/frontier-runner
-feature/metrics
-experiment/prompt-v1
 experiment/prompt-v2-safety
 feature/ingestion-telegram
+feature/ingestion-email
+feature/pdf-extraction
 feature/streamlit-interface
 docs/final-delivery
 ```
 
-| Rôle | Responsabilités | Peut démarrer |
-|---|---|---|
-| Données et annotation | Pitchs, grille, double annotation, dataset card | tout de suite |
-| Pipeline et modèle local | Schémas Pydantic, validation, Ollama, tests | tout de suite |
-| Modèle frontier et coûts | Appels hébergés, tokens, coûts, Langfuse, budget | tout de suite |
-| Évaluation et interface | Métriques, notebook, figures, Streamlit, rapport | dès le schéma figé |
+| Rôle | Responsabilités |
+|---|---|
+| Moteur | Passage sur le corpus, contrôles du §11, Langfuse |
+| Ingestion | Adaptateurs Telegram et email, événement normalisé |
+| Extraction | Texte des PDF et des liens, cas illisibles |
+| Interface et livraison | Streamlit, notebook, présentation |
 
 La rédaction des 50 pitchs se partage à 4 — **12 à 13 chacun** — sinon une seule personne bloque toute l'équipe.
 
-L'annotation représente **100 évaluations, soit 25 par personne**. C'est le poste le plus lourd du projet : à prendre en compte dans le planning avant de s'engager sur 50 pitchs.
-
-Les rôles pipeline, frontier et évaluation n'attendent pas les données : le schéma de sortie est figé au §7, il suffit de développer contre lui avec 2 ou 3 pitchs factices.
+Les rôles ingestion, extraction et interface n'attendent pas le moteur : le schéma de sortie est figé au §7, il suffit de développer contre lui avec 2 ou 3 sorties enregistrées dans `results/raw_runs.jsonl`.
 
 Chaque Pull Request précise ce qui change, comment le vérifier, les résultats obtenus, les limites connues, et l'absence de secret.
 
 ## 16. Definition of Done
 
 - [ ] la grille, les poids et la règle de sélection sont figés ;
-- [ ] 50 pitchs fictifs et leurs scores de référence sont versionnés ;
+- [ ] 50 pitchs fictifs calibrés sont versionnés ;
 - [ ] les données ont une provenance et une dataset card ;
 - [ ] les sorties respectent un schéma Pydantic validé ;
 - [ ] le score total est recalculé dans le code ;
-- [ ] les deux modèles passent exactement le même benchmark ;
-- [ ] au moins trois versions de prompt sont comparées ;
-- [ ] qualité, classement, latence, coût et sécurité sont mesurés ;
-- [ ] les deux injections sont testées avant et après défense ;
-- [ ] un LLM-as-judge et une vérification humaine sont documentés ;
+- [ ] les 50 pitchs sont scorés en V2 et les contrôles du §11 sont consignés ;
+- [ ] les injections du corpus sont contenues par V2 ;
 - [ ] les appels LLM sont tracés avec Langfuse ;
 - [ ] les cas d'erreur et les pitchs illisibles sont gérés ;
 - [ ] l'ingestion Telegram et email fonctionne de bout en bout ;
 - [ ] l'interface Streamlit utilise le même pipeline que le notebook ;
 - [ ] le notebook s'exécute de bout en bout, sans import vers le repo du professeur ;
-- [ ] la recommandation finale repose sur les résultats mesurés ;
 - [ ] aucun secret ni contenu confidentiel n'est committé ;
 - [ ] une démonstration reproductible et une présentation sont prêtes ;
 - [ ] la version finale est taguée `v1.0`.
@@ -503,16 +469,13 @@ Chaque Pull Request précise ce qui change, comment le vérifier, les résultats
 ## 17. Présentation finale — 10 minutes
 
 1. **Problème — 1 min** : le flux de pitchs qu'un fonds ne peut pas lire.
-2. **Méthode — 2 min** : données, grille, modèles, prompts.
-3. **Démonstration — 2 min** : un PDF envoyé sur Telegram, noté, classé, affiché.
-4. **Résultats — 2 min** : qualité, classement, latence, coût.
-5. **Sécurité et limites — 1 min** : injection, hallucinations, 50 pitchs fictifs.
-6. **Recommandation — 1 min** : local, frontier ou hybride.
-7. **Questions — 1 min**.
+2. **Produit — 2 min** : canaux, grille, sélection adaptative, justification par le texte.
+3. **Démonstration — 3 min** : un PDF envoyé sur Telegram, noté, classé, affiché.
+4. **Moteur — 2 min** : pourquoi un modèle local, ses bornes, ce que disent les contrôles.
+5. **Sécurité et limites — 1 min** : injection, hallucinations, 50 pitchs fictifs, un modèle de 8 milliards de paramètres jamais comparé à un frontier.
+6. **Questions — 1 min**.
 
-La recommandation doit être conditionnelle et défendue : le local s'il atteint une qualité suffisante avec un avantage net de coût ou de confidentialité ; le frontier si son gain justifie son prix ; un système hybride si le local peut filtrer les cas évidents et le frontier réévaluer la zone frontière du classement.
-
-Ne jamais conclure sur la seule qualité ou le seul coût. Expliquer les compromis, les limites d'un échantillon de 50 pitchs fictifs et les risques d'un usage réel.
+Ne pas présenter le score comme une décision. Expliquer ce que le moteur contrôle, ce qu'il ne contrôle pas, et les risques d'un usage réel.
 
 ## 18. Première action
 
@@ -520,8 +483,8 @@ Réunion courte, et rien ne démarre avant que ces cinq points soient figés :
 
 1. la grille et ses pondérations ;
 2. la règle de sélection `max(5, 10 %)` et les deux métriques de classement ;
-3. ~~le modèle frontier~~ — **décidé** : `gpt-6-astra`, local `deepseek-r1:8b`. Voir la configuration dans le [README](../README.md#configuration-de-lexpérience) ;
-4. la validation de `CALIBRATION_GRID.md` et la répartition des 5 pitchs par personne ;
+3. ~~le modèle~~ — **décidé** : `deepseek-r1:8b` en local. Voir le [README](../README.md#moteur-de-scoring) ;
+4. la validation de `CALIBRATION_GRID.md` ;
 5. les deux canaux d'ingestion de la v1.
 
 Une fois ces décisions fusionnées dans `main`, la branche `data/pitches-and-labels` démarre.

@@ -52,7 +52,9 @@ L'extraction de profil produit **exactement ces champs**, mais à partir de pitc
 
 Autrement dit, les deux directions ne s'excluaient pas : il manquait l'étage qui les relie. Le désaccord portait sur l'ordre — construire le corpus d'abord, le filtre ensuite.
 
-### Ce que ça apporterait au benchmark P8
+### Ce que ça apporterait à l'évaluation
+
+> Section écrite quand le projet comparait deux modèles. L'argument vaut toujours si la comparaison revient (voir plus bas).
 
 C'est l'argument le plus fort en faveur de cette feature, et il vaut d'être pesé **avant** de la repousser trop loin.
 
@@ -90,3 +92,29 @@ Le jeu de données existant suffit : les 50 pitchs portent déjà les champs à 
 Détaillé au §4 du [protocole](PROTOCOL.md#canaux). Instagram demande un compte Business lié à une Page, une app Meta et un passage en App Review ; X demande un accès API payant avec des DM restreints. Aucun des deux ne tient dans les délais du rendu.
 
 À reprendre seulement si le produit sort du cadre du cours. Prérequis commun : un **résolveur de liens**, puisque sur ces canaux un pitch arrive sous forme de lien bien plus souvent que de PDF.
+
+---
+
+## Comparaison de modèles local / frontier
+
+**Statut : retirée du MVP le 23 septembre 2026, avec l'accord du professeur.**
+
+Le sujet d'origine du cours (P8) : comparer `deepseek-r1:8b` en local à un modèle frontier (`gpt-6-astra`) sur la qualité, la latence et le coût, et recommander lequel mettre en production.
+
+### Ce qui est déjà construit
+
+- la matrice reprenable (`src/benchmark.py`) en une passe, avec un test de stabilité sur 10 pitchs ;
+- les métriques : MAE, Spearman, chevauchement du top 5, accord de recommandation, variation due aux injections (`src/metrics.py`) ;
+- les bornes du modèle local et ses latences mesurées ;
+- l'outillage d'annotation à l'aveugle (`scripts/annotate.py`, `scripts/build_reference.py`) et sa variante par IA tierce (`scripts/annotate_ai.py`, [`AI_REFERENCE.md`](AI_REFERENCE.md)).
+
+### Ce qui manquait
+
+- **une référence** : 100 annotations humaines, ou une référence IA validée sur un échantillon humain. Le quota gratuit de Gemini (20 requêtes par jour) a bloqué la seconde voie ;
+- **du temps machine** : ~5,5 h pour la part locale en une passe ;
+- **une clé OpenAI** : ~5 $ pour la part frontier, davantage si le modèle facture son raisonnement.
+
+### Pour la rouvrir
+
+Activer la facturation Gemini (moins de 1 $ pour les 45 pitchs restants), faire annoter l'échantillon de 12 pitchs, puis lancer `python3 -m src.benchmark`. Tout le reste est en place.
+

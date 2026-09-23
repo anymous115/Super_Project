@@ -158,13 +158,7 @@ def collect_project_status(root: Optional[Path] = None) -> ProjectSnapshot:
     sourced = sum(bool(row.get("source_url")) for row in derived)
     pdfs = len(list((root / "data/pdfs").glob("P*.pdf"))) if (root / "data/pdfs").exists() else 0
 
-    annotations: List[Dict[str, Any]] = []
-    for annotator in "ABCD":
-        annotations.extend(_jsonl(root / f"data/annotations/{annotator}.jsonl"))
-    reconciliations = _jsonl(root / "data/annotations/reconciliation.jsonl")
-    # Référence IA validée par échantillon humain (docs/AI_REFERENCE.md).
-    ai_notes = [row for path in sorted((root / "data/annotations/ai").glob("*.jsonl")) for row in _jsonl(path)]
-    references = _jsonl(root / "data/reference_scores.jsonl")
+    traps = {row["pitch_id"] for row in pitches if row.get("is_injection_test")}
 
     modules = (
         "src/config.py",
@@ -181,12 +175,15 @@ def collect_project_status(root: Optional[Path] = None) -> ProjectSnapshot:
 
     runs = _jsonl(root / "results/raw_runs.jsonl")
     valid_runs = sum(bool(row.get("valid_json")) for row in runs)
-    configurations = {
-        (row.get("model"), row.get("prompt_version"))
-        for row in runs
-        if row.get("model") and row.get("prompt_version")
+    # Le produit tourne sur un seul modèle, avec le prompt V2 (§10 du protocole).
+    engine = [row for row in runs if row.get("prompt_version") == "V2" and row.get("parsed_output")]
+    scored = {row.get("pitch_id") for row in engine}
+    contained = {
+        row.get("pitch_id")
+        for row in engine
+        if row.get("pitch_id") in traps and row["parsed_output"].get("recommendation") != "shortlist"
     }
-    summaries = _csv_rows(root / "results/benchmark_summary.csv")
+    checks_written = (root / "docs/ENGINE_CHECKS.md").exists()
 
     ingestion_files = (
         "src/ingest/normalize.py",
@@ -204,26 +201,20 @@ def collect_project_status(root: Optional[Path] = None) -> ProjectSnapshot:
         notebook_ready = "benchmark_task.jsonl" not in notebook_text and "src.benchmark" in notebook_text
 
     presentation_count = len(list(root.glob("*.pptx"))) + len(list((root / "docs").glob("*.pptx")))
-    final_report = any(
-        (root / path).exists()
-        for path in ("docs/FINAL_REPORT.md", "docs/RECOMMENDATION.md", "results/FINAL_REPORT.md")
-    )
     tags = set(_git(root, "tag", "--list").splitlines())
 
     phases = (
         PhaseProgress(1, "Cadrage", (
             TaskProgress("Vision et protocole", float((root / "docs/PROTOCOL.md").exists()), "Protocole versionné", "Finaliser docs/PROTOCOL.md", 1),
             TaskProgress("Grille et sélection", float((root / "data/calibration.jsonl").exists()), "Calibration machine-lisible", "Générer data/calibration.jsonl", 1),
-            TaskProgress("Modèles et machine figés", float((root / "src/config.py").exists() and "gpt-6-astra" in (root / "src/config.py").read_text(encoding="utf-8")), "Configuration du benchmark", "Figer les deux modèles et la machine", 1),
+            TaskProgress("Modèles et machine figés", float((root / "src/config.py").exists() and "deepseek-r1:8b" in (root / "src/config.py").read_text(encoding="utf-8")), "Configuration du moteur", "Figer le modèle et la machine", 1),
         )),
         PhaseProgress(2, "Données", (
             TaskProgress("Corpus rédigé", _ratio(drafted, 50), f"{drafted}/50 pitchs", "Rédiger les pitchs manquants", 1),
             TaskProgress("Validation humaine", _ratio(validated, 50), f"{validated}/50 validés", "Relire et valider les pitchs drafted", 1),
             TaskProgress("Provenance documentée", _ratio(sourced, max(37, len(derived))), f"{sourced}/{max(37, len(derived))} sources dérivées", "Compléter les URL de provenance", 1),
             TaskProgress("PDF générés", _ratio(pdfs, 50), f"{pdfs}/50 PDF", "Générer les PDF manquants", 2),
-            TaskProgress("Notes de l'IA tierce", _ratio(len(ai_notes), 50), f"{len(ai_notes)}/50 pitchs notés par Gemini", "Lancer scripts/annotate_ai.py", 1),
-            TaskProgress("Échantillon humain", _ratio(len(annotations), 24), f"{len(annotations)}/24 annotations de validation", "A, C et D : 8 pitchs chacun, voir docs/AI_REFERENCE.md", 1),
-            TaskProgress("Référence validée", _ratio(len(references), 50), f"{len(references)}/50 références", "Lancer scripts/build_ai_reference.py, puis taguer data-v1", 1),
+            TaskProgress("Données gelées", float("data-v1" in tags), "Tag data-v1 présent" if "data-v1" in tags else "Tag data-v1 absent", "Taguer data-v1 une fois les pitchs validés", 2),
         )),
         PhaseProgress(3, "Pipeline", (
             TaskProgress("Modules du pipeline", _ratio(module_count, len(modules)), f"{module_count}/{len(modules)} modules", "Implémenter les modules manquants", 2),
@@ -231,11 +222,10 @@ def collect_project_status(root: Optional[Path] = None) -> ProjectSnapshot:
             TaskProgress("Tests automatisés écrits", _ratio(test_count, 7), f"{test_count} fichiers de tests", "Ajouter les tests essentiels manquants", 2),
             TaskProgress("Premier appel enregistré", float(bool(runs)), f"{len(runs)} appel(s) enregistré(s)", "Faire un smoke test local sur 3 pitchs", 1),
         )),
-        PhaseProgress(4, "Expériences", (
-            TaskProgress("Matrice benchmark", _ratio(len(runs), 340), f"{len(runs)}/340 appels (300 + 40 de stabilité) · {valid_runs} JSON valides", "Lancer ou reprendre la matrice, puis --stability", 2),
-            TaskProgress("Six configurations couvertes", _ratio(len(configurations), 6), f"{len(configurations)}/6 modèle × prompt", "Couvrir les configurations manquantes", 2),
-            TaskProgress("Synthèse des métriques", _ratio(len(summaries), 6), f"{len(summaries)}/6 lignes de synthèse", "Générer benchmark_summary.csv", 2),
-            TaskProgress("Recommandation finale", float(final_report), "Rapport final détecté" if final_report else "Aucun rapport final", "Rédiger la recommandation local/frontier/hybride", 3),
+        PhaseProgress(4, "Moteur", (
+            TaskProgress("Corpus scoré en V2", _ratio(len(scored), 50), f"{len(scored)}/50 pitchs scorés", "python3 -m src.benchmark --models local --prompts V2", 1),
+            TaskProgress("Injections contenues", _ratio(len(contained), max(len(traps), 1)), f"{len(contained)}/{len(traps)} pitchs piégés hors shortlist", "Scorer les pitchs piégés en V2 et vérifier la sélection", 2),
+            TaskProgress("Contrôles consignés", float(checks_written), "docs/ENGINE_CHECKS.md présent" if checks_written else "Aucun compte rendu", "Consigner les contrôles du §11 dans docs/ENGINE_CHECKS.md", 2),
         )),
         PhaseProgress(5, "Produit", (
             TaskProgress("Ingestion et extraction", _ratio(ingestion_count, len(ingestion_files)), f"{ingestion_count}/{len(ingestion_files)} composants", "Construire Telegram, email et extraction PDF", 3),
@@ -255,12 +245,10 @@ def collect_project_status(root: Optional[Path] = None) -> ProjectSnapshot:
         "drafted_pitches": drafted,
         "validated_pitches": validated,
         "pdfs": pdfs,
-        "annotations": len(annotations),
-        "ai_notes": len(ai_notes),
-        "references": len(references),
-        "benchmark_runs": len(runs),
+        "engine_runs": len(runs),
         "valid_runs": valid_runs,
-        "summary_rows": len(summaries),
+        "scored_pitches": len(scored),
+        "traps_contained": len(contained),
         "tests": test_count,
     }
     return ProjectSnapshot(
