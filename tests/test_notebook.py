@@ -24,9 +24,24 @@ def test_notebook_couvre_les_etapes_du_benchmark():
         "".join(cell.get("source", [])) if isinstance(cell.get("source"), list) else cell.get("source", "")
         for cell in notebook["cells"]
     )
-    for concept in ("Jeu de données", "Référence humaine", "Prompt engineering", "Matrice expérimentale", "Sécurité", "Conclusion"):
+    for concept in (
+        "Jeu de données",
+        "Repères de calibration",
+        "Prompt engineering",
+        "Passage du moteur sur le corpus",
+        "Sécurité",
+        "Conclusion",
+    ):
         assert concept in text
     assert text.count("TODO") >= 8
+
+
+def test_notebook_reflete_le_protocole_local_actuel():
+    text = NOTEBOOK.read_text(encoding="utf-8")
+    assert "50 pitchs × 1 modèle local × 1 prompt V2 × 1 répétition = 50 appels" in text
+    assert "900 appels" not in text
+    assert "six configurations" not in text
+    assert "data/reference_scores.jsonl" not in text
 
 
 def test_notebook_contient_les_visuels_pedagogiques():
