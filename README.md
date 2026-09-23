@@ -47,7 +47,7 @@ Aucun modèle Anthropic n'est éligible : les pitchs du corpus sont rédigés pa
 
 **Source :** [OpenAI — API pricing](https://developers.openai.com/api/docs/pricing) · **Consultée le 22 septembre 2026**
 
-Coût estimé de la part frontier : **~14 $** pour 450 appels (501 k tokens d'entrée, 180 k de sortie), hors cache et outils externes.
+Coût estimé de la part frontier : **~4,70 $** pour 150 appels en une passe (168 k tokens d'entrée, 60 k de sortie), plus moins d'1 $ pour le test de stabilité, hors cache et outils externes. Un modèle qui facture son raisonnement comme de la sortie peut multiplier la part de sortie : un appel test sur 3 pitchs la mesure avant la série.
 
 Recalculé sur le corpus réel par `python3 scripts/estimate_cost.py`. L'estimation précédente de ~17 $ partait du plafond de 800 mots par pitch ; le corpus en fait **475 en moyenne**, et une entrée pèse 897 à 1 287 tokens selon la version de prompt, pas 1 800.
 
@@ -56,7 +56,7 @@ Recalculé sur le corpus réel par `python3 scripts/estimate_cost.py`. L'estimat
 - température 0 ;
 - mêmes 50 pitchs, même ordre de passage ;
 - un appel d'échauffement local exclu des mesures ;
-- 3 répétitions par configuration ;
+- une passe par configuration, plus 3 passes en V2 sur 10 pitchs pour la stabilité ;
 - modèle local borné à `num_ctx` 8192 et `num_predict` 4096, chaque appel plafonné à 600 s.
 
 > **Ces bornes ne sont pas un réglage de confort.** Ollama charge `deepseek-r1:8b` avec une fenêtre de 4 096 tokens. Une entrée d'environ 1 000 tokens plus un raisonnement libre la sature, et le serveur se met alors à réévaluer le prompt en boucle : un appel observé a dépassé **58 minutes** sans rendre la main, contre 122 secondes pour un pitch de taille comparable.
@@ -73,9 +73,7 @@ Recalculé sur le corpus réel par `python3 scripts/estimate_cost.py`. L'estimat
 | V1 | ~130 s (interpolé) | 5,4 h |
 | V2 | 206 s | 8,6 h |
 
-**La matrice locale complète — 450 appels sur 3 répétitions — représente environ 16 heures** sur la machine de mesure. Le frontier, lui, se compte en minutes.
-
-Le §10 prévoit le cas : « si le budget se tend, réduire d'abord le nombre de répétitions, pas le nombre de pitchs ». Une répétition sur les 50 pitchs ramène la série locale à **5,4 heures**.
+Trois répétitions de la matrice locale, soit 450 appels, auraient pris **environ 16 heures**. Le §10 prévoit le cas : « si le budget se tend, réduire d'abord le nombre de répétitions, pas le nombre de pitchs ». La série tourne donc en **une passe, 150 appels locaux, environ 5,4 heures**. Le test de stabilité (20 appels locaux en V2) ajoute environ 1 heure.
 
 ### Machine de mesure
 
@@ -154,12 +152,13 @@ pytest                        # 53 tests, aucun appel de modèle
 | `src/schemas.py` | Validation Pydantic des sorties, et recalcul du total |
 | `src/prompts.py` | V0 / V1 / V2, avec l'empreinte de chaque version |
 | `src/score_pitch.py` | Un appel : prompt, modèle, mesure, validation, enregistrement |
-| `src/benchmark.py` | La matrice 2 × 3 × 50 × 3, reprenable |
+| `src/benchmark.py` | La matrice 2 × 3 × 50 en une passe, plus le test de stabilité, reprenable |
 | `src/metrics.py` | MAE, Spearman, chevauchement du top 5, latences, coûts |
 
 ```bash
-python3 -m src.benchmark --models local --prompts V0 --limit 3 --repetitions 1
-python3 -m src.benchmark                 # la matrice complète, 900 appels
+python3 -m src.benchmark --models local --prompts V0 --limit 3
+python3 -m src.benchmark                 # la matrice, 300 appels en une passe
+python3 -m src.benchmark --stability     # 3 passes en V2 sur 10 pitchs, 40 appels
 python3 -m src.benchmark --summary       # agrège dans results/benchmark_summary.csv
 python3 scripts/estimate_cost.py         # recalcule le budget depuis le corpus
 ```

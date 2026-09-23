@@ -302,9 +302,11 @@ Les appels sont tracés avec **Langfuse** : prompt, version, entrée, sortie, la
 | Local (Ollama) | ✓ | ✓ | ✓ |
 | Frontier | ✓ | ✓ | ✓ |
 
-50 pitchs × 2 modèles × 3 prompts = **300 appels** par répétition, **900 appels** sur 3 répétitions.
+50 pitchs × 2 modèles × 3 prompts = **300 appels**, en **une passe**. S'y ajoute un **test de stabilité** : 3 passes en V2 sur 10 pitchs (`STABILITY_SAMPLE` dans `src/config.py`), soit 40 appels de plus.
 
-Un appel pèse **897 à 1 287 tokens d'entrée** selon la version de prompt, et environ 400 de sortie. La part frontier sur 3 répétitions représente **~501 k tokens d'entrée et ~180 k de sortie**, soit **~14 $** aux tarifs consignés dans le README.
+> **Changement du 23 septembre 2026.** Le protocole prévoyait 3 répétitions de toute la matrice, soit 900 appels. À température 0, répéter 50 pitchs trois fois mesure surtout ce qu'on sait déjà, pour environ 16 h de calcul local et un coût frontier triplé. On applique la règle ci-dessous (réduire les répétitions, pas les pitchs) et on mesure la stabilité là où elle compte : sur le prompt de production, avec des pitchs des trois paliers et deux injections. Les passes de stabilité sont agrégées à part, pour ne pas peser plus lourd dans les métriques de qualité ni dans le coût par pitch.
+
+Un appel pèse **897 à 1 287 tokens d'entrée** selon la version de prompt, et environ 400 de sortie hors raisonnement. La part frontier en une passe représente **~168 k tokens d'entrée et ~60 k de sortie**, soit **~5 $** aux tarifs consignés dans le README, davantage si le modèle facture un raisonnement.
 
 Ces chiffres sont recalculés depuis le corpus par `scripts/estimate_cost.py`, pas écrits à la main. La première estimation partait du plafond de 800 mots par pitch et annonçait 1 800 tokens par appel pour ~810 k au total ; le corpus fait 475 mots en moyenne, et l'écart valait mieux qu'un arrondi dans une étude dont le coût est l'un des deux axes.
 

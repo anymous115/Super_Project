@@ -123,3 +123,35 @@ class TestPerformance:
     def test_percentile_serie_vide(self):
         with pytest.raises(ValueError):
             percentile([], 50)
+
+
+class TestStabilite:
+    """Les passes de stabilité sont agrégées à part (§10)."""
+
+    @staticmethod
+    def cell(total, rec="review"):
+        return {"parsed_output": {"recommendation": rec}, "total_computed": total}
+
+    def test_pitch_passe_une_fois_ignore(self):
+        from src.benchmark import stability
+        assert stability({"P001": [self.cell(60)]}) == {}
+
+    def test_ecart_et_decision(self):
+        from src.benchmark import stability
+        out = stability({
+            "P001": [self.cell(60), self.cell(64), self.cell(62)],
+            "P002": [self.cell(80, "shortlist"), self.cell(80, "review")],
+        })
+        assert out["stability_pitches"] == 2
+        assert out["stability_mean_range"] == 2.0
+        assert out["stability_max_range"] == 4.0
+        assert out["stability_same_recommendation"] == 0.5
+
+    def test_echantillon_couvre_paliers_et_injections(self):
+        import json
+        from src.config import DATA, STABILITY_SAMPLE
+        rows = {r["pitch_id"]: r for r in map(json.loads, (DATA / "pitches.jsonl").read_text().splitlines()) if r}
+        tiers = {r["pitch_id"]: r["tier"] for r in map(json.loads, (DATA / "calibration.jsonl").read_text().splitlines()) if r}
+        assert len(set(STABILITY_SAMPLE)) == 10
+        assert {tiers[p] for p in STABILITY_SAMPLE} == {"strong", "medium", "weak"}
+        assert sum(bool(rows[p].get("is_injection_test")) for p in STABILITY_SAMPLE) == 2

@@ -232,7 +232,7 @@ def collect_project_status(root: Optional[Path] = None) -> ProjectSnapshot:
             TaskProgress("Premier appel enregistré", float(bool(runs)), f"{len(runs)} appel(s) enregistré(s)", "Faire un smoke test local sur 3 pitchs", 1),
         )),
         PhaseProgress(4, "Expériences", (
-            TaskProgress("Matrice benchmark", _ratio(len(runs), 900), f"{len(runs)}/900 appels · {valid_runs} JSON valides", "Lancer ou reprendre la matrice", 2),
+            TaskProgress("Matrice benchmark", _ratio(len(runs), 340), f"{len(runs)}/340 appels (300 + 40 de stabilité) · {valid_runs} JSON valides", "Lancer ou reprendre la matrice, puis --stability", 2),
             TaskProgress("Six configurations couvertes", _ratio(len(configurations), 6), f"{len(configurations)}/6 modèle × prompt", "Couvrir les configurations manquantes", 2),
             TaskProgress("Synthèse des métriques", _ratio(len(summaries), 6), f"{len(summaries)}/6 lignes de synthèse", "Générer benchmark_summary.csv", 2),
             TaskProgress("Recommandation finale", float(final_report), "Rapport final détecté" if final_report else "Aucun rapport final", "Rédiger la recommandation local/frontier/hybride", 3),

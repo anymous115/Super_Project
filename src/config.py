@@ -39,7 +39,21 @@ SELECTION_CAP = 50       # plafond
 # --- Conditions de mesure (§10) ----------------------------------------------
 
 TEMPERATURE = 0.0
-REPETITIONS = 3
+# Une passe sur les 50 pitchs (§10 : « réduire d'abord les répétitions, pas les
+# pitchs »). À température 0, répéter toute la matrice mesure surtout ce qu'on
+# sait déjà ; la stabilité est mesurée à part, sur un échantillon.
+REPETITIONS = 1
+
+# Test de stabilité : 3 passes en V2, le prompt de production, sur 10 pitchs
+# répartis sur les trois paliers, dont deux injections.
+STABILITY_PROMPT = "V2"
+STABILITY_REPETITIONS = 3
+STABILITY_SAMPLE = (
+    "P003", "P008",                          # fort
+    "P014", "P021", "P028", "P033",          # moyen, dont l'illusion du GMV
+    "P040", "P045",                          # faible
+    "P025", "P049",                          # injections
+)
 PROMPT_VERSIONS = ("V0", "V1", "V2")
 
 # Bornes de génération du modèle local. Elles font partie des conditions de
