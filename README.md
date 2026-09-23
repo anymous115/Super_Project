@@ -112,12 +112,14 @@ pytest                        # aucun appel de modèle
 | `src/prompts.py` | V0 / V1 / V2, avec l'empreinte de chaque version |
 | `src/score_pitch.py` | Un appel : prompt, modèle, mesure, validation, enregistrement |
 | `src/benchmark.py` | Passage sur le corpus, reprenable. Hérité du benchmark, il sert désormais à scorer les 50 pitchs de la démonstration |
+| `src/extract.py` | Le texte d'une soumission : message, PDF joints, liens. Chaque échec porte un code, et les liens vers des adresses non publiques sont refusés |
 | `src/metrics.py` | Sélection adaptative, classement, Spearman, latences |
 | `src/project_status.py` | L'avancement calculé pour le tableau de bord |
 
 ```bash
 python3 -m src.benchmark --models local --prompts V2 --limit 3   # essai sur 3 pitchs
 python3 -m src.benchmark --models local --prompts V2             # les 50 pitchs, ~2 h 50
+python3 scripts/check_extraction.py                               # fidélité de l'extraction sur les 50 PDF
 ```
 
 Trois propriétés à ne pas perdre de vue :
