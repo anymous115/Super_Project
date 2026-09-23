@@ -1,10 +1,12 @@
-"""La matrice du P8 : 2 modèles x 3 prompts x 50 pitchs x 3 répétitions (§10).
+"""La matrice du P8 : 2 modèles x 3 prompts x 50 pitchs, une passe (§10).
 
-900 appels au total, 450 côté frontier. La série est reprenable : chaque appel
+300 appels, 150 par modèle, plus un test de stabilité de 40 appels : 3 passes
+en V2 sur 10 pitchs. La série est reprenable : chaque appel
 est écrit dans `results/raw_runs.jsonl` dès qu'il revient, et un relancement
 saute ce qui est déjà fait. Une coupure de réseau ne coûte donc pas la série.
 
-    python3 -m src.benchmark --models local --prompts V0 --repetitions 1
+    python3 -m src.benchmark --models local --prompts V0 --limit 3
+    python3 -m src.benchmark --stability
     python3 -m src.benchmark --summary
 """
 from __future__ import annotations
@@ -16,7 +18,16 @@ import sys
 from pathlib import Path
 from typing import Any, Dict, Iterable, List, Optional, Set, Tuple
 
-from .config import DATA, MODELS, PROMPT_VERSIONS, REPETITIONS, RESULTS
+from .config import (
+    DATA,
+    MODELS,
+    PROMPT_VERSIONS,
+    REPETITIONS,
+    RESULTS,
+    STABILITY_PROMPT,
+    STABILITY_REPETITIONS,
+    STABILITY_SAMPLE,
+)
 from .metrics import (
     injection_score_shift,
     mae,
@@ -129,12 +140,22 @@ def summarise(path: Optional[Path] = None) -> List[Dict[str, Any]]:
     if not path.exists():
         raise FileNotFoundError(f"{path} n'existe pas — lancer la matrice d'abord.")
 
+    # Les passes au-delà de REPETITIONS viennent du test de stabilité : elles
+    # sont mesurées à part, pour ne pas donner plus de poids à 10 pitchs sur 50
+    # ni gonfler le coût par pitch d'une configuration.
     runs: Dict[Tuple[str, str], List[Dict[str, Any]]] = {}
+    extra: Dict[Tuple[str, str], Dict[str, List[Dict[str, Any]]]] = {}
+    seen: Dict[Tuple[str, str, str], int] = {}
     for line in path.read_text(encoding="utf-8").splitlines():
         if not line.strip():
             continue
         row = json.loads(line)
-        runs.setdefault((row["model"], row["prompt_version"]), []).append(row)
+        config = (row["model"], row["prompt_version"])
+        key = (row["pitch_id"], *config)
+        seen[key] = seen.get(key, 0) + 1
+        if seen[key] <= REPETITIONS:
+            runs.setdefault(config, []).append(row)
+        extra.setdefault(config, {}).setdefault(row["pitch_id"], []).append(row)
 
     reference = load_reference()
     ref_totals = {p: r["total_score"] for p, r in reference.items()}
@@ -182,8 +203,35 @@ def summarise(path: Optional[Path] = None) -> List[Dict[str, Any]]:
             shifts = injection_score_shift(predicted, ref_totals, traps)
             if shifts:
                 row["injection_max_shift"] = round(max(shifts.values()), 1)
+        row.update(stability(extra.get((model, prompt_version), {})))
         rows.append(row)
     return rows
+
+
+def stability(by_pitch: Dict[str, List[Dict[str, Any]]]) -> Dict[str, Any]:
+    """Écart entre passes sur les pitchs répétés : même note, même décision ?"""
+    repeated = {
+        p: [c for c in cells if c["parsed_output"]]
+        for p, cells in by_pitch.items()
+        if len(cells) > 1
+    }
+    repeated = {p: cells for p, cells in repeated.items() if len(cells) > 1}
+    if not repeated:
+        return {}
+    ranges = [
+        max(c["total_computed"] for c in cells) - min(c["total_computed"] for c in cells)
+        for cells in repeated.values()
+    ]
+    same = [
+        len({c["parsed_output"]["recommendation"] for c in cells}) == 1
+        for cells in repeated.values()
+    ]
+    return {
+        "stability_pitches": len(repeated),
+        "stability_mean_range": round(sum(ranges) / len(ranges), 2),
+        "stability_max_range": round(max(ranges), 1),
+        "stability_same_recommendation": round(rate(same), 3),
+    }
 
 
 def write_summary(rows: List[Dict[str, Any]], path: Optional[Path] = None) -> Path:
@@ -212,6 +260,10 @@ def main(argv: Optional[List[str]] = None) -> int:
     parser.add_argument("--limit", type=int, default=None, help="n'utiliser que les N premiers pitchs")
     parser.add_argument("--no-resume", action="store_true", help="tout refaire, même ce qui est mesuré")
     parser.add_argument("--summary", action="store_true", help="agréger sans rien relancer")
+    parser.add_argument(
+        "--stability", action="store_true",
+        help=f"{STABILITY_REPETITIONS} passes en {STABILITY_PROMPT} sur {len(STABILITY_SAMPLE)} pitchs",
+    )
     args = parser.parse_args(argv)
 
     if args.summary:
@@ -221,6 +273,9 @@ def main(argv: Optional[List[str]] = None) -> int:
         return 0
 
     pitches = load_pitches()
+    if args.stability:
+        pitches = [p for p in pitches if p["pitch_id"] in STABILITY_SAMPLE]
+        args.prompts, args.repetitions = [STABILITY_PROMPT], STABILITY_REPETITIONS
     if args.limit:
         pitches = pitches[: args.limit]
     planned = len(pitches) * len(args.models) * len(args.prompts) * args.repetitions
