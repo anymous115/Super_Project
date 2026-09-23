@@ -19,8 +19,9 @@ from typing import Any, Dict, List, Optional
 
 from .config import (CALL_TIMEOUT_SECONDS, DATA, LOCAL_NUM_CTX, LOCAL_NUM_PREDICT,
                      MODELS, RESULTS, TEMPERATURE, ModelConfig, load_env, require_env)
+from .guard import scan
 from .prompts import build_prompt, fingerprint
-from .schemas import parse_output
+from .schemas import output_json_schema, parse_output
 
 RAW_RUNS = RESULTS / "raw_runs.jsonl"
 
@@ -77,6 +78,9 @@ def _call_ollama(model: ModelConfig, system: str, user: str) -> ModelReply:
                 {"role": "user", "content": user},
             ],
             "stream": False,
+            # La génération est contrainte par le schéma de sortie : le modèle
+            # ne peut produire que du JSON de la bonne forme.
+            "format": output_json_schema(),
             "options": {
                 "temperature": TEMPERATURE,
                 "num_ctx": LOCAL_NUM_CTX,
@@ -154,6 +158,11 @@ class RunRecord:
     output_tokens: int
     estimated_cost: float
     error: Optional[str]
+    # Filtre anti-injection, appliqué au texte avant le modèle (src/guard.py).
+    # Un pitch signalé est noté quand même, pour mesure, mais sort du
+    # classement automatique et part en revue humaine.
+    guard_flagged: bool = False
+    guard_families: List[str] = field(default_factory=list)
 
     def as_json(self) -> str:
         return json.dumps(asdict(self), ensure_ascii=False)
@@ -168,6 +177,7 @@ def score_pitch(
 ) -> RunRecord:
     """Note un pitch et renvoie la ligne de résultat. Ne lève jamais."""
     model = MODELS[model_key]
+    verdict = scan(pitch["pitch_text"])
     system, user = build_prompt(
         prompt_version, pitch["pitch_id"], pitch["pitch_text"], output_language
     )
@@ -211,6 +221,8 @@ def score_pitch(
         output_tokens=reply.output_tokens if reply else 0,
         estimated_cost=model.cost(reply.input_tokens, reply.output_tokens) if reply else 0.0,
         error=error or (result.error if result else "aucune réponse"),
+        guard_flagged=verdict.flagged,
+        guard_families=verdict.families,
     )
 
     if trace:

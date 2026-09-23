@@ -178,10 +178,12 @@ def collect_project_status(root: Optional[Path] = None) -> ProjectSnapshot:
     # Le produit tourne sur un seul modèle, avec le prompt V2 (§10 du protocole).
     engine = [row for row in runs if row.get("prompt_version") == "V2" and row.get("parsed_output")]
     scored = {row.get("pitch_id") for row in engine}
+    # Contenu : écarté par le filtre, ou noté sans finir en shortlist.
     contained = {
         row.get("pitch_id")
         for row in engine
-        if row.get("pitch_id") in traps and row["parsed_output"].get("recommendation") != "shortlist"
+        if row.get("pitch_id") in traps
+        and (row.get("guard_flagged") or row["parsed_output"].get("recommendation") != "shortlist")
     }
     checks_written = (root / "docs/ENGINE_CHECKS.md").exists()
 
@@ -211,7 +213,7 @@ def collect_project_status(root: Optional[Path] = None) -> ProjectSnapshot:
         PhaseProgress(1, "Cadrage", (
             TaskProgress("Vision et protocole", float((root / "docs/PROTOCOL.md").exists()), "Protocole versionné", "Finaliser docs/PROTOCOL.md", 1),
             TaskProgress("Grille et sélection", float((root / "data/calibration.jsonl").exists()), "Calibration machine-lisible", "Générer data/calibration.jsonl", 1),
-            TaskProgress("Modèles et machine figés", float((root / "src/config.py").exists() and "deepseek-r1:8b" in (root / "src/config.py").read_text(encoding="utf-8")), "Configuration du moteur", "Figer le modèle et la machine", 1),
+            TaskProgress("Modèles et machine figés", float((root / "src/config.py").exists() and "qwen2.5:14b" in (root / "src/config.py").read_text(encoding="utf-8")), "Configuration du moteur", "Figer le modèle et la machine", 1),
         )),
         PhaseProgress(2, "Données", (
             TaskProgress("Corpus rédigé", _ratio(drafted, 50), f"{drafted}/50 pitchs", "Rédiger les pitchs manquants", 1),
@@ -228,7 +230,7 @@ def collect_project_status(root: Optional[Path] = None) -> ProjectSnapshot:
         )),
         PhaseProgress(4, "Moteur", (
             TaskProgress("Corpus scoré en V2", _ratio(len(scored), 50), f"{len(scored)}/50 pitchs scorés", "python3 -m src.benchmark --models local --prompts V2", 1),
-            TaskProgress("Injections contenues", _ratio(len(contained), max(len(traps), 1)), f"{len(contained)}/{len(traps)} pitchs piégés hors shortlist", "Scorer les pitchs piégés en V2 et vérifier la sélection", 2),
+            TaskProgress("Injections contenues", _ratio(len(contained), max(len(traps), 1)), f"{len(contained)}/{len(traps)} pitchs piégés contenus", "Scorer les pitchs piégés en V2 et vérifier la sélection", 2),
             TaskProgress("Contrôles consignés", float(checks_written), "docs/ENGINE_CHECKS.md présent" if checks_written else "Aucun compte rendu", "Consigner les contrôles du §11 dans docs/ENGINE_CHECKS.md", 2),
         )),
         PhaseProgress(5, "Produit", (

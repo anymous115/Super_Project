@@ -56,22 +56,19 @@ STABILITY_SAMPLE = (
 )
 PROMPT_VERSIONS = ("V0", "V1", "V2")
 
-# Bornes de génération du modèle local. Elles font partie des conditions de
-# mesure : sans elles, le benchmark ne termine pas.
+# Bornes de génération du modèle local.
 #
-# `deepseek-r1:8b` est chargé par Ollama avec une fenêtre de 4 096 tokens. Une
-# entrée de ~1 000 tokens plus un raisonnement libre la sature, et Ollama se met
-# alors à réévaluer le prompt en boucle. Un appel observé a dépassé 58 minutes
-# sans rendre la main, contre 122 secondes pour le même type de pitch.
-LOCAL_NUM_CTX = 8192        # de quoi tenir l'entrée, le raisonnement et la réponse
-CALL_TIMEOUT_SECONDS = 600  # un appel qui dépasse est un échec enregistré, pas un blocage
+# Ollama charge un modèle avec une fenêtre de 4 096 tokens par défaut, trop
+# juste pour un pitch plus le prompt V2 : on la fixe à 8 192. Chaque appel est
+# plafonné en temps, pour qu'un appel bloqué devienne un échec enregistré.
+LOCAL_NUM_CTX = 8192
+CALL_TIMEOUT_SECONDS = 600
 
-# 2048 ne suffit pas : avec le prompt V2, deepseek consomme la totalité du
-# budget en raisonnement et n'émet aucune réponse — les trois appels mesurés
-# sont revenus tronqués, 100 % de réflexion, zéro caractère de réponse.
-# À 4096 il termine de lui-même (`done_reason: stop`) en 3 681 tokens.
-# C'est un filet de sécurité, pas une contrainte active.
-LOCAL_NUM_PREDICT = 4096
+# `qwen2.5:14b` répond en 430 à 600 tokens, JSON compris : 2 048 laisse une
+# marge large. Historique : `deepseek-r1:8b`, modèle de raisonnement, épuisait
+# 4 096 tokens en réflexion sans répondre sur 14 pitchs sur 18 (23 septembre
+# 2026) — c'est ce qui a fait changer de modèle.
+LOCAL_NUM_PREDICT = 2048
 
 
 @dataclass(frozen=True)
@@ -92,7 +89,9 @@ class ModelConfig:
 MODELS: Dict[str, ModelConfig] = {
     "local": ModelConfig(
         key="local",
-        name="deepseek-r1:8b",
+        # Choisi le 23 septembre 2026 après mesure sur les 50 pitchs : voir
+        # README, « Moteur de scoring ».
+        name="qwen2.5:14b",
         backend="ollama",
         price_in=0.0,
         price_out=0.0,

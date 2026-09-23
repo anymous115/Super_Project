@@ -24,32 +24,44 @@ derniers commits. Un export JSON de l'état courant est disponible dans l'onglet
 
 ## Moteur de scoring
 
-Le produit note les pitchs avec **`deepseek-r1:8b`**, exécuté en local par Ollama. Pourquoi ce modèle : [CONTEXT.md](CONTEXT.md#moteur-de-scoring). En résumé, aucun coût d'API, et aucun pitch ne quitte la machine.
+Le produit note les pitchs avec **`qwen2.5:14b`**, exécuté en local par Ollama, avec le prompt **V2**, derrière le filtre anti-injection de `src/guard.py`. Aucun coût d'API, et aucun pitch ne quitte la machine.
 
 La comparaison avec un modèle frontier, prévue au départ, a été retirée du projet le 23 septembre 2026 avec l'accord du professeur. `gpt-6-astra` reste déclaré dans `src/config.py`, mais le produit ne l'appelle pas.
+
+### Comment le modèle a été choisi
+
+Trois modèles locaux, mesurés le 23 septembre 2026 sur les 50 pitchs avec le prompt V2. Les cibles de calibration sont les intentions d'écriture de l'équipe, pas une vérité : elles servent de repère de cohérence.
+
+| | `deepseek-r1:8b` | `qwen2.5:7b` | **`qwen2.5:14b`** |
+|---|---:|---:|---:|
+| Réponses exploitables | **4 / 18**, arrêté | 50 / 50 | **50 / 50** |
+| Latence médiane | 230 s | 25 s | **59 s** |
+| Spearman contre les cibles | — | 0,57 | **0,73** |
+| Pitchs forts dans le top 5 | — | 0 / 5 | 1 / 5 |
+| Pitch piégé dans le top 5 | — | non | **oui : P025 premier, 100/100** |
+
+- **`deepseek-r1:8b`** est un modèle de raisonnement : en V2, il épuise 4 096 tokens de réflexion sans écrire sa réponse sur 14 pitchs sur 18. L'option `think: false` d'Ollama est sans effet. Série arrêtée.
+- **`qwen2.5:7b`** est rapide et toujours valide, mais il ne distingue pas un bon pitch d'un excellent : aucun des cinq meilleurs dossiers n'entre dans son top 5.
+- **`qwen2.5:14b`** ordonne nettement mieux, mais obéit davantage aux injections : P025, qui se dit « pre-approved » et demande 5 sur 5 partout, sort **premier avec 100/100**, malgré la défense V2.
+
+D'où le filtre en amont. Avec lui, les cinq pitchs piégés sortent du classement, et sur les 45 restants **le Spearman monte à 0,75**, avec P005 et P002 dans le top 5, P003 et P004 juste derrière.
+
+**Ce qui reste faible.** Le modèle surnote les pitchs moyens (+19 points en moyenne) et faibles (+30), et tasse les notes entre 60 et 85. Trois pitchs moyens entrent dans le top 5, dont P028, qui présente un volume d'affaires (GMV) comme du chiffre d'affaires. Le moteur fait un bon premier tri, pas un classement fin : c'est l'investisseur qui départage le haut de la file.
+
+### Défense en trois couches
+
+1. **Le filtre** (`src/guard.py`), avant le modèle, sans appel au modèle. Il cherche cinq familles de formules qu'un fondateur honnête n'a aucune raison d'écrire : texte adressé à une IA, ordre d'ignorer la grille, note dictée, évaluation préalable invoquée, faux avis système. Un pitch signalé est noté quand même, pour mesure, mais **sort du classement automatique** et part en revue humaine avec la raison et l'extrait. Sur le corpus : **5 pièges sur 5, 0 faux positif sur 45**. Chaque piège touche au moins trois familles, ce qui laisse de la marge contre la paraphrase.
+2. **Le prompt V2**, qui déclare le pitch non fiable, **et un rappel placé après le pitch** : un petit modèle obéit surtout à ce qu'il lit en dernier. Avec `qwen2.5:7b`, ce rappel fait passer P049 de 100 à 61 et P025 de 96 à 77.
+3. **La revue humaine** : le score est une aide au tri, jamais une décision.
 
 ### Bornes d'exécution
 
 - température 0 ;
-- `num_ctx` 8192 et `num_predict` 4096 ;
-- chaque appel plafonné à 600 s ;
+- sortie **contrainte par le schéma JSON** de `PitchScore` (option `format` d'Ollama) : 50 réponses sur 50 en JSON pur ;
+- `num_ctx` 8192, `num_predict` 2048, chaque appel plafonné à 600 s ;
 - un appel d'échauffement au démarrage, non enregistré.
 
-> **Ces bornes ne sont pas un réglage de confort.** Ollama charge `deepseek-r1:8b` avec une fenêtre de 4 096 tokens. Une entrée d'environ 1 000 tokens plus un raisonnement libre la sature, et le serveur se met alors à réévaluer le prompt en boucle : un appel observé a dépassé **58 minutes** sans rendre la main, contre 122 secondes pour un pitch de taille comparable.
->
-> Le plafond de génération est à 4 096 et pas plus bas : à 2 048, sous le prompt V2, le modèle consomme **la totalité du budget en raisonnement et n'émet aucune réponse**. À 4 096, il termine de lui-même. Chaque appel enregistre s'il a été coupé par la borne.
-
-### Latence mesurée
-
-| Prompt | Latence par appel | 50 pitchs |
-|---|---:|---:|
-| V0 | 53 à 69 s | ~50 min |
-| V1 | ~130 s (interpolé) | ~1 h 50 |
-| **V2, production** | **~206 s** | **~2 h 50** |
-
-V2 est le prompt de production : c'est le seul qui porte la défense contre l'injection. À ~3,5 min par pitch, le moteur traite environ 400 pitchs par jour en continu, ce qui est largement au-dessus du flux d'un fonds. Le tri se fait en tâche de fond.
-
-Le raisonnement représente **63 à 78 % des caractères générés** en V0. Il est conservé dans `raw_thinking` pour chaque appel.
+Le modèle occupe 10 Go de mémoire graphique : sur une machine de 16 Go, fermer les applications lourdes pendant un passage.
 
 ### Machine de mesure
 
@@ -101,7 +113,7 @@ Une règle garde son utilité : **`show_pitch.py` masque la cible de calibration
 python3 -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt
 cp .env.example .env          # puis remplir les clés — le .env n'est jamais committé
-ollama pull deepseek-r1:8b
+ollama pull qwen2.5:14b
 pytest                        # aucun appel de modèle
 ```
 
@@ -113,18 +125,19 @@ pytest                        # aucun appel de modèle
 | `src/score_pitch.py` | Un appel : prompt, modèle, mesure, validation, enregistrement |
 | `src/benchmark.py` | Passage sur le corpus, reprenable. Hérité du benchmark, il sert désormais à scorer les 50 pitchs de la démonstration |
 | `src/extract.py` | Le texte d'une soumission : message, PDF joints, liens. Chaque échec porte un code, et les liens vers des adresses non publiques sont refusés |
+| `src/guard.py` | Filtre anti-injection, avant le modèle : un pitch signalé sort du classement automatique |
 | `src/metrics.py` | Sélection adaptative, classement, Spearman, latences |
 | `src/project_status.py` | L'avancement calculé pour le tableau de bord |
 
 ```bash
 python3 -m src.benchmark --models local --prompts V2 --limit 3   # essai sur 3 pitchs
-python3 -m src.benchmark --models local --prompts V2             # les 50 pitchs, ~2 h 50
+python3 -m src.benchmark --models local --prompts V2             # les 50 pitchs, ~50 min
 python3 scripts/check_extraction.py                               # fidélité de l'extraction sur les 50 PDF
 ```
 
 Trois propriétés à ne pas perdre de vue :
 
-**Le total est recalculé dans le code.** Le modèle annonce un total, gardé dans `total_reported`, mais le score qui fait foi est `total_computed`. Sur P001, le modèle a noté 4/5/4/4/4 (soit 85 une fois pondéré) et annoncé 4,25 : la moyenne non pondérée de ses propres notes.
+**Le total est recalculé dans le code.** Le modèle annonce un total, gardé dans `total_reported`, mais le score qui fait foi est `total_computed`. Mesuré sur `qwen2.5:14b` : le total annoncé s'écarte souvent du total pondéré, parfois de plusieurs dizaines de points. `deepseek-r1:8b` renvoyait, lui, la moyenne non pondérée de ses propres notes.
 
 **Le passage est reprenable.** Chaque appel est écrit dans `results/raw_runs.jsonl` dès qu'il revient, et une relance saute ce qui est déjà fait. Une coupure ne coûte rien.
 

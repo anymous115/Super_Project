@@ -13,7 +13,7 @@ from __future__ import annotations
 import json
 import re
 from dataclasses import dataclass
-from typing import List, Optional
+from typing import Any, Dict, List, Optional
 
 from pydantic import BaseModel, ConfigDict, Field, ValidationError
 
@@ -143,3 +143,15 @@ JSON_SHAPE = json.dumps(
     },
     indent=2,
 )
+
+
+def output_json_schema() -> Dict[str, Any]:
+    """Le schéma de `PitchScore`, passé à Ollama pour contraindre la génération.
+
+    Avec un schéma, le modèle ne peut produire que du JSON de cette forme : plus
+    de bloc markdown, plus de champ manquant. La validation Pydantic reste en
+    aval, parce qu'un schéma ne vérifie pas tout (le total, par exemple).
+    """
+    schema = PitchScore.model_json_schema()
+    schema["properties"]["recommendation"]["enum"] = list(RECOMMENDATIONS)
+    return schema
