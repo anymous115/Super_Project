@@ -42,6 +42,23 @@ TEMPERATURE = 0.0
 REPETITIONS = 3
 PROMPT_VERSIONS = ("V0", "V1", "V2")
 
+# Bornes de génération du modèle local. Elles font partie des conditions de
+# mesure : sans elles, le benchmark ne termine pas.
+#
+# `deepseek-r1:8b` est chargé par Ollama avec une fenêtre de 4 096 tokens. Une
+# entrée de ~1 000 tokens plus un raisonnement libre la sature, et Ollama se met
+# alors à réévaluer le prompt en boucle. Un appel observé a dépassé 58 minutes
+# sans rendre la main, contre 122 secondes pour le même type de pitch.
+LOCAL_NUM_CTX = 8192        # de quoi tenir l'entrée, le raisonnement et la réponse
+CALL_TIMEOUT_SECONDS = 600  # un appel qui dépasse est un échec enregistré, pas un blocage
+
+# 2048 ne suffit pas : avec le prompt V2, deepseek consomme la totalité du
+# budget en raisonnement et n'émet aucune réponse — les trois appels mesurés
+# sont revenus tronqués, 100 % de réflexion, zéro caractère de réponse.
+# À 4096 il termine de lui-même (`done_reason: stop`) en 3 681 tokens.
+# C'est un filet de sécurité, pas une contrainte active.
+LOCAL_NUM_PREDICT = 4096
+
 
 @dataclass(frozen=True)
 class ModelConfig:

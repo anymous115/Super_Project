@@ -164,7 +164,13 @@ def summarise(path: Optional[Path] = None) -> List[Dict[str, Any]]:
             "input_tokens": sum(c["input_tokens"] for c in cells),
             "output_tokens": sum(c["output_tokens"] for c in cells),
             "cost_usd": round(sum(c["estimated_cost"] for c in cells), 4),
+            "pitch_id_mismatch_rate": round(rate(c.get("pitch_id_mismatch") for c in cells), 3),
+            "truncated_rate": round(rate(c.get("truncated") for c in cells), 3),
         }
+        # Part du coût de sortie partie en raisonnement, pour un modèle qui en produit.
+        chars = sum(c.get("output_chars", 0) + c.get("thinking_chars", 0) for c in cells)
+        if chars:
+            row["thinking_share"] = round(sum(c.get("thinking_chars", 0) for c in cells) / chars, 3)
         if predicted:
             row["mae_total"] = round(mae(predicted, ref_totals), 2)
             row["spearman"] = round(spearman(predicted, ref_totals), 3)

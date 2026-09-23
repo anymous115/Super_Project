@@ -56,7 +56,26 @@ Recalculé sur le corpus réel par `python3 scripts/estimate_cost.py`. L'estimat
 - température 0 ;
 - mêmes 50 pitchs, même ordre de passage ;
 - un appel d'échauffement local exclu des mesures ;
-- 3 répétitions par configuration.
+- 3 répétitions par configuration ;
+- modèle local borné à `num_ctx` 8192 et `num_predict` 4096, chaque appel plafonné à 600 s.
+
+> **Ces bornes ne sont pas un réglage de confort.** Ollama charge `deepseek-r1:8b` avec une fenêtre de 4 096 tokens. Une entrée d'environ 1 000 tokens plus un raisonnement libre la sature, et le serveur se met alors à réévaluer le prompt en boucle : un appel observé a dépassé **58 minutes** sans rendre la main, contre 122 secondes pour un pitch de taille comparable.
+>
+> Sans plafond de génération, la série locale ne termine pas. Le taux de troncature est enregistré par appel, pour qu'une réponse coupée par la borne se distingue d'une réponse terminée par le modèle.
+>
+> Le plafond est à 4 096 et pas plus bas : à 2 048, `deepseek-r1:8b` sous prompt V2 consomme **la totalité du budget en raisonnement et n'émet aucune réponse**. À 4 096 il termine de lui-même.
+
+### Temps de la série locale — mesuré
+
+| Prompt | Latence par appel | 150 appels |
+|---|---:|---:|
+| V0 | 60 s | 2,5 h |
+| V1 | ~130 s (interpolé) | 5,4 h |
+| V2 | 206 s | 8,6 h |
+
+**La matrice locale complète — 450 appels sur 3 répétitions — représente environ 16 heures** sur la machine de mesure. Le frontier, lui, se compte en minutes.
+
+Le §10 prévoit le cas : « si le budget se tend, réduire d'abord le nombre de répétitions, pas le nombre de pitchs ». Une répétition sur les 50 pitchs ramène la série locale à **5,4 heures**.
 
 ### Machine de mesure
 
