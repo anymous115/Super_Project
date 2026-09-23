@@ -1,5 +1,7 @@
 # Référence IA — protocole
 
+> **Abandonné le 23 septembre 2026.** Cette référence servait à noter la comparaison de modèles, retirée du projet avec l'accord du professeur (voir [`CONTEXT.md`](../CONTEXT.md#historique-des-décisions)). Le quota gratuit de Gemini (20 requêtes par jour et par modèle) a arrêté le lot à 5 pitchs sur 50. Le document et les scripts restent comme trace de la méthode. **Aucune annotation n'est attendue.**
+
 La référence du benchmark est produite par **Gemini Flash** (`gemini-3.8-flash`) sur les 50 pitchs, puis **validée contre un échantillon annoté à la main**. Ce document remplace la double annotation complète du §6 du [protocole](PROTOCOL.md#annotation-de-référence), faute de temps et d'annotateurs.
 
 ## Pourquoi ce choix tient

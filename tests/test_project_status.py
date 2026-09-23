@@ -22,15 +22,18 @@ def test_status_evolue_avec_les_livrables(tmp_path):
             }
         ],
     )
-    write_jsonl(tmp_path / "data/annotations/A.jsonl", [{"pitch_id": "P001"}])
-    write_jsonl(tmp_path / "results/raw_runs.jsonl", [{"model": "local", "prompt_version": "V0", "valid_json": True}])
+    write_jsonl(tmp_path / "results/raw_runs.jsonl", [
+        {"pitch_id": "P001", "model": "local", "prompt_version": "V0", "valid_json": True},
+        {"pitch_id": "P001", "model": "local", "prompt_version": "V2", "valid_json": True,
+         "parsed_output": {"recommendation": "review"}},
+    ])
 
     snapshot = collect_project_status(tmp_path)
 
     assert snapshot.metrics["drafted_pitches"] == 1
     assert snapshot.metrics["validated_pitches"] == 1
-    assert snapshot.metrics["annotations"] == 1
-    assert snapshot.metrics["benchmark_runs"] == 1
+    assert snapshot.metrics["engine_runs"] == 2
+    assert snapshot.metrics["scored_pitches"] == 1
     assert snapshot.phases[1].tasks[0].progress == 1 / 50
     assert snapshot.phases[2].tasks[-1].state == "Terminé"
 

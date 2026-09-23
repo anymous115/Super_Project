@@ -67,8 +67,9 @@ un moteur de scoring VC. Chaque pitch est du texte libre structuré en sections
 — problème, solution, marché, concurrence, équipe, traction, business model,
 go-to-market, financement — comme un fondateur l'enverrait par email.
 
-Le corpus sert d'entrée unique au benchmark du projet : deux modèles reçoivent
-exactement la même chaîne de caractères et doivent produire le même objet noté.
+Le corpus alimente le moteur de scoring du produit et sa démonstration : chaque
+pitch est noté par le même modèle, avec la même grille, et la file triée qui en
+sort est celle que l'interface présente à l'investisseur.
 
 ## Composition
 
@@ -165,15 +166,19 @@ reçoit vraiment — laquelle est bien plus concentrée dans le bas.
 
 **Le corpus a été rédigé par un modèle de langage**, relu et corrigé par
 l'équipe. Un modèle de la même famille le noterait en partie sur sa propre
-cohérence : c'est la raison pour laquelle aucun modèle Anthropic n'est éligible
-au benchmark.
+cohérence : c'est la raison pour laquelle aucun modèle Anthropic ne sert de
+moteur de scoring.
 
 **Un seul secteur géographique et une seule langue.** Les pitchs sont anglophones
 et les repères de marché européens et nord-américains.
 
 **{sum(1 for p in pitches if p['review_status'] != 'validated')} pitchs sur {len(pitches)} sont encore en `{max(statuses, key=statuses.get)}`** : rédigés,
-pas validés. Les scores de référence issus de la double annotation ne sont pas
-encore produits.
+pas validés.
+
+**Pas de scores de référence annotés.** La double annotation prévue a été
+abandonnée avec la comparaison de modèles (23 septembre 2026). Les cibles de
+`calibration.jsonl` sont les intentions d'écriture de l'équipe : elles servent
+de repère de cohérence, pas de vérité.
 
 ## Réutilisation
 
@@ -192,8 +197,7 @@ de personne réelle. C'est vérifié par un test (`tests/test_corpus.py`).
 {table(["Fichier", "Contenu"], [
     ["`data/pitches.jsonl`", "les pitchs, leur provenance et leur statut"],
     ["`data/calibration.jsonl`", "les scores cibles — généré, lecture seule"],
-    ["`data/reference_scores.jsonl`", "les scores de référence — **pas encore produit**"],
-    ["`data/annotations/`", "les annotations individuelles et les réconciliations"],
+    ["`data/pdfs/`", "les 50 PDF, rendus depuis `pitch_text` en trois mises en page"],
 ])}
 """]
     return "\n".join(parts)

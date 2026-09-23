@@ -68,7 +68,7 @@ def render_overview(snapshot: ProjectSnapshot) -> None:
     cols[0].metric("Avancement global", percent(snapshot.progress))
     cols[1].metric("Phase active", f"{current.number}. {current.name}" if current else "Terminé")
     cols[2].metric("Jalons restants", incomplete)
-    cols[3].metric("Appels benchmark", f"{snapshot.metrics['benchmark_runs']} / 900")
+    cols[3].metric("Pitchs scorés", f"{snapshot.metrics['scored_pitches']} / 50")
     st.progress(snapshot.progress)
 
     st.subheader("Pipeline du projet")
@@ -90,28 +90,26 @@ def render_overview(snapshot: ProjectSnapshot) -> None:
 
 def render_data(snapshot: ProjectSnapshot) -> None:
     metrics = snapshot.metrics
-    cols = st.columns(5)
+    cols = st.columns(3)
     cols[0].metric("Pitchs rédigés", f"{metrics['drafted_pitches']} / 50")
     cols[1].metric("Pitchs validés", f"{metrics['validated_pitches']} / 50")
     cols[2].metric("PDF", f"{metrics['pdfs']} / 50")
-    cols[3].metric("Annotations", f"{metrics['annotations']} / 100")
-    cols[4].metric("Références", f"{metrics['references']} / 50")
     task_table(snapshot.phases[1])
     st.info(
-        "Les scores de calibration guident la rédaction, mais seuls les scores issus de la "
-        "double annotation deviennent la référence du benchmark."
+        "Les scores de calibration guident la rédaction et servent de repère de cohérence "
+        "au moteur. Ce sont des intentions d'écriture, pas une vérité."
     )
 
 
 def render_pipeline(snapshot: ProjectSnapshot) -> None:
     cols = st.columns(4)
     cols[0].metric("Tests écrits", snapshot.metrics["tests"])
-    cols[1].metric("Appels enregistrés", snapshot.metrics["benchmark_runs"])
+    cols[1].metric("Appels enregistrés", snapshot.metrics["engine_runs"])
     cols[2].metric("JSON valides", snapshot.metrics["valid_runs"])
-    cols[3].metric("Synthèses", f"{snapshot.metrics['summary_rows']} / 6")
+    cols[3].metric("Injections contenues", snapshot.metrics["traps_contained"])
     st.subheader("Phase 3 · Pipeline")
     task_table(snapshot.phases[2])
-    st.subheader("Phase 4 · Expériences")
+    st.subheader("Phase 4 · Moteur")
     task_table(snapshot.phases[3])
 
 
@@ -140,7 +138,7 @@ snapshot = collect_project_status(ROOT)
 render_header(snapshot)
 
 overview, data_tab, pipeline_tab, delivery_tab, activity_tab = st.tabs(
-    ["Vue d’ensemble", "Données", "Pipeline & benchmark", "Produit & livraison", "Activité Git"]
+    ["Vue d’ensemble", "Données", "Pipeline & moteur", "Produit & livraison", "Activité Git"]
 )
 with overview:
     render_overview(snapshot)
