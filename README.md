@@ -6,6 +6,22 @@ Capstone du cours « Prompt & Context Engineering ». Le projet reçoit des pitc
 - **[`docs/PROTOCOL.md`](docs/PROTOCOL.md)** — le protocole opérationnel
 - **[`phases/01_cadrage/`](phases/01_cadrage/)** — le brief produit
 
+## Tableau de bord d'avancement
+
+Le tableau de bord de pilotage calcule l'état des six phases directement depuis
+les fichiers du dépôt : pitchs validés, annotations, PDF, modules, appels du
+benchmark et livrables finaux. Il évolue donc après chaque pull ou commit, sans
+mettre à jour un pourcentage à la main.
+
+```bash
+streamlit run dashboard.py
+```
+
+L'onglet **Vue d'ensemble** montre la phase active et les prochaines actions.
+Les autres onglets détaillent les données, le benchmark, la livraison et les
+derniers commits. Un export JSON de l'état courant est disponible dans l'onglet
+**Activité Git**.
+
 ## Configuration de l'expérience
 
 Exigée par le [§10 du protocole](docs/PROTOCOL.md#10-benchmark--le-volet-p8). Ces valeurs sont figées pour toute la durée du benchmark.
