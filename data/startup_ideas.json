@@ -1,0 +1,202 @@
+{
+  "P001": {
+    "idea": "Pyrolane développe des réacteurs qui transforment le méthane en hydrogène et en carbone solide pour l’industrie.",
+    "source_sha256": "b57a8e94db3f108c7ef6157d47503366b10d412664c9d4b66aad338cdedc11ee"
+  },
+  "P002": {
+    "idea": "Minth fournit aux entreprises l’infrastructure nécessaire pour émettre et gérer leur propre stablecoin en marque blanche.",
+    "source_sha256": "5a8b5c399327823b80ae121ffd938ce0728f297816d5a38527594993495eaeb7"
+  },
+  "P003": {
+    "idea": "Vessa automatise les échanges avec les patients à partir des données de rendez-vous et de facturation des cliniques.",
+    "source_sha256": "37210cd400f23bf57107c66219a29a5e6bdd3b42cc54425ec6a9e9bc40e496f3"
+  },
+  "P004": {
+    "idea": "Boardwise développe un agent IA qui écrit, teste et débogue des logiciels embarqués sur du matériel réel ou simulé.",
+    "source_sha256": "07f061b3e68233729d845aed3384102338bfd57454dc7e5162fdd875148a788c"
+  },
+  "P005": {
+    "idea": "Driftwatch surveille les applications cloud en fonctionnement pour identifier les vulnérabilités réellement exposées et les comportements anormaux.",
+    "source_sha256": "d6cebd1c149c82f62cc9a7ef37b684f0d41ef81174ddf380d5184006741d42d0"
+  },
+  "P006": {
+    "idea": "Remorq regroupe les expéditions de plusieurs entreprises dans un même camion pour transporter leurs palettes sans passage par un hub.",
+    "source_sha256": "09c2c376ba2cb5451c390a7a43f5a3f14c51ad0f552ad836a16e157f4683c957"
+  },
+  "P007": {
+    "idea": "Halden automatise le support client des entreprises SaaS en répondant à partir des données réelles de leur produit.",
+    "source_sha256": "15ce613148291a21839547b31f7c67d0aabccbed3e4a4f379ba77106cff745c6"
+  },
+  "P008": {
+    "idea": "Tenura automatise la gestion réglementaire des portefeuilles de logements, notamment les loyers, les notifications et les obligations énergétiques.",
+    "source_sha256": "96b7da574d4d6e6c31c082fd509544a7040035f0f520d93354fbe5c4b751899d"
+  },
+  "P009": {
+    "idea": "Sparepath met en relation acheteurs et vendeurs de pièces détachées industrielles grâce à un catalogue de stocks normalisé.",
+    "source_sha256": "6a2ca9c7a407777664220770542037e588942528538be8aceb30f83e08083117"
+  },
+  "P010": {
+    "idea": "Fennwick vend directement aux consommateurs des boissons fonctionnelles dont les ingrédients et les dosages sont explicités.",
+    "source_sha256": "3519758fa1283b5753d7bc9f7ce70691e764bbd338037d8cdc75bb8c8454377f"
+  },
+  "P011": {
+    "idea": "Olwen rapproche les postes ouverts des compétences des salariés pour faciliter leur mobilité au sein de l’entreprise.",
+    "source_sha256": "4f6c8bdd0574797a9504ff88a3e2439655de74684997157a30ca8c1b1c88fd7f"
+  },
+  "P012": {
+    "idea": "Verta loue à la journée des utilitaires électriques partagés avec recharge, entretien et assurance inclus.",
+    "source_sha256": "b45ffdd84a5b9eacf40a74395f5e0a92c9f22fea896c01ae56dbc7b89785e19a"
+  },
+  "P013": {
+    "idea": "Nurra commercialise du lait infantile par abonnement avec une traçabilité des ingrédients et des analyses publiées pour chaque lot.",
+    "source_sha256": "a40fe87af64007dfad664f0d42f1d522954f964539e3939e40c0a04b26fcecd2"
+  },
+  "P014": {
+    "idea": "Payloom réunit la paie, l’arrivée et le départ des salariés, les équipements et les avantages sociaux dans un même outil RH.",
+    "source_sha256": "e89fc9a9f72b1dd017b7b44261ea320464d75da28f85991fed69148d14628608"
+  },
+  "P015": {
+    "idea": "Repolyn développe un procédé de recyclage chimique qui décompose le PET en matières premières réutilisables.",
+    "source_sha256": "e81d49d025380d468636ec57a00b845ec63c51d31974c32d6d0c1485a7c3eba9"
+  },
+  "P016": {
+    "idea": "Veyra Health développe des cabines autonomes destinées à réaliser plusieurs examens de santé et à transmettre les anomalies à un médecin.",
+    "source_sha256": "3806dbeac69ebf5b4cd011d6640a2a0f4431d90736b40c7cdb9db63c46fded50"
+  },
+  "P017": {
+    "idea": "Keyhold fournit aux PME sans équipe de cybersécurité un service géré de protection des postes, des identités et du cloud.",
+    "source_sha256": "0d4600bd9bd44eb842d46982bf12f7e06124b2677e1ed19970c9376369a33949"
+  },
+  "P018": {
+    "idea": "Forgelane permet aux développeurs de reproduire le même environnement de compilation sur leur ordinateur et dans leurs outils d’intégration continue.",
+    "source_sha256": "c1d0e7502c43488b1fc6dde939bb7dc9b63f32bfc4f447c0fd1f13af85775e9e"
+  },
+  "P019": {
+    "idea": "Fieldrove développe un robot agricole autonome qui repère les mauvaises herbes et pulvérise uniquement les zones ciblées.",
+    "source_sha256": "92a3d9eaf6ba49f687fd6dc33e1109c96e29b9a0ad1bb15fcaf77b1177693541"
+  },
+  "P020": {
+    "idea": "Oruma permet aux plateformes logicielles sectorielles de proposer des comptes, des cartes et des paiements bancaires sous leur propre marque.",
+    "source_sha256": "032e83ec41390035ec8d8c5c784d9ba4aa2cf2585d13f267cf0b4c58b7fed665"
+  },
+  "P021": {
+    "idea": "Crestwave avance des fonds aux créateurs vidéo sur leurs revenus futurs et prend en charge une partie de leur gestion administrative.",
+    "source_sha256": "6ea71ace2618a82e76b6df1e300ed430060b8ec705ae4252d5b58965d7ab0747"
+  },
+  "P022": {
+    "idea": "Pallexa automatise la facturation et la gestion opérationnelle des prestataires logistiques en se connectant à leurs logiciels d’entrepôt.",
+    "source_sha256": "6f80bfee65c0191dbc54c45ed96016b6714a7d1bc7a361006420a09271c50ca5"
+  },
+  "P023": {
+    "idea": "Aloria associe un programme de bien-être de douze semaines à un suivi régulier par un coach humain.",
+    "source_sha256": "cb698748ca7edbdcc7c86ef1fe558306ccd1e52fc969e3e6f1b645c38e7c8b70"
+  },
+  "P024": {
+    "idea": "Harbourline centralise les cotisations, les votes, la comptabilité et les obligations réglementaires des associations de propriétaires.",
+    "source_sha256": "907ad25655b0b133a0bb71bf33ece1fc81404cdab70eabc85ada9b75ddc76dbb"
+  },
+  "P025": {
+    "idea": "Corvex AI extrait les informations utiles des dossiers de sinistres et produit des synthèses reliées aux documents d’origine.",
+    "source_sha256": "24b2c283ab6c7f5f7e3cfd4669758a2db507f78cf03bddf399d2617c5dc68164"
+  },
+  "P026": {
+    "idea": "Skolara propose des cours de soutien scolaire en ligne, en petits groupes de quatre élèves accompagnés par un enseignant.",
+    "source_sha256": "65b85334f7aeb906fb0a907dbbbb35c7fd358a74882930aab298af016f30c37b"
+  },
+  "P027": {
+    "idea": "Chainwright développe un réseau décentralisé de calcul dont les résultats seraient vérifiables par des preuves cryptographiques.",
+    "source_sha256": "9009a2fd68a6dd2b0b73d1639653f4b61bf00c150d134c36f764d2fa2bba72d7"
+  },
+  "P028": {
+    "idea": "Bazaro relie les commerçants indépendants aux marques sur une marketplace de gros avec commande centralisée et paiement différé.",
+    "source_sha256": "d4e9b7636c7f9633adcbf8b9855477513b05ac3e060b9aa916bc2b619b76acfb"
+  },
+  "P029": {
+    "idea": "Voltaro développe un réseau de stations où les livreurs échangent la batterie déchargée de leur deux-roues électrique contre une batterie chargée.",
+    "source_sha256": "c84aca767d7c7c84a21aba924a4139e6e51f6c9b43436ffb969c6191fac96f21"
+  },
+  "P030": {
+    "idea": "Hollr propose des salons audio privés entre amis avec transcription des échanges pour retrouver facilement les conversations.",
+    "source_sha256": "0ea75a7c304fb3be3ab353209626d7f8893417f93fd6354099d4112bbfb9bc3c"
+  },
+  "P031": {
+    "idea": "Perimetra intègre une assurance à la réservation de matériel de location et centralise la gestion des sinistres.",
+    "source_sha256": "54d5b25acbdea2c6ca0c9564f63b489b5b33583a4cfbe542c131db71de5ff813"
+  },
+  "P032": {
+    "idea": "Pantry Collective rachète des marques alimentaires et mutualise leur logistique, leur marketing et leurs outils de gestion.",
+    "source_sha256": "25d8a61ec33b40387b61dbddfe7fa4be8740aee8fc630b2b3a8d480a7de90bc9"
+  },
+  "P033": {
+    "idea": "Torvik développe un bracelet destiné à suivre l’hydratation en continu à partir de mesures de bio-impédance.",
+    "source_sha256": "8ba27d4105f16b4a447684a6ed654d91472cfe6b81182f08de6d075f506e9e84"
+  },
+  "P034": {
+    "idea": "Rolecast développe un outil qui déduit les compétences des salariés de leur travail pour les rapprocher des postes ouverts en interne.",
+    "source_sha256": "d5fefc0e082b816f5b948d6d017eb5117d6f5334bc63fe2c8275bddd98569d20"
+  },
+  "P035": {
+    "idea": "Verdalis conçoit un système qui stockerait de l’électricité sous forme de chaleur pour alimenter les procédés industriels.",
+    "source_sha256": "688ed418405cad14f3db5d15666e79eecbee83250c267c0645f6adf12db2cce0"
+  },
+  "P036": {
+    "idea": "Nyssa Health suit la récupération après une opération grâce à une application et un capteur, avec tri des alertes par des infirmiers.",
+    "source_sha256": "f9a927059c3d18ba466d90c544a89ad453dd5e0c3481a77399811b82a1f18629"
+  },
+  "P037": {
+    "idea": "Verticus Farms cultive des salades et des herbes en fermes verticales intérieures pour approvisionner les commerces et restaurants locaux.",
+    "source_sha256": "bb536385175bbca48bdb44dffb06eac558c1ad754742a10790b7af893e823eae"
+  },
+  "P038": {
+    "idea": "Quantivo AI souhaite proposer une plateforme d’aide à la décision en entreprise fondée sur l’IA, sans préciser de cas d’usage concret.",
+    "source_sha256": "11902f77262c30d8194cc643708df209b8f6aa38687b85e8dd3f6af058eedeeb"
+  },
+  "P039": {
+    "idea": "Clipwell regroupe la publication, les statistiques, les partenariats commerciaux et le suivi des paiements des créateurs de contenu.",
+    "source_sha256": "bb104b6e249e1e95c2dd489af608fc08622df485a85c8619c2984110bfd3aa32"
+  },
+  "P040": {
+    "idea": "Halcyon Threat souhaite réunir les signaux des outils de cybersécurité pour hiérarchiser les expositions aux attaques.",
+    "source_sha256": "d5fcbb8f610998f3fdf9f8df6f6c8f9a020cda97b04bbbf5d63a6a1c2b199a45"
+  },
+  "P041": {
+    "idea": "Tandem permet de proposer des activités locales et de rencontrer des personnes souhaitant y participer.",
+    "source_sha256": "f345609a5494b8db5db9e4e0ad596a249a738578072d59fde680b8f9b0d2681f"
+  },
+  "P042": {
+    "idea": "Pierrefonds accompagne les investisseurs immobiliers de l’achat d’un logement à sa rénovation, sa mise en location et sa gestion.",
+    "source_sha256": "effb287f8ef576dfdb777b9fae4b6d9eb3c97426383e22413ceef2b2cff84889"
+  },
+  "P043": {
+    "idea": "BrightPath Learning propose des préparations aux concours combinant cours enregistrés, exercices adaptatifs et accompagnement individuel.",
+    "source_sha256": "13282aa6bc186eabc65079a2526aeec54bd03a4eb8794f3ae5fee0533504700b"
+  },
+  "P044": {
+    "idea": "Nexara développe un protocole d’échange destiné à apporter de la liquidité aux actifs du monde réel représentés sous forme de tokens.",
+    "source_sha256": "7c95c64574220aeb7276d5ef9c9cf7b946fbc14d2fd96e10052e884e29f8cb8d"
+  },
+  "P045": {
+    "idea": "Brewell conçoit un appareil connecté pour contrôler la température et suivre les fermentations alimentaires à domicile.",
+    "source_sha256": "b0926dbdd49c12d8b0722408e3441019f7ab34f416737f935b26ebbc4f7a422d"
+  },
+  "P046": {
+    "idea": "Calmly souhaite développer une application de bien-être mental avec séances guidées, suivi de l’humeur et exercices quotidiens.",
+    "source_sha256": "3846d24f2c1a0811eac5834c42f64a96fb1c412902e49eea5a322ea302b8ca05"
+  },
+  "P047": {
+    "idea": "Terravix développe un robot agricole autonome qui identifie les mauvaises herbes et les retire mécaniquement, sans produits chimiques.",
+    "source_sha256": "6afae81c0a6d9446a3e8390c67206600224360fe7c9077c5e0928fc2d5ae23b3"
+  },
+  "P048": {
+    "idea": "Skipp déploie des trottinettes électriques en libre-service dans les villes européennes de taille intermédiaire.",
+    "source_sha256": "0aad6239408da00539f622547a92217ba18f3d7976978328a8006ff742884ed8"
+  },
+  "P049": {
+    "idea": "Swaply propose une marketplace généraliste de seconde main avec annonces, messagerie et paiements intégrés.",
+    "source_sha256": "005355b5976194f28823219053739ba28626192fd036bebbe6a6c916ac011982"
+  },
+  "P050": {
+    "idea": "Zenithal souhaite créer une plateforme de travail collaboratif fondée sur l’IA, mais le pitch ne décrit pas encore ses fonctionnalités concrètes.",
+    "source_sha256": "2efd1a5efb05ee3face05c72e56e069b712bc32907d70c47a3124ed3f53ded7f"
+  }
+}

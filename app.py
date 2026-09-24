@@ -13,6 +13,7 @@ from src.intake import (INTAKE_RUNS, SUBMISSIONS, append_jsonl, load_dossiers,
                         load_shortlist, save_shortlist, new_submission, queue)
 from src.score_pitch import append_run, score_pitch
 from src.ui_copy import COPY
+from src.startup_ideas import startup_idea
 
 st.set_page_config(page_title="Unicornext · V1", page_icon="✦", layout="wide")
 st.html(Path(__file__).parent / "assets/unicornext.css")
@@ -88,8 +89,7 @@ def cards(items, prefix):
                 status = t["flagged"] if d.flagged else t["ranked"] if d.score is not None else t["waiting"]
                 tone = "warning" if d.flagged else "pending" if d.score is None else ""
                 score = f"{d.score:.0f}" if d.score is not None else "—"
-                st.html(f'<div class="card-head"><span class="monogram" aria-hidden="true">{escape(d.company_name[:2].upper())}</span><span class="tag {tone}">{escape(status)}</span></div><div class="company">{escape(d.company_name)}</div><div class="meta">{escape(d.sector)} · {escape(d.pitch_id)}</div><div class="card-score">{score} <small>/ 100 · {escape(t["score"].split(" /")[0])}</small></div>')
-                st.html('<p class="card-description">' + escape(d.text.splitlines()[0].split(" — ", 1)[-1]) + '</p>')
+                st.html(f'<div class="card-head"><span class="monogram" aria-hidden="true">{escape(d.company_name[:2].upper())}</span><span class="tag {tone}">{escape(status)}</span></div><div class="company">{escape(d.company_name)}</div><p class="card-description">{escape(startup_idea(d))}</p><div class="meta">{escape(d.sector)} · {escape(d.pitch_id)}</div><div class="card-score">{score} <small>/ 100 · {escape(t["score"].split(" /")[0])}</small></div>')
                 st.caption(recommendation_label(d.recommendation))
                 st.button(tr("Ouvrir la fiche", "Open profile"), key=f"open_{prefix}_{d.pitch_id}", on_click=go, args=(d.pitch_id,), width="stretch", help=d.company_name)
                 save_button(d, f"{prefix}_{d.pitch_id}")
@@ -142,8 +142,11 @@ subtitles = {
     "submit": tr("Le prochain potentiel commence par un pitch.", "The next opportunity starts with a pitch."),
 }
 with st.container(key=f"page_{page}"):
-    st.html('<div class="eyebrow">UNICORNEXT / V1 · INVESTOR WORKSPACE</div>')
-    st.title(pages[page])
+    st.html('<div class="eyebrow">UNICORNEXT / DEAL INTELLIGENCE</div>')
+    if page == "dashboard":
+        st.html('<h1 class="hero-title">' + tr("Repérez le potentiel.<br>Gardez une <span>longueur d’avance.</span>", "Spot the potential.<br>Stay <span>one step ahead.</span>") + "</h1>")
+    else:
+        st.title(pages[page])
     st.html(f'<p class="hero-sub">{escape(subtitles[page])}</p>')
 
 if page == "dashboard":
@@ -156,6 +159,30 @@ if page == "dashboard":
     report = Path(__file__).parent / "docs/UNICORNEXT_V1_SCORES.md"
     if report.exists():
         st.download_button(tr("Télécharger les 50 analyses", "Download all 50 assessments"), report.read_text(), file_name="unicornext-v1-analyses.md", mime="text/markdown")
+    chart, featured = st.columns([1.65, 1], gap="medium")
+    with chart, st.container(key="market_distribution"):
+        st.subheader(tr("Le pipeline, en perspective", "Your pipeline, in perspective"))
+        st.caption(tr("Nombre de dossiers par tranche de score · sur 100", "Pitches by score range · out of 100"))
+        buckets = [("0–19", 0, 20), ("20–39", 20, 40), ("40–59", 40, 60), ("60–79", 60, 80), ("80–100", 80, 101)]
+        counts = [sum(d.score is not None and low <= d.score < high for d in dossiers) for _,low,high in buckets]
+        peak = max(counts, default=0) or 1
+        st.html('<div class="distribution">' + ''.join(f'<div class="dist-column"><span class="dist-value">{n}</span><div class="dist-bar" aria-hidden="true" style="height:{max(3,n/peak*125)}px"></div><span class="dist-label">{label}</span></div>' for (label,_,_),n in zip(buckets,counts)) + '</div>')
+        if not any(counts):
+            st.caption(t["no_score"])
+    with featured, st.container(key="featured_company"):
+        st.html('<div class="feature-kicker">' + tr("En tête du classement", "Leading the ranking") + '</div>')
+        if groups["ranked"]:
+            leader = groups["ranked"][0]
+            st.subheader(leader.company_name)
+            st.write(startup_idea(leader))
+            st.caption(leader.sector)
+            st.html(f'<div class="feature-score">{leader.score:.0f}<small> / 100</small></div>')
+            st.button(tr("Découvrir le dossier ↗", "Explore the profile ↗"), key="featured_open", on_click=go, args=(leader.pitch_id,), width="stretch")
+        else:
+            st.subheader(tr("Votre prochain dossier", "Your next opportunity"))
+            st.caption(t["no_score"])
+            st.button(t["submit"], on_click=lambda: st.session_state.update(page="submit"), width="stretch")
+    st.write("")
     st.subheader(tr("À regarder de plus près", "Worth a closer look"))
     st.caption(tr("Les 5 meilleurs dossiers scorés : score pondéré, puis traction et marché en cas d’égalité.", "Top 5 scored pitches: weighted score, then traction and market to break ties."))
     if groups["selected"]:
@@ -225,6 +252,7 @@ elif page == "detail":
                         on_click=go, args=(ids[min(len(ids)-1, position+1)],), width="stretch")
         d = lookup[pid]
         st.header(d.company_name)
+        st.write(startup_idea(d))
         st.caption(f'{d.sector} · {t.get(d.channel,d.channel)}' + (f' · {d.submitted_at}' if d.submitted_at else ''))
         st.caption(tr("Source de la note : ", "Assessment source: ") + (d.assessment_source or "—"))
         save_button(d, "detail")
@@ -278,6 +306,7 @@ elif page == "shortlist":
                     d = next(d for d in saved if d.pitch_id == pid)
                     with col, st.container(border=True):
                         st.subheader(d.company_name)
+                        st.write(startup_idea(d))
                         st.metric(t["score"], f"{d.score:.0f}" if d.score is not None else "—")
                         if d.flagged:
                             st.warning(t["guard"])

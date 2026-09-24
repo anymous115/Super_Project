@@ -186,4 +186,4 @@ Trois propriétés à ne pas perdre de vue :
 
 La navigation propose une vue d’ensemble, un explorateur (cartes ou tableau), les fiches startup, une shortlist et le dépôt de pitch. La shortlist locale est conservée dans `results/intake_shortlist.json`, partagée entre les sessions de cet ordinateur ; elle permet de comparer jusqu’à trois dossiers. Les dossiers signalés participent au classement et à la shortlist ; les consignes de manipulation sont ignorées. Les scores absents sont affichés comme tels.
 
-Identité visuelle : porcelaine, bleu encre et violet iris, contrôles natifs accessibles au clavier, mises en page adaptatives et animations courtes désactivées avec `prefers-reduced-motion`. Les styles se trouvent dans `assets/unicornext.css`.
+Identité visuelle : sauge claire, anthracite et citron, contrôles natifs accessibles au clavier, mises en page adaptatives et animations courtes désactivées avec `prefers-reduced-motion`. Les styles se trouvent dans `assets/unicornext.css`.
