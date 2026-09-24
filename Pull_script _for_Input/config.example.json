@@ -1,0 +1,18 @@
+{
+    "intervalle_secondes": 15,
+    "fichier_sortie": "messages.jsonl",
+
+    "telegram": {
+        "actif": true,
+        "token": "123456789:remplacer-par-le-jeton-donne-par-BotFather"
+    },
+
+    "mail": {
+        "actif": true,
+        "serveur_imap": "imap.gmail.com",
+        "port": 993,
+        "adresse": "boite-dediee@example.com",
+        "mot_de_passe": "remplacer-par-un-mot-de-passe-d-application",
+        "dossier": "INBOX"
+    }
+}
