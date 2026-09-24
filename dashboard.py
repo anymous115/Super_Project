@@ -5,6 +5,7 @@ Lancer avec : streamlit run dashboard.py
 from __future__ import annotations
 
 import json
+import os
 from pathlib import Path
 
 import streamlit as st
@@ -17,7 +18,7 @@ STATE_ICON = {"Terminée": "✅", "Terminé": "✅", "En cours": "🟠", "À fai
 
 
 st.set_page_config(
-    page_title="Pilotage · VC Pitch Intake",
+    page_title="Pilotage · Unicornext",
     page_icon="📊",
     layout="wide",
 )
@@ -53,12 +54,18 @@ def render_header(snapshot: ProjectSnapshot) -> None:
     with left:
         st.title("Pilotage du projet")
         st.caption(
-            "VC Pitch Intake & Triage · état calculé depuis les fichiers du dépôt "
+            "Unicornext · état calculé depuis les fichiers du dépôt "
             f"· branche `{snapshot.branch}` · commit `{snapshot.commit}`"
         )
     with right:
         if st.button("↻ Actualiser", width="stretch"):
             st.rerun()
+    st.caption("Suivi interne de la réalisation du projet. L’interface destinée aux investisseurs est accessible ci-dessous.")
+    st.link_button(
+        "Ouvrir Unicornext — application investisseur",
+        os.environ.get("UNICORNEXT_APP_URL", "http://127.0.0.1:8502"),
+        type="primary",
+    )
 
 
 def render_overview(snapshot: ProjectSnapshot) -> None:
@@ -71,6 +78,8 @@ def render_overview(snapshot: ProjectSnapshot) -> None:
     cols[3].metric("Pitchs scorés", f"{snapshot.metrics['scored_pitches']} / 50")
     st.progress(snapshot.progress)
 
+    if snapshot.metrics["v1_mode"]:
+        st.info("V1 : validation humaine obligatoire supprimée. Les notes directes IA alimentent l’application ; les appels du benchmark restent mesurés séparément.")
     st.subheader("Pipeline du projet")
     phase_columns = st.columns(3)
     for index, phase in enumerate(snapshot.phases):
@@ -92,7 +101,7 @@ def render_data(snapshot: ProjectSnapshot) -> None:
     metrics = snapshot.metrics
     cols = st.columns(3)
     cols[0].metric("Pitchs rédigés", f"{metrics['drafted_pitches']} / 50")
-    cols[1].metric("Pitchs validés", f"{metrics['validated_pitches']} / 50")
+    cols[1].metric("Évaluations IA V1", f"{metrics['direct_assessments']} / 50")
     cols[2].metric("PDF", f"{metrics['pdfs']} / 50")
     task_table(snapshot.phases[1])
     st.info(
@@ -107,6 +116,14 @@ def render_pipeline(snapshot: ProjectSnapshot) -> None:
     cols[1].metric("Appels enregistrés", snapshot.metrics["engine_runs"])
     cols[2].metric("JSON valides", snapshot.metrics["valid_runs"])
     cols[3].metric("Injections contenues", snapshot.metrics["traps_contained"])
+    st.subheader("Filtre anti-injection · corpus courant")
+    guard_cols = st.columns(2)
+    guard_cols[0].metric(
+        "Pièges détectés",
+        f"{snapshot.metrics['guard_caught']} / {snapshot.metrics['guard_traps']}",
+    )
+    guard_cols[1].metric("Faux positifs", snapshot.metrics["guard_false_positives"])
+    st.caption("Mesure directe de src/guard.py sur les pitchs du dépôt. Les injections contenues par le moteur sont comptées séparément après scoring V2.")
     st.subheader("Phase 3 · Pipeline")
     task_table(snapshot.phases[2])
     st.subheader("Phase 4 · Moteur")
@@ -115,6 +132,11 @@ def render_pipeline(snapshot: ProjectSnapshot) -> None:
 
 def render_deliverables(snapshot: ProjectSnapshot) -> None:
     st.subheader("Phase 5 · Produit")
+    st.metric(
+        "PDF extraits fidèlement",
+        f"{snapshot.metrics['pdf_fidelity_passed']} / {snapshot.metrics['pdf_checked']}",
+    )
+    st.caption("Comparaison des mots extraits avec pitch_text, dans le même ordre ; seuil de fidélité : 98 %.")
     task_table(snapshot.phases[4])
     st.subheader("Phase 6 · Livraison")
     task_table(snapshot.phases[5])

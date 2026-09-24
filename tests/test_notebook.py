@@ -33,7 +33,13 @@ def test_notebook_couvre_les_etapes_du_benchmark():
         "Conclusion",
     ):
         assert concept in text
-    assert text.count("TODO") >= 8
+    assert "qwen2.5:14b" in text
+    assert "Filtre anti-injection" in text
+    assert "Extraction PDF" in text
+    assert all(
+        "TODO" not in "".join(cell.get("source", []))
+        for cell in notebook["cells"] if cell["cell_type"] == "code"
+    )
 
 
 def test_notebook_reflete_le_protocole_local_actuel():

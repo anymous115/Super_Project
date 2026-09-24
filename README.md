@@ -1,4 +1,4 @@
-# Super_Project — VC Pitch Intake & Triage
+# Unicornext — V1
 
 Capstone du cours « Prompt & Context Engineering ». Le projet reçoit des pitchs de fondateurs, les note selon une grille VC, les classe, et remonte les meilleurs dossiers à l'investisseur.
 
@@ -9,7 +9,7 @@ Capstone du cours « Prompt & Context Engineering ». Le projet reçoit des pitc
 ## Tableau de bord d'avancement
 
 Le tableau de bord de pilotage calcule l'état des six phases directement depuis
-les fichiers du dépôt : pitchs validés, PDF, modules, pitchs scorés, ingestion
+les fichiers du dépôt : évaluations IA, PDF, modules, pitchs scorés, ingestion
 et livrables finaux. Il évolue donc après chaque pull ou commit, sans
 mettre à jour un pourcentage à la main.
 
@@ -22,11 +22,29 @@ Les autres onglets détaillent les données, le moteur, la livraison et les
 derniers commits. Un export JSON de l'état courant est disponible dans l'onglet
 **Activité Git**.
 
-## Moteur de scoring
+## Unicornext — espace investisseur
 
-Le produit note les pitchs avec **`qwen2.5:14b`**, exécuté en local par Ollama, avec le prompt **V2**, derrière le filtre anti-injection de `src/guard.py`. Aucun coût d'API, et aucun pitch ne quitte la machine.
+```bash
+streamlit run app.py --server.port 8502
+```
 
-La comparaison avec un modèle frontier, prévue au départ, a été retirée du projet le 23 septembre 2026 avec l'accord du professeur. `gpt-6-astra` reste déclaré dans `src/config.py`, mais le produit ne l'appelle pas.
+Ouvrir **http://127.0.0.1:8502** pour l’application investisseur. Le port 8501 est utilisé par le tableau de pilotage interne. Son bouton d’accès au produit peut être configuré avec `UNICORNEXT_APP_URL`.
+
+La V1 affiche **50 notes directement attribuées par Codex**, avec justifications par critère, réserves et extraits. **La validation humaine obligatoire a été supprimée**, conformément à la décision de l’équipe. Les anciens statuts du corpus sont conservés comme historique, sans bloquer l’app.
+
+Les écrans : vue d’ensemble et top 5, recherche en cartes/tableau, fiche startup, shortlist persistante et comparaison de trois dossiers. Les entreprises du corpus sont fictives ; les notes évaluent leur pitch, sans vérification externe.
+
+- [Décision et périmètre V1](docs/UNICORNEXT_V1.md)
+- [Les 50 notes et leurs justifications](docs/UNICORNEXT_V1_SCORES.md)
+- Notes versionnées dans `data/assessments/unicornext_v1.jsonl`, liées au texte par SHA-256.
+
+## Scoring automatique des nouveaux dépôts
+
+Le dépôt accepte texte, PDF et liens publics. Il conserve le pipeline Streamlit/Python et analyse les nouveaux dossiers via **`qwen2.5:14b` / V2 dans Ollama**. La provenance de chaque score est affichée dans la fiche. Aucun appel API Codex n’est déclenché par l’application. Les dépôts locaux restent dans `results/intake_*.jsonl`, ignorés par Git.
+
+## Historique du choix du moteur local
+
+Les mesures ci-dessous concernent les essais locaux antérieurs ; les évaluations directes de la V1 sont distinctes de ce benchmark et n’inventent ni coût ni latence.
 
 ### Comment le modèle a été choisi
 
@@ -48,11 +66,13 @@ D'où le filtre en amont. Avec lui, les cinq pitchs piégés sortent du classeme
 
 **Ce qui reste faible.** Le modèle surnote les pitchs moyens (+19 points en moyenne) et faibles (+30), et tasse les notes entre 60 et 85. Trois pitchs moyens entrent dans le top 5, dont P028, qui présente un volume d'affaires (GMV) comme du chiffre d'affaires. Le moteur fait un bon premier tri, pas un classement fin : c'est l'investisseur qui départage le haut de la file.
 
-### Défense en trois couches
+### Défense du benchmark historique
+
+Dans la V1 actuelle, les alertes restent informatives : tous les dossiers scorés participent au classement. Le mécanisme d’exclusion décrit ci-dessous concerne les expériences historiques.
 
 1. **Le filtre** (`src/guard.py`), avant le modèle, sans appel au modèle. Il cherche cinq familles de formules qu'un fondateur honnête n'a aucune raison d'écrire : texte adressé à une IA, ordre d'ignorer la grille, note dictée, évaluation préalable invoquée, faux avis système. Un pitch signalé est noté quand même, pour mesure, mais **sort du classement automatique** et part en revue humaine avec la raison et l'extrait. Sur le corpus : **5 pièges sur 5, 0 faux positif sur 45**. Chaque piège touche au moins trois familles, ce qui laisse de la marge contre la paraphrase.
 2. **Le prompt V2**, qui déclare le pitch non fiable, **et un rappel placé après le pitch** : un petit modèle obéit surtout à ce qu'il lit en dernier. Avec `qwen2.5:7b`, ce rappel fait passer P049 de 100 à 61 et P025 de 96 à 77.
-3. **La revue humaine** : le score est une aide au tri, jamais une décision.
+3. **V1 sans validation humaine obligatoire** : notes et réserves sont directement accessibles. Les critères et la provenance sont affichés.
 
 ### Bornes d'exécution
 
@@ -125,6 +145,7 @@ pytest                        # aucun appel de modèle
 | `src/score_pitch.py` | Un appel : prompt, modèle, mesure, validation, enregistrement |
 | `src/benchmark.py` | Passage sur le corpus, reprenable. Hérité du benchmark, il sert désormais à scorer les 50 pitchs de la démonstration |
 | `src/extract.py` | Le texte d'une soumission : message, PDF joints, liens. Chaque échec porte un code, et les liens vers des adresses non publiques sont refusés |
+| `src/triage.py` | Le chaînon entre la réception et l'interface : chaque soumission de `inbox/` est extraite, filtrée, notée, puis rangée dans sa file (classée, revue humaine, illisible, erreur) |
 | `src/guard.py` | Filtre anti-injection, avant le modèle : un pitch signalé sort du classement automatique |
 | `src/metrics.py` | Sélection adaptative, classement, Spearman, latences |
 | `src/project_status.py` | L'avancement calculé pour le tableau de bord |
@@ -133,7 +154,25 @@ pytest                        # aucun appel de modèle
 python3 -m src.benchmark --models local --prompts V2 --limit 3   # essai sur 3 pitchs
 python3 -m src.benchmark --models local --prompts V2             # les 50 pitchs, ~50 min
 python3 scripts/check_extraction.py                               # fidélité de l'extraction sur les 50 PDF
+python3 scripts/build_engine_checks.py                            # régénère docs/ENGINE_CHECKS.md depuis les résultats
 ```
+
+Le compte rendu du dernier passage est dans **[docs/ENGINE_CHECKS.md](docs/ENGINE_CHECKS.md)** : 50 réponses sur 50, 5 pièges sur 5 écartés, Spearman de 0,75 contre la calibration.
+
+### Le parcours complet
+
+```bash
+python3 scripts/ingest.py telegram        # terminal 1 : reçoit les pitchs du bot
+python3 scripts/ingest.py email           # terminal 2 : relève la boîte dédiée
+python3 scripts/score_inbox.py --watch    # terminal 3 : note ce qui arrive, toutes les 30 s
+python3 scripts/score_inbox.py queue      # les files : classés (★ sélection), revue humaine, illisibles
+```
+
+Chaque soumission de `inbox/SUB-0001/` reçoit un `score.json` à côté de son `submission.json`. `src/triage.load_queue()` rend les files que l'interface affiche. Une soumission déjà notée n'est jamais renotée.
+
+Vérifié de bout en bout avec `qwen2.5:14b` le 24 septembre 2026 : un PDF reçu par Telegram est lu, noté et classé ; P025 reçu par email est noté 100/100 par le modèle, signalé par le filtre, et part en revue humaine.
+
+> **Limite relevée.** Le même pitch (P005) obtient **73 reçu en PDF** et **83 en texte brut**. L'extraction est fidèle au mot près : c'est la mise en forme du texte (sauts de ligne, titres, étiquette de la pièce jointe) qui déplace la note. Deux fondateurs au contenu égal peuvent donc être notés différemment selon le format d'envoi.
 
 Trois propriétés à ne pas perdre de vue :
 
@@ -142,3 +181,9 @@ Trois propriétés à ne pas perdre de vue :
 **Le passage est reprenable.** Chaque appel est écrit dans `results/raw_runs.jsonl` dès qu'il revient, et une relance saute ce qui est déjà fait. Une coupure ne coûte rien.
 
 **Aucune sortie n'est corrigée à la main.** Une réponse invalide est enregistrée comme échec. Le seul nettoyage automatique consiste à retirer le bloc markdown autour du JSON, et il est tracé (`valid_json` contre `valid_json_cleaned`).
+
+### Interface Unicornext
+
+La navigation propose une vue d’ensemble, un explorateur (cartes ou tableau), les fiches startup, une shortlist et le dépôt de pitch. La shortlist locale est conservée dans `results/intake_shortlist.json`, partagée entre les sessions de cet ordinateur ; elle permet de comparer jusqu’à trois dossiers. Les dossiers signalés participent au classement et à la shortlist ; les consignes de manipulation sont ignorées. Les scores absents sont affichés comme tels.
+
+Identité visuelle : porcelaine, bleu encre et violet iris, contrôles natifs accessibles au clavier, mises en page adaptatives et animations courtes désactivées avec `prefers-reduced-motion`. Les styles se trouvent dans `assets/unicornext.css`.
