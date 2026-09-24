@@ -125,6 +125,7 @@ pytest                        # aucun appel de modèle
 | `src/score_pitch.py` | Un appel : prompt, modèle, mesure, validation, enregistrement |
 | `src/benchmark.py` | Passage sur le corpus, reprenable. Hérité du benchmark, il sert désormais à scorer les 50 pitchs de la démonstration |
 | `src/extract.py` | Le texte d'une soumission : message, PDF joints, liens. Chaque échec porte un code, et les liens vers des adresses non publiques sont refusés |
+| `src/triage.py` | Le chaînon entre la réception et l'interface : chaque soumission de `inbox/` est extraite, filtrée, notée, puis rangée dans sa file (classée, revue humaine, illisible, erreur) |
 | `src/guard.py` | Filtre anti-injection, avant le modèle : un pitch signalé sort du classement automatique |
 | `src/metrics.py` | Sélection adaptative, classement, Spearman, latences |
 | `src/project_status.py` | L'avancement calculé pour le tableau de bord |
@@ -137,6 +138,21 @@ python3 scripts/build_engine_checks.py                            # régénère 
 ```
 
 Le compte rendu du dernier passage est dans **[docs/ENGINE_CHECKS.md](docs/ENGINE_CHECKS.md)** : 50 réponses sur 50, 5 pièges sur 5 écartés, Spearman de 0,75 contre la calibration.
+
+### Le parcours complet
+
+```bash
+python3 scripts/ingest.py telegram        # terminal 1 : reçoit les pitchs du bot
+python3 scripts/ingest.py email           # terminal 2 : relève la boîte dédiée
+python3 scripts/score_inbox.py --watch    # terminal 3 : note ce qui arrive, toutes les 30 s
+python3 scripts/score_inbox.py queue      # les files : classés (★ sélection), revue humaine, illisibles
+```
+
+Chaque soumission de `inbox/SUB-0001/` reçoit un `score.json` à côté de son `submission.json`. `src/triage.load_queue()` rend les files que l'interface affiche. Une soumission déjà notée n'est jamais renotée.
+
+Vérifié de bout en bout avec `qwen2.5:14b` le 24 septembre 2026 : un PDF reçu par Telegram est lu, noté et classé ; P025 reçu par email est noté 100/100 par le modèle, signalé par le filtre, et part en revue humaine.
+
+> **Limite relevée.** Le même pitch (P005) obtient **73 reçu en PDF** et **83 en texte brut**. L'extraction est fidèle au mot près : c'est la mise en forme du texte (sauts de ligne, titres, étiquette de la pièce jointe) qui déplace la note. Deux fondateurs au contenu égal peuvent donc être notés différemment selon le format d'envoi.
 
 Trois propriétés à ne pas perdre de vue :
 

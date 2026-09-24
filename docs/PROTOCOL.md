@@ -88,11 +88,40 @@ Chaque adaptateur produit la même structure, quel que soit le canal :
   "sender_handle": "@founder_handle",
   "text": "Contenu du message",
   "attachments": [{"type": "pdf", "path": "..."}],
-  "links": ["https://..."]
+  "links": ["https://..."],
+  "source_ref": "telegram:123456:42",
+  "warnings": []
 }
 ```
 
 Ajouter un canal revient à écrire un adaptateur qui produit cet objet. Rien en aval ne change.
+
+En aval, `src/triage.py` prend chaque soumission de `inbox/`, en extrait le texte (`src/extract.py`), passe le filtre anti-injection, la note, et écrit un `score.json` dont le `status` range la soumission dans une file : `scored` (classée), `review` (signalée par le filtre, revue humaine), `unreadable` ou `error`. C'est ce que lit l'interface.
+
+Deux champs s'ajoutent au schéma initial. `source_ref` est l'identifiant du message côté canal : un redémarrage ne réingère jamais deux fois le même message. `warnings` garde ce qui s'est mal passé à l'ingestion — PDF illisible, trop lourd, pièce jointe non PDF — pour que le VC sache pourquoi un dossier arrive incomplet.
+
+L'objet est défini et validé dans `src/ingest/normalize.py`. Chaque soumission est rangée dans `inbox/SUB-0001/`, avec son `submission.json` et ses PDF. **`inbox/` n'est jamais committé** : une soumission réelle contient au minimum un identifiant personnel.
+
+### Réception
+
+| Canal | Mode | Pourquoi |
+|---|---|---|
+| Telegram | Long polling (`getUpdates`) | Un webhook exige une URL HTTPS publique ; le polling tourne depuis un portable. L'objet reçu est identique : passer au webhook ne change pas l'adaptateur. |
+| Email | Relève IMAP d'une boîte dédiée, accusé en SMTP | Bibliothèque standard, aucun service tiers. Un message n'est marqué lu qu'une fois enregistré. |
+
+```bash
+python scripts/ingest.py telegram     # terminal 1
+python scripts/ingest.py email        # terminal 2
+python scripts/ingest.py list         # la file reçue
+```
+
+Règles communes, parce que le contenu vient d'inconnus :
+
+- un PDF se reconnaît à son contenu (`%PDF-`), pas à son nom ; 20 Mo maximum ;
+- un nom de fichier reçu est réduit à un nom simple, sans chemin ;
+- le bot Telegram n'écoute que les conversations privées ;
+- aucun accusé n'est envoyé à un répondeur automatique, une liste de diffusion ou à notre propre adresse, et notre accusé se déclare automatique : deux répondeurs ne peuvent pas s'emballer ;
+- l'accusé de réception ne répète jamais le contenu reçu.
 
 ### Canaux
 
@@ -379,7 +408,7 @@ Super_Project/
 │   ├── ingest/
 │   │   ├── normalize.py
 │   │   ├── telegram.py
-│   │   └── email.py
+│   │   └── mail.py        # pas email.py : masquerait le module standard
 │   ├── extract.py
 │   ├── score_pitch.py
 │   ├── benchmark.py        # passage sur le corpus
