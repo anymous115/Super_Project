@@ -228,8 +228,9 @@ def collect_project_status(root: Optional[Path] = None) -> ProjectSnapshot:
     ingestion_files = (
         "src/ingest/normalize.py",
         "src/ingest/telegram.py",
-        "src/ingest/email.py",
+        "src/ingest/mail.py",
         "src/extract.py",
+        "src/triage.py",
     )
     ingestion_count = _count_existing(root, ingestion_files)
     product_app = (root / "app.py").exists()
@@ -273,7 +274,7 @@ def collect_project_status(root: Optional[Path] = None) -> ProjectSnapshot:
             TaskProgress("Contrôles consignés", float(checks_written), "docs/ENGINE_CHECKS.md présent" if checks_written else "Aucun compte rendu", "Consigner les contrôles du §11 dans docs/ENGINE_CHECKS.md", 2),
         )),
         PhaseProgress(5, "Produit", (
-            TaskProgress("Ingestion et extraction", _ratio(ingestion_count, len(ingestion_files)), f"{ingestion_count}/{len(ingestion_files)} composants", "Construire Telegram, email et extraction PDF", 3),
+            TaskProgress("Ingestion et extraction", _ratio(ingestion_count, len(ingestion_files)), f"{ingestion_count}/{len(ingestion_files)} composants", "Construire Telegram, email, extraction et notation de la boîte de réception", 3),
             TaskProgress("Fidélité de l'extraction PDF", _ratio(pdf_fidelity_passed, 50), f"{pdf_fidelity_passed}/{pdf_checked} PDF fidèles (seuil 98 %)", "Corriger les PDF dont l'extraction perd ou inverse des mots", 2),
             TaskProgress("Frontend Unicornext V1", float(product_app), "Application investisseur : app.py présent" if product_app else "app.py absent", "Construire l'interface produit dans app.py", 3),
         )),
