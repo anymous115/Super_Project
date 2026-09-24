@@ -162,11 +162,13 @@ Le compte rendu du dernier passage est dans **[docs/ENGINE_CHECKS.md](docs/ENGIN
 ### Le parcours complet
 
 ```bash
-python3 scripts/ingest.py telegram        # terminal 1 : reçoit les pitchs du bot
-python3 scripts/ingest.py email           # terminal 2 : relève la boîte dédiée
-python3 scripts/score_inbox.py --watch    # terminal 3 : note ce qui arrive, toutes les 30 s
-python3 scripts/score_inbox.py queue      # les files : classés (★ sélection), revue humaine, illisibles
+cp Input_Telegram_Mail/config.example.json Input_Telegram_Mail/config.json   # une fois ; secrets dans .env
+python3 Input_Telegram_Mail/input_listener.py   # terminal 1 : Telegram + boîte mail → inbox/
+python3 scripts/score_inbox.py --watch          # terminal 2 : note ce qui arrive, toutes les 30 s
+python3 scripts/score_inbox.py queue            # les files : classés (★ sélection), revue humaine, illisibles
 ```
+
+Avec `"noter": true` dans `config.json`, l'écouteur note lui-même ce qu'il reçoit : un seul terminal suffit. Il confie chaque message à `src/ingest/`, qui télécharge le deck PDF, ignore un message déjà reçu et envoie l'accusé de réception.
 
 Chaque soumission de `inbox/SUB-0001/` reçoit un `score.json` à côté de son `submission.json`. `src/triage.load_queue()` rend les files que l'interface affiche. Une soumission déjà notée n'est jamais renotée.
 

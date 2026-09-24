@@ -5,7 +5,7 @@
     python scripts/score_inbox.py --watch    # recommence toutes les 30 s
     python scripts/score_inbox.py queue      # affiche les files, sans rien noter
 
-À lancer à côté de `scripts/ingest.py telegram` et `scripts/ingest.py email`.
+À lancer à côté de `Input_Telegram_Mail/input_listener.py`.
 Le modèle local doit tourner (`ollama serve`, modèle `qwen2.5:14b`).
 """
 import argparse
