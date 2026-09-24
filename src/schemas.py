@@ -13,7 +13,7 @@ from __future__ import annotations
 import json
 import re
 from dataclasses import dataclass
-from typing import List, Optional
+from typing import Any, Dict, List, Optional
 
 from pydantic import BaseModel, ConfigDict, Field, ValidationError
 
@@ -127,9 +127,12 @@ def parse_output(raw: str) -> ParseResult:
         return ParseResult(None, False, False, f"schéma non respecté : {exc}")
 
 
+# Le placeholder ne doit pas être un identifiant plausible : avec "P001",
+# deepseek-r1 recopiait P001 en notant P046. L'identifiant vient du message
+# utilisateur, pas du gabarit.
 JSON_SHAPE = json.dumps(
     {
-        "pitch_id": "P001",
+        "pitch_id": "<the pitch_id given above>",
         "scores": {c: 0 for c in CRITERIA},
         "total_score": 0,
         "strengths": ["..."],
@@ -140,3 +143,15 @@ JSON_SHAPE = json.dumps(
     },
     indent=2,
 )
+
+
+def output_json_schema() -> Dict[str, Any]:
+    """Le schéma de `PitchScore`, passé à Ollama pour contraindre la génération.
+
+    Avec un schéma, le modèle ne peut produire que du JSON de cette forme : plus
+    de bloc markdown, plus de champ manquant. La validation Pydantic reste en
+    aval, parce qu'un schéma ne vérifie pas tout (le total, par exemple).
+    """
+    schema = PitchScore.model_json_schema()
+    schema["properties"]["recommendation"]["enum"] = list(RECOMMENDATIONS)
+    return schema

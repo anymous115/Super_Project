@@ -4,6 +4,8 @@
 **Livrable :** product brief validé par l'équipe
 **Dépendance suivante :** Phase 2 — Données
 
+> **Mise à jour du 23 septembre 2026.** La comparaison avec un modèle frontier mentionnée plus bas a été retirée du projet, avec l'accord du professeur. Le produit tourne sur `deepseek-r1:8b` seul. Voir [`CONTEXT.md`](../../CONTEXT.md#historique-des-décisions).
+
 > **Historique.** Ce brief a d'abord été rédigé pour une variante « VC Startup Opportunity Finder » (catalogue d'idées interrogé par le VC). L'équipe a retenu le sens inverse : le **tri de pitchs entrants**.
 >
 > Le document est adapté, pas refait. Le persona, la table des risques, la configuration LLM, la sélection adaptative et le bilinguisme sont **conservés tels quels**. Ce qui change est signalé au §12, avec les cases à revalider.

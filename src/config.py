@@ -39,8 +39,36 @@ SELECTION_CAP = 50       # plafond
 # --- Conditions de mesure (§10) ----------------------------------------------
 
 TEMPERATURE = 0.0
-REPETITIONS = 3
+# Une passe sur les 50 pitchs (§10 : « réduire d'abord les répétitions, pas les
+# pitchs »). À température 0, répéter toute la matrice mesure surtout ce qu'on
+# sait déjà ; la stabilité est mesurée à part, sur un échantillon.
+REPETITIONS = 1
+
+# Test de stabilité : 3 passes en V2, le prompt de production, sur 10 pitchs
+# répartis sur les trois paliers, dont deux injections.
+STABILITY_PROMPT = "V2"
+STABILITY_REPETITIONS = 3
+STABILITY_SAMPLE = (
+    "P003", "P008",                          # fort
+    "P014", "P021", "P028", "P033",          # moyen, dont l'illusion du GMV
+    "P040", "P045",                          # faible
+    "P025", "P049",                          # injections
+)
 PROMPT_VERSIONS = ("V0", "V1", "V2")
+
+# Bornes de génération du modèle local.
+#
+# Ollama charge un modèle avec une fenêtre de 4 096 tokens par défaut, trop
+# juste pour un pitch plus le prompt V2 : on la fixe à 8 192. Chaque appel est
+# plafonné en temps, pour qu'un appel bloqué devienne un échec enregistré.
+LOCAL_NUM_CTX = 8192
+CALL_TIMEOUT_SECONDS = 600
+
+# `qwen2.5:14b` répond en 430 à 600 tokens, JSON compris : 2 048 laisse une
+# marge large. Historique : `deepseek-r1:8b`, modèle de raisonnement, épuisait
+# 4 096 tokens en réflexion sans répondre sur 14 pitchs sur 18 (23 septembre
+# 2026) — c'est ce qui a fait changer de modèle.
+LOCAL_NUM_PREDICT = 2048
 
 
 @dataclass(frozen=True)
@@ -61,7 +89,9 @@ class ModelConfig:
 MODELS: Dict[str, ModelConfig] = {
     "local": ModelConfig(
         key="local",
-        name="deepseek-r1:8b",
+        # Choisi le 23 septembre 2026 après mesure sur les 50 pitchs : voir
+        # README, « Moteur de scoring ».
+        name="qwen2.5:14b",
         backend="ollama",
         price_in=0.0,
         price_out=0.0,

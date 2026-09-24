@@ -2,6 +2,8 @@
 
 Document de travail pour le [§6 du protocole](PROTOCOL.md#6-données).
 
+> **Document des phases 1 et 2.** Il a été écrit quand le projet comparait un modèle local à un modèle frontier contre une référence annotée à la main. Cette comparaison a été retirée le 23 septembre 2026 (voir [`CONTEXT.md`](../CONTEXT.md#historique-des-décisions)). La calibration reste valable : elle garantit l'étalement des scores dont la démonstration a besoin. Les passages sur le benchmark et l'annotation à 4 sont conservés comme historique.
+
 > **Ce fichier est la source de vérité.** Les données machine-lisibles en sont *générées* :
 >
 > ```bash

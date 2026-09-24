@@ -17,9 +17,11 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
-from .config import DATA, MODELS, RESULTS, TEMPERATURE, ModelConfig, load_env, require_env
+from .config import (CALL_TIMEOUT_SECONDS, DATA, LOCAL_NUM_CTX, LOCAL_NUM_PREDICT,
+                     MODELS, RESULTS, TEMPERATURE, ModelConfig, load_env, require_env)
+from .guard import scan
 from .prompts import build_prompt, fingerprint
-from .schemas import parse_output
+from .schemas import output_json_schema, parse_output
 
 RAW_RUNS = RESULTS / "raw_runs.jsonl"
 
@@ -54,6 +56,12 @@ class ModelReply:
     input_tokens: int
     output_tokens: int
     model_version: str
+    # Ollama renvoie la réflexion d'un modèle de raisonnement dans un champ
+    # distinct de la réponse, mais la compte dans `eval_count`. Sans la garder,
+    # on ne peut pas dire quelle part du coût local part en raisonnement.
+    thinking: str = ""
+    # "stop" si le modèle a fini, "length" s'il a heurté le plafond.
+    done_reason: str = ""
 
 
 def _call_ollama(model: ModelConfig, system: str, user: str) -> ModelReply:
@@ -70,17 +78,27 @@ def _call_ollama(model: ModelConfig, system: str, user: str) -> ModelReply:
                 {"role": "user", "content": user},
             ],
             "stream": False,
-            "options": {"temperature": TEMPERATURE},
+            # La génération est contrainte par le schéma de sortie : le modèle
+            # ne peut produire que du JSON de la bonne forme.
+            "format": output_json_schema(),
+            "options": {
+                "temperature": TEMPERATURE,
+                "num_ctx": LOCAL_NUM_CTX,
+                "num_predict": LOCAL_NUM_PREDICT,
+            },
         },
-        timeout=300.0,
+        timeout=CALL_TIMEOUT_SECONDS,
     )
     response.raise_for_status()
     payload = response.json()
+    message = payload["message"]
     return ModelReply(
-        text=payload["message"]["content"],
+        text=message.get("content", ""),
         input_tokens=payload.get("prompt_eval_count", 0),
         output_tokens=payload.get("eval_count", 0),
         model_version=payload.get("model", model.name),
+        thinking=message.get("thinking") or "",
+        done_reason=payload.get("done_reason", ""),
     )
 
 
@@ -124,9 +142,15 @@ class RunRecord:
     prompt_fingerprint: str
     temperature: float
     raw_output: str
+    raw_thinking: str           # réflexion d'un modèle de raisonnement, hors réponse
     parsed_output: Optional[Dict[str, Any]]
     valid_json: bool            # JSON pur, sans texte autour
     valid_json_cleaned: bool    # valide après retrait des enveloppes connues
+    output_chars: int           # longueur de la réponse
+    thinking_chars: int         # longueur de la réflexion — comptée dans output_tokens
+    truncated: bool             # génération arrêtée par le plafond, pas par le modèle
+    pitch_id_echoed: Optional[str]   # l'identifiant que le modèle a renvoyé
+    pitch_id_mismatch: bool          # ... et s'il ne correspond pas à celui envoyé
     total_reported: Optional[float]
     total_computed: Optional[float]
     latency_seconds: float
@@ -134,6 +158,11 @@ class RunRecord:
     output_tokens: int
     estimated_cost: float
     error: Optional[str]
+    # Filtre anti-injection, appliqué au texte avant le modèle (src/guard.py).
+    # Un pitch signalé est noté quand même, pour mesure, mais sort du
+    # classement automatique et part en revue humaine.
+    guard_flagged: bool = False
+    guard_families: List[str] = field(default_factory=list)
 
     def as_json(self) -> str:
         return json.dumps(asdict(self), ensure_ascii=False)
@@ -148,6 +177,7 @@ def score_pitch(
 ) -> RunRecord:
     """Note un pitch et renvoie la ligne de résultat. Ne lève jamais."""
     model = MODELS[model_key]
+    verdict = scan(pitch["pitch_text"])
     system, user = build_prompt(
         prompt_version, pitch["pitch_id"], pitch["pitch_text"], output_language
     )
@@ -174,9 +204,15 @@ def score_pitch(
         prompt_fingerprint=fingerprint(prompt_version),
         temperature=TEMPERATURE,
         raw_output=raw,
+        raw_thinking=reply.thinking if reply else "",
         parsed_output=parsed.model_dump() if parsed else None,
         valid_json=bool(result and result.valid_json_strict),
         valid_json_cleaned=bool(result and result.valid_json_cleaned),
+        output_chars=len(raw),
+        thinking_chars=len(reply.thinking) if reply else 0,
+        truncated=bool(reply and reply.done_reason == "length"),
+        pitch_id_echoed=parsed.pitch_id if parsed else None,
+        pitch_id_mismatch=bool(parsed and parsed.pitch_id != pitch["pitch_id"]),
         total_reported=parsed.total_score if parsed else None,
         # Le total qui fait foi est recalculé ici, jamais repris du modèle (§5).
         total_computed=parsed.computed_total() if parsed else None,
@@ -185,6 +221,8 @@ def score_pitch(
         output_tokens=reply.output_tokens if reply else 0,
         estimated_cost=model.cost(reply.input_tokens, reply.output_tokens) if reply else 0.0,
         error=error or (result.error if result else "aucune réponse"),
+        guard_flagged=verdict.flagged,
+        guard_families=verdict.families,
     )
 
     if trace:
