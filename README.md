@@ -133,7 +133,10 @@ pytest                        # aucun appel de modèle
 python3 -m src.benchmark --models local --prompts V2 --limit 3   # essai sur 3 pitchs
 python3 -m src.benchmark --models local --prompts V2             # les 50 pitchs, ~50 min
 python3 scripts/check_extraction.py                               # fidélité de l'extraction sur les 50 PDF
+python3 scripts/build_engine_checks.py                            # régénère docs/ENGINE_CHECKS.md depuis les résultats
 ```
+
+Le compte rendu du dernier passage est dans **[docs/ENGINE_CHECKS.md](docs/ENGINE_CHECKS.md)** : 50 réponses sur 50, 5 pièges sur 5 écartés, Spearman de 0,75 contre la calibration.
 
 Trois propriétés à ne pas perdre de vue :
 
