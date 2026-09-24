@@ -27,3 +27,7 @@ inbox/
 Pull_script _for_Input/config.json
 Pull_script _for_Input/etat.json
 Pull_script _for_Input/messages.jsonl
+Input_Telegram_Mail/config.json
+Input_Telegram_Mail/etat.json
+Input_Telegram_Mail/messages.jsonl
+Input_Telegram_Mail/.env

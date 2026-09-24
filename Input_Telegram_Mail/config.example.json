@@ -1,0 +1,19 @@
+{
+    "intervalle_secondes": 15,
+    "fichier_sortie": "messages.jsonl",
+    "noter": false,
+
+    "telegram": {
+        "actif": true
+    },
+
+    "mail": {
+        "actif": true,
+        "serveur_imap": "imap.gmail.com",
+        "port": 993,
+        "serveur_smtp": "smtp.gmail.com",
+        "port_smtp": 465,
+        "dossier": "INBOX",
+        "accuse_reception": true
+    }
+}

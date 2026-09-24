@@ -112,10 +112,11 @@ L'objet est défini et validé dans `src/ingest/normalize.py`. Chaque soumission
 | Email | Relève IMAP d'une boîte dédiée, accusé en SMTP | Bibliothèque standard, aucun service tiers. Un message n'est marqué lu qu'une fois enregistré. |
 
 ```bash
-python scripts/ingest.py telegram     # terminal 1
-python scripts/ingest.py email        # terminal 2
-python scripts/ingest.py list         # la file reçue
+python Input_Telegram_Mail/input_listener.py   # Telegram et e-mail, dans un seul processus
+python scripts/score_inbox.py queue            # la file reçue et notée
 ```
+
+L'écouteur (`Input_Telegram_Mail/`) tient les deux boucles de relève ; chaque message est confié aux adaptateurs de `src/ingest/`, qui appliquent les règles ci-dessous. Réglages dans `Input_Telegram_Mail/config.json`, secrets dans `.env` (`TELEGRAM_TOKEN`, `MAIL_ADRESSE`, `MAIL_MOT_DE_PASSE`).
 
 Règles communes, parce que le contenu vient d'inconnus :
 

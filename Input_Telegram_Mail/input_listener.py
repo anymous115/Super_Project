@@ -1,33 +1,46 @@
 """
-Surveille en boucle un bot Telegram et une boîte mail (IMAP).
-Chaque nouveau message est récupéré et stocké (une ligne JSON par message
-dans le fichier de sortie), puis passé à la fonction `traiter_message`.
+Surveille en boucle un bot Telegram et une boîte mail (IMAP), et dépose chaque
+pitch reçu dans `inbox/`, où la notation le prend en charge.
 
-Uniquement la bibliothèque standard de Python : rien à installer.
-Lancer :  python input_listener.py
+Chaque message est :
+  1. consigné tel quel dans le fichier de sortie (une ligne JSON par message) ;
+  2. confié à `src/ingest/`, qui télécharge le deck PDF s'il y en a un, ignore
+     un message déjà reçu, l'enregistre dans `inbox/SUB-XXXX/` et envoie
+     l'accusé de réception au fondateur.
 
-Les réglages publics sont dans config.json, les secrets (token, adresse,
-mot de passe) dans le fichier .env, qui n'est pas envoyé sur GitHub.
+Avec `"noter": true` dans config.json, une troisième boucle note ce qui arrive
+(extraction, filtre anti-injection, qwen2.5:14b) : un seul terminal suffit pour
+toute la chaîne. Il faut alors qu'Ollama tourne.
+
+Lancer :  python Input_Telegram_Mail/input_listener.py
+
+Les réglages publics sont dans config.json (copier config.example.json), les
+secrets (token, adresse, mot de passe) dans le fichier .env, qui n'est pas
+envoyé sur GitHub.
 """
 
 import email
 import imaplib
 import json
 import os
+import sys
 import threading
 import time
 import urllib.error
 import urllib.parse
 import urllib.request
 from datetime import datetime
-from email.header import decode_header, make_header
-from html.parser import HTMLParser
 from pathlib import Path
+from types import SimpleNamespace
 
 DOSSIER = Path(__file__).resolve().parent
+RACINE = DOSSIER.parent
 FICHIER_CONFIG = DOSSIER / "config.json"
-FICHIER_ENV = DOSSIER / ".env"
 FICHIER_ETAT = DOSSIER / "etat.json"  # mémorise le dernier message Telegram lu
+
+sys.path.insert(0, str(RACINE))
+from src.ingest import mail, telegram  # noqa: E402
+from src.ingest.normalize import Inbox  # noqa: E402
 
 verrou_ecriture = threading.Lock()
 
@@ -35,34 +48,33 @@ verrou_ecriture = threading.Lock()
 # ---------------------------------------------------------------- secrets
 
 def charger_env():
-    """Lit les lignes NOM=valeur du .env. Une vraie variable d'environnement
-    déjà définie garde la priorité."""
-    if not FICHIER_ENV.exists():
-        return
-    for ligne in FICHIER_ENV.read_text(encoding="utf-8").splitlines():
-        ligne = ligne.strip()
-        if not ligne or ligne.startswith("#") or "=" not in ligne:
+    """Lit les lignes NOM=valeur du .env (celui du dossier, puis celui du dépôt).
+    Une vraie variable d'environnement déjà définie garde la priorité."""
+    for fichier in (DOSSIER / ".env", RACINE / ".env"):
+        if not fichier.exists():
             continue
-        nom, valeur = ligne.split("=", 1)
-        os.environ.setdefault(nom.strip(), valeur.strip().strip('"').strip("'"))
+        for ligne in fichier.read_text(encoding="utf-8").splitlines():
+            ligne = ligne.strip()
+            if not ligne or ligne.startswith("#") or "=" not in ligne:
+                continue
+            nom, valeur = ligne.split("=", 1)
+            os.environ.setdefault(nom.strip(), valeur.strip().strip('"').strip("'"))
 
 
-def secret(nom):
-    valeur = os.environ.get(nom)
-    if not valeur:
-        raise SystemExit(f"{nom} manquant : remplis-le dans le fichier .env (voir .env.example).")
-    return valeur
+def secret(*noms):
+    """Le premier des noms qui est rempli. Les anciens noms du .env
+    (TELEGRAM_BOT_TOKEN, EMAIL_ADDRESS, EMAIL_PASSWORD) marchent aussi."""
+    for nom in noms:
+        valeur = os.environ.get(nom)
+        if valeur:
+            return valeur
+    raise SystemExit(f"{noms[0]} manquant : remplis-le dans le fichier .env (voir .env.example).")
 
 
 # ---------------------------------------------------------------- stockage
 
-def traiter_message(message):
-    """Point d'entrée pour la suite du projet : appelé à chaque nouveau message.
-    `message` est un dict : source, expediteur, sujet, texte, date."""
-    print(f"[{message['source']}] {message['expediteur']} : {message['texte'][:80]!r}")
-
-
-def stocker(config, source, expediteur, texte, sujet=None):
+def consigner(config, source, expediteur, texte, sujet=None):
+    """Garde une trace brute du message, avant tout traitement."""
     message = {
         "date": datetime.now().isoformat(timespec="seconds"),
         "source": source,
@@ -73,7 +85,12 @@ def stocker(config, source, expediteur, texte, sujet=None):
     with verrou_ecriture:
         with open(DOSSIER / config["fichier_sortie"], "a", encoding="utf-8") as f:
             f.write(json.dumps(message, ensure_ascii=False) + "\n")
-    traiter_message(message)
+
+
+def annoncer(source, soumission):
+    if soumission:
+        print(f"[{source}] {soumission.submission_id} reçu de {soumission.sender_handle}"
+              f" ({len(soumission.attachments)} PDF, {len(soumission.links)} lien(s))")
 
 
 def lire_etat():
@@ -97,8 +114,20 @@ def appel_telegram(token, methode, params, delai):
     return donnees["result"]
 
 
-def boucle_telegram(config):
+def traiter_update(config, maj, client, boite):
+    """Une update Telegram : trace brute, puis dépôt dans inbox/ avec son PDF."""
+    msg = maj.get("message") or {}
+    texte = msg.get("text") or msg.get("caption") or ""
+    if msg.get("document"):
+        texte = (texte + f"\n[pièce jointe : {msg['document'].get('file_name', '?')}]").strip()
+    if texte:
+        consigner(config, "telegram", telegram.sender_handle(msg.get("from", {})), texte)
+    return telegram.handle_update(maj, client, boite)
+
+
+def boucle_telegram(config, boite):
     token = config["telegram"]["token"]
+    client = telegram.TelegramClient(token=token)
     etat = lire_etat()
     decalage = etat.get("telegram_offset", 0)
     # Long polling : Telegram garde la requête ouverte jusqu'à `attente` secondes
@@ -113,117 +142,112 @@ def boucle_telegram(config):
             )
             for maj in mises_a_jour:
                 decalage = maj["update_id"] + 1
-                msg = maj.get("message") or maj.get("channel_post")
-                if not msg:
-                    continue
-                texte = msg.get("text") or msg.get("caption")
-                if not texte:
-                    continue
-                auteur = msg.get("from") or msg.get("chat", {})
-                expediteur = auteur.get("username") or auteur.get("first_name") or auteur.get("title") or str(auteur.get("id"))
-                stocker(config, "telegram", expediteur, texte)
+                try:
+                    annoncer("telegram", traiter_update(config, maj, client, boite))
+                except Exception as erreur:
+                    # Un message qui échoue ne doit pas bloquer la file.
+                    print(f"Telegram : message {maj['update_id']} ignoré ({type(erreur).__name__})")
             if mises_a_jour:
                 etat = lire_etat()
                 etat["telegram_offset"] = decalage
                 ecrire_etat(etat)
         except (urllib.error.URLError, TimeoutError, RuntimeError) as erreur:
-            print(f"Telegram : erreur ({erreur}), nouvel essai dans {attente} s")
+            # L'URL contient le token : on n'affiche que le type d'erreur.
+            print(f"Telegram : erreur ({type(erreur).__name__}), nouvel essai dans {attente} s")
             time.sleep(attente)
 
 
 # ---------------------------------------------------------------- mail
 
-class ExtracteurTexte(HTMLParser):
-    def __init__(self):
-        super().__init__()
-        self.morceaux = []
-
-    def handle_data(self, data):
-        self.morceaux.append(data)
-
-
-def decoder_entete(valeur):
-    return str(make_header(decode_header(valeur))) if valeur else ""
+def traiter_mail(config, brut, boite, repondre):
+    """Un mail brut : trace, puis dépôt dans inbox/ avec son PDF et accusé."""
+    brouillon, _ = mail.parse_email(brut)
+    msg = email.message_from_bytes(brut)
+    consigner(config, "mail", brouillon.sender_handle, brouillon.text, sujet=msg.get("Subject"))
+    return mail.handle_email(brut, boite, repondre, config["mail"]["adresse"])
 
 
-def decoder_partie(partie):
-    brut = partie.get_payload(decode=True) or b""
-    return brut.decode(partie.get_content_charset() or "utf-8", errors="replace")
-
-
-def texte_du_mail(msg):
-    """Renvoie le texte brut du mail, ou le HTML débarrassé de ses balises à défaut."""
-    html = None
-    for partie in msg.walk():
-        if partie.get_content_maintype() == "multipart" or partie.get_filename():
-            continue
-        if partie.get_content_type() == "text/plain":
-            return decoder_partie(partie).strip()
-        if partie.get_content_type() == "text/html" and html is None:
-            html = decoder_partie(partie)
-    if html is None:
-        return ""
-    extracteur = ExtracteurTexte()
-    extracteur.feed(html)
-    return " ".join(" ".join(extracteur.morceaux).split())
-
-
-def relever_mails(config):
+def relever_mails(config, boite, repondre):
     cfg = config["mail"]
     with imaplib.IMAP4_SSL(cfg["serveur_imap"], cfg["port"]) as imap:
         imap.login(cfg["adresse"], cfg["mot_de_passe"])
         imap.select(cfg["dossier"])
         _, numeros = imap.search(None, "UNSEEN")
         for numero in numeros[0].split():
-            # Lire le corps (RFC822) marque automatiquement le mail comme lu,
-            # il ne sera donc pas récupéré une seconde fois.
-            _, donnees = imap.fetch(numero, "(RFC822)")
-            msg = email.message_from_bytes(donnees[0][1])
-            stocker(
-                config,
-                "mail",
-                decoder_entete(msg.get("From")),
-                texte_du_mail(msg),
-                sujet=decoder_entete(msg.get("Subject")),
-            )
+            # PEEK : le mail reste non lu tant qu'il n'est pas enregistré ;
+            # un plantage en cours de route le laisse dans la file.
+            _, donnees = imap.fetch(numero, "(BODY.PEEK[])")
+            try:
+                annoncer("mail", traiter_mail(config, donnees[0][1], boite, repondre))
+            except Exception as erreur:
+                print(f"Mail : message {numero.decode()} ignoré ({type(erreur).__name__})")
+                continue
+            imap.store(numero, "+FLAGS", "\\Seen")
 
 
-def boucle_mail(config):
+def boucle_mail(config, boite):
+    cfg = config["mail"]
+    reglages = SimpleNamespace(address=cfg["adresse"], password=cfg["mot_de_passe"],
+                               smtp_host=cfg["serveur_smtp"], smtp_port=cfg["port_smtp"])
+    repondre = mail.smtp_reply(reglages) if cfg.get("accuse_reception", True) else None
     intervalle = config["intervalle_secondes"]
     print("Mail : surveillance démarrée")
     while True:
         try:
-            relever_mails(config)
+            relever_mails(config, boite, repondre)
         except (imaplib.IMAP4.error, OSError) as erreur:
             print(f"Mail : erreur ({erreur})")
         time.sleep(intervalle)
+
+
+# ---------------------------------------------------------------- notation
+
+def boucle_notation(config, boite):
+    """Note ce qui arrive dans inbox/ (voir scripts/score_inbox.py)."""
+    from src.triage import pending, process_inbox
+
+    print("Notation : démarrée (qwen2.5:14b via Ollama)")
+    while True:
+        try:
+            if pending(boite):
+                for resultat in process_inbox(boite):
+                    total = (resultat.get("run") or {}).get("total_computed")
+                    print(f"[notation] {resultat['submission_id']} : {resultat['status']}"
+                          + (f", {total:.0f}/100" if total is not None else ""))
+        except Exception as erreur:
+            print(f"Notation : erreur ({type(erreur).__name__}: {erreur})")
+        time.sleep(config["intervalle_secondes"])
 
 
 # ---------------------------------------------------------------- lancement
 
 def main():
     if not FICHIER_CONFIG.exists():
-        print("config.json introuvable.")
+        print("config.json introuvable : copie config.example.json en config.json.")
         return
     config = json.loads(FICHIER_CONFIG.read_text(encoding="utf-8"))
 
-    # Les secrets viennent du .env, jamais de config.json (qui est public).
+    # Les secrets viennent du .env, jamais de config.json.
     charger_env()
     if config["telegram"]["actif"]:
-        config["telegram"]["token"] = secret("TELEGRAM_TOKEN")
+        config["telegram"]["token"] = secret("TELEGRAM_TOKEN", "TELEGRAM_BOT_TOKEN")
     if config["mail"]["actif"]:
-        config["mail"]["adresse"] = secret("MAIL_ADRESSE")
-        config["mail"]["mot_de_passe"] = secret("MAIL_MOT_DE_PASSE")
+        config["mail"]["adresse"] = secret("MAIL_ADRESSE", "EMAIL_ADDRESS")
+        config["mail"]["mot_de_passe"] = secret("MAIL_MOT_DE_PASSE", "EMAIL_PASSWORD")
 
+    boite = Inbox()
     fils = []
     if config["telegram"]["actif"]:
-        fils.append(threading.Thread(target=boucle_telegram, args=(config,), daemon=True))
+        fils.append(threading.Thread(target=boucle_telegram, args=(config, boite), daemon=True))
     if config["mail"]["actif"]:
-        fils.append(threading.Thread(target=boucle_mail, args=(config,), daemon=True))
+        fils.append(threading.Thread(target=boucle_mail, args=(config, boite), daemon=True))
     if not fils:
         print("Aucune source active dans config.json.")
         return
+    if config.get("noter"):
+        fils.append(threading.Thread(target=boucle_notation, args=(config, boite), daemon=True))
 
+    print(f"Pitchs déposés dans {boite.root}")
     for fil in fils:
         fil.start()
     try:
