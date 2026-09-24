@@ -22,3 +22,8 @@ results/intake_*.jsonl
 results/intake_shortlist.json
 # Soumissions reçues par Telegram et e-mail : données personnelles (§13)
 inbox/
+
+# Script d'écoute de Gabin : secrets et messages reçus, jamais committés
+Pull_script _for_Input/config.json
+Pull_script _for_Input/etat.json
+Pull_script _for_Input/messages.jsonl

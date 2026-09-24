@@ -5,11 +5,15 @@ dans le fichier de sortie), puis passé à la fonction `traiter_message`.
 
 Uniquement la bibliothèque standard de Python : rien à installer.
 Lancer :  python input_listener.py
+
+Les réglages publics sont dans config.json, les secrets (token, adresse,
+mot de passe) dans le fichier .env, qui n'est pas envoyé sur GitHub.
 """
 
 import email
 import imaplib
 import json
+import os
 import threading
 import time
 import urllib.error
@@ -22,9 +26,32 @@ from pathlib import Path
 
 DOSSIER = Path(__file__).resolve().parent
 FICHIER_CONFIG = DOSSIER / "config.json"
+FICHIER_ENV = DOSSIER / ".env"
 FICHIER_ETAT = DOSSIER / "etat.json"  # mémorise le dernier message Telegram lu
 
 verrou_ecriture = threading.Lock()
+
+
+# ---------------------------------------------------------------- secrets
+
+def charger_env():
+    """Lit les lignes NOM=valeur du .env. Une vraie variable d'environnement
+    déjà définie garde la priorité."""
+    if not FICHIER_ENV.exists():
+        return
+    for ligne in FICHIER_ENV.read_text(encoding="utf-8").splitlines():
+        ligne = ligne.strip()
+        if not ligne or ligne.startswith("#") or "=" not in ligne:
+            continue
+        nom, valeur = ligne.split("=", 1)
+        os.environ.setdefault(nom.strip(), valeur.strip().strip('"').strip("'"))
+
+
+def secret(nom):
+    valeur = os.environ.get(nom)
+    if not valeur:
+        raise SystemExit(f"{nom} manquant : remplis-le dans le fichier .env (voir .env.example).")
+    return valeur
 
 
 # ---------------------------------------------------------------- stockage
@@ -176,9 +203,17 @@ def boucle_mail(config):
 
 def main():
     if not FICHIER_CONFIG.exists():
-        print("config.json introuvable : copie config.example.json en config.json et remplis-le.")
+        print("config.json introuvable.")
         return
     config = json.loads(FICHIER_CONFIG.read_text(encoding="utf-8"))
+
+    # Les secrets viennent du .env, jamais de config.json (qui est public).
+    charger_env()
+    if config["telegram"]["actif"]:
+        config["telegram"]["token"] = secret("TELEGRAM_TOKEN")
+    if config["mail"]["actif"]:
+        config["mail"]["adresse"] = secret("MAIL_ADRESSE")
+        config["mail"]["mot_de_passe"] = secret("MAIL_MOT_DE_PASSE")
 
     fils = []
     if config["telegram"]["actif"]:

@@ -4,15 +4,15 @@
 
     "telegram": {
         "actif": true,
-        "token": "COLLE_ICI_LE_TOKEN_DONNE_PAR_BOTFATHER"
+        "token": "123456789:remplacer-par-le-jeton-donne-par-BotFather"
     },
 
     "mail": {
         "actif": true,
         "serveur_imap": "imap.gmail.com",
         "port": 993,
-        "adresse": "Jak.FrpMLC@gmail.com",
-        "mot_de_passe": "gfal xvfc azpz cprj",
+        "adresse": "boite-dediee@example.com",
+        "mot_de_passe": "remplacer-par-un-mot-de-passe-d-application",
         "dossier": "INBOX"
     }
 }
