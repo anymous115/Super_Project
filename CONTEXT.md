@@ -1,5 +1,7 @@
 # Contexte du projet
 
+> **Évolution V1 — 24 septembre 2026 :** l’équipe a supprimé la validation humaine obligatoire. Les 50 notes directes IA alimentent Unicornext. Voir [la décision V1](docs/UNICORNEXT_V1.md). Les mentions de validation ci-dessous décrivent le protocole antérieur.
+
 Ce dépôt contient le capstone du cours « Prompt & Context Engineering ». Il part du sujet **P8 — Quality-vs-cost benchmark**, dont le périmètre a été élargi **avec l'accord du professeur** afin de privilégier la construction d'un produit fonctionnel plutôt que la tâche de démonstration du cours.
 
 Le **23 septembre 2026**, toujours avec l'accord du professeur, la comparaison de modèles a été retirée du projet. Le livrable est désormais **le produit** : un moteur de scoring sur un seul modèle, alimenté par de vrais canaux d'entrée et présenté dans une interface. Le détail de cette décision est plus bas, dans l'historique.

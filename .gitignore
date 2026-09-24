@@ -13,5 +13,10 @@ venv/
 # Notebook
 .ipynb_checkpoints/
 
+# Soumissions et réponses manuelles locales, potentiellement confidentielles
+results/intake_*.jsonl
+
 # macOS
 .DS_Store
+
+results/intake_shortlist.json

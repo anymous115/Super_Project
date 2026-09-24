@@ -1,5 +1,7 @@
 # Protocole opérationnel — VC Pitch Intake & Triage
 
+> **Évolution V1 — 24 septembre 2026 :** l’équipe a supprimé la validation humaine obligatoire. Les 50 notes directes IA alimentent Unicornext. Voir [la décision V1](UNICORNEXT_V1.md). Les mentions de validation ci-dessous décrivent le protocole antérieur.
+
 ![Roadmap visuelle du projet](PROJECT_ROADMAP.png)
 
 ## 1. Vision du produit
