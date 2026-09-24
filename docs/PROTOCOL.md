@@ -96,6 +96,8 @@ Chaque adaptateur produit la même structure, quel que soit le canal :
 
 Ajouter un canal revient à écrire un adaptateur qui produit cet objet. Rien en aval ne change.
 
+En aval, `src/triage.py` prend chaque soumission de `inbox/`, en extrait le texte (`src/extract.py`), passe le filtre anti-injection, la note, et écrit un `score.json` dont le `status` range la soumission dans une file : `scored` (classée), `review` (signalée par le filtre, revue humaine), `unreadable` ou `error`. C'est ce que lit l'interface.
+
 Deux champs s'ajoutent au schéma initial. `source_ref` est l'identifiant du message côté canal : un redémarrage ne réingère jamais deux fois le même message. `warnings` garde ce qui s'est mal passé à l'ingestion — PDF illisible, trop lourd, pièce jointe non PDF — pour que le VC sache pourquoi un dossier arrive incomplet.
 
 L'objet est défini et validé dans `src/ingest/normalize.py`. Chaque soumission est rangée dans `inbox/SUB-0001/`, avec son `submission.json` et ses PDF. **`inbox/` n'est jamais committé** : une soumission réelle contient au minimum un identifiant personnel.

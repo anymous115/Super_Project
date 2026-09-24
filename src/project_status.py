@@ -190,8 +190,9 @@ def collect_project_status(root: Optional[Path] = None) -> ProjectSnapshot:
     ingestion_files = (
         "src/ingest/normalize.py",
         "src/ingest/telegram.py",
-        "src/ingest/email.py",
+        "src/ingest/mail.py",
         "src/extract.py",
+        "src/triage.py",
     )
     ingestion_count = _count_existing(root, ingestion_files)
     product_app = (root / "app.py").exists()
@@ -234,7 +235,7 @@ def collect_project_status(root: Optional[Path] = None) -> ProjectSnapshot:
             TaskProgress("Contrôles consignés", float(checks_written), "docs/ENGINE_CHECKS.md présent" if checks_written else "Aucun compte rendu", "Consigner les contrôles du §11 dans docs/ENGINE_CHECKS.md", 2),
         )),
         PhaseProgress(5, "Produit", (
-            TaskProgress("Ingestion et extraction", _ratio(ingestion_count, len(ingestion_files)), f"{ingestion_count}/{len(ingestion_files)} composants", "Construire Telegram, email et extraction PDF", 3),
+            TaskProgress("Ingestion et extraction", _ratio(ingestion_count, len(ingestion_files)), f"{ingestion_count}/{len(ingestion_files)} composants", "Construire Telegram, email, extraction et notation de la boîte de réception", 3),
             TaskProgress("Interface VC Streamlit", float(product_app), "app.py présent" if product_app else "app.py absent", "Construire l'interface produit dans app.py", 3),
         )),
         PhaseProgress(6, "Livraison", (
