@@ -70,3 +70,78 @@ def test_cellules_python_sont_syntaxiquement_valides():
     for index, cell in enumerate(code_cells):
         source = "".join(cell.get("source", [])) if isinstance(cell.get("source"), list) else cell.get("source", "")
         compile(source, f"notebook-cell-{index}", "exec")
+
+
+def test_revue_qualitative_executable_seule(monkeypatch, tmp_path, capsys):
+    from src import config
+
+    source = next(
+        "".join(cell["source"]) for cell in load_notebook()["cells"]
+        if cell["cell_type"] == "code" and "review_rows = []" in "".join(cell["source"])
+    )
+    monkeypatch.setattr(config, "RESULTS", tmp_path)
+    namespace = {}
+    exec(source, namespace)
+    assert namespace["review_df"].empty
+    assert "en attente des sorties V2" in capsys.readouterr().out
+
+    record = {"pitch_id": "P001", "model": config.MODELS["local"].name,
+              "prompt_version": "V2", "total_computed": 0,
+              "parsed_output": {"evidence": ["preuve"]}}
+    records = [dict(record, total_computed=90), record,
+               dict(record, prompt_version="V1", total_computed=80),
+               dict(record, model="autre-modele", total_computed=70),
+               dict(record, pitch_id="inconnu"),
+               dict(record, pitch_id="P002"),
+               dict(record, pitch_id="P002", parsed_output=None)]
+    (tmp_path / "raw_runs.jsonl").write_text(
+        "\n".join(json.dumps(row) for row in records), encoding="utf-8"
+    )
+    namespace = {}
+    exec(source, namespace)
+    review = namespace["review_df"]
+    assert review["pitch_id"].tolist() == ["P001"]
+    assert review.iloc[0]["score"] == 0
+    assert review.iloc[0]["preuves"] == 1
+    assert review.iloc[0]["écart"] == abs(review.iloc[0]["cible"])
+
+
+def test_demo_inference_gere_echec_et_succes(monkeypatch, capsys):
+    import importlib
+    from src.config import MODELS, WEIGHTS
+
+    scoring = importlib.import_module("src.score_pitch")
+    source = next(
+        "".join(cell["source"]) for cell in load_notebook()["cells"]
+        if cell["cell_type"] == "code" and "record = score_pitch(pitch," in "".join(cell["source"])
+    )
+
+    def unavailable(*args):
+        raise ConnectionError("serveur inaccessible")
+
+    monkeypatch.setitem(scoring.BACKENDS, "ollama", unavailable)
+    namespace = {}
+    exec(source, namespace)
+    assert namespace["record"].parsed_output is None
+    assert "ConnectionError: serveur inaccessible" in capsys.readouterr().out
+
+    monkeypatch.setitem(scoring.BACKENDS, "ollama", lambda *args: scoring.ModelReply(
+        text="réponse invalide", input_tokens=10, output_tokens=2,
+        model_version=MODELS["local"].name,
+    ))
+    exec(source, {})
+    assert "Réponse non exploitable (extrait) : réponse invalide" in capsys.readouterr().out
+
+    output = {
+        "pitch_id": "P005", "scores": {name: 3 for name in WEIGHTS},
+        "total_score": 60, "strengths": ["Équipe"], "risks": ["Marché"],
+        "missing_information": [], "recommendation": "review", "evidence": ["preuve"],
+    }
+    monkeypatch.setitem(scoring.BACKENDS, "ollama", lambda *args: scoring.ModelReply(
+        text=json.dumps(output), input_tokens=10, output_tokens=30,
+        model_version=MODELS["local"].name,
+    ))
+    namespace = {}
+    exec(source, namespace)
+    assert namespace["record"].total_computed == 60
+    assert "Recommandation : review" in capsys.readouterr().out
