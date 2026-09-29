@@ -8,12 +8,12 @@ le long polling (`getUpdates`) marche depuis un portable, ce qui suffit pour la
 démonstration. L'objet `update` est identique dans les deux modes : un webhook
 n'aurait qu'à appeler `handle_update()` avec le corps de la requête.
 
-Le jeton du bot est lu dans `TELEGRAM_BOT_TOKEN` et n'apparaît jamais dans un
-message d'erreur : il fait partie de l'URL de chaque appel.
+La boucle de relève est dans `Input_Telegram_Mail/input_listener.py`. Le jeton
+du bot n'apparaît jamais dans un message d'erreur : il fait partie de l'URL de
+chaque appel.
 """
 from __future__ import annotations
 
-import time
 from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional
 
@@ -34,7 +34,6 @@ from .normalize import (
 
 API = "https://api.telegram.org"
 POLL_TIMEOUT = 30    # secondes : Telegram garde la requête ouverte jusqu'à un message
-RETRY_DELAY = 5      # secondes d'attente après un relevé en échec
 
 WELCOME = "Hello! This bot collects startup pitches for the fund. " + INSTRUCTIONS
 
@@ -166,39 +165,3 @@ def handle_update(update: Dict[str, Any], client: Any, inbox: Inbox) -> Optional
         print(f"Telegram : accusé de {submission.submission_id} non envoyé ({exc}).")
     return submission
 
-
-# --- Boucle de réception -----------------------------------------------------
-
-
-def run(inbox: Optional[Inbox] = None, client: Optional[TelegramClient] = None, once: bool = False) -> None:
-    """Écoute le bot et ingère chaque message. `once` : un seul relevé, puis sortie.
-
-    L'offset confirme à Telegram les updates déjà traitées. Au redémarrage,
-    celles qui n'étaient pas confirmées reviennent, et `source_ref` évite de
-    les enregistrer deux fois.
-    """
-    inbox = inbox or Inbox()
-    client = client or TelegramClient()
-    offset: Optional[int] = None
-    print("Telegram : en écoute. Ctrl+C pour arrêter.")
-    while True:
-        try:
-            updates = client.get_updates(offset)
-        except TelegramError as exc:
-            print(f"Telegram : relevé impossible ({exc}).")
-            if once:
-                return
-            time.sleep(RETRY_DELAY)
-            continue
-        for update in updates:
-            offset = update["update_id"] + 1
-            try:
-                submission = handle_update(update, client, inbox)
-            except Exception as exc:
-                # Un message qui échoue ne doit pas bloquer la file.
-                print(f"Telegram : update {update['update_id']} ignorée ({type(exc).__name__}: {exc}).")
-                continue
-            if submission:
-                print(f"Telegram : {submission.submission_id} reçu de {submission.sender_handle}.")
-        if once:
-            return
