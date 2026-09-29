@@ -5,16 +5,18 @@ import json
 from dataclasses import asdict, dataclass, field
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Sequence
+from typing import Any, Dict, List, Optional, Sequence, Tuple
 
 from pydantic import ValidationError
 
 from .config import DATA, MODELS, RESULTS
 from .guard import scan
+from .ingest.normalize import INBOX, Submission
 from .metrics import rank_pitches, select
 from .prompts import fingerprint
 from .schemas import PitchScore
 from .score_pitch import RAW_RUNS
+from .triage import SCORE_FILE
 from .v1_assessments import V1_ASSESSMENTS, load_v1_assessments
 
 SUBMISSIONS = RESULTS / "intake_submissions.jsonl"
@@ -40,6 +42,42 @@ def append_jsonl(path: Path, row: Dict[str, Any]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     with path.open("a", encoding="utf-8") as handle:
         handle.write(json.dumps(row, ensure_ascii=False) + "\n")
+
+
+def load_inbox(inbox_root: Path) -> Tuple[List[Dict[str, Any]], List[Dict[str, Any]]]:
+    """Les pitchs reçus par Telegram et e-mail, au format du corpus.
+
+    Renvoie (sources, appels de notation). Chaque `inbox/SUB-0001/` devient une
+    source ; son `score.json`, écrit par `src/triage.py`, fournit l'appel. Une
+    soumission pas encore notée, ou illisible, reste visible : elle attend dans
+    la file au lieu de disparaître. L'expéditeur n'est jamais repris : c'est un
+    identifiant personnel, et l'interface n'en a pas besoin.
+    """
+    sources: List[Dict[str, Any]] = []
+    runs: List[Dict[str, Any]] = []
+    for path in sorted(Path(inbox_root).glob("SUB-*/submission.json")):
+        try:
+            submission = Submission.model_validate_json(path.read_text(encoding="utf-8"))
+        except (OSError, ValueError):
+            continue    # une soumission abîmée ne doit pas bloquer les autres
+        payload: Dict[str, Any] = {}
+        try:
+            payload = json.loads((path.parent / SCORE_FILE).read_text(encoding="utf-8"))
+        except (OSError, ValueError):
+            pass
+        text = ((payload.get("extraction") or {}).get("text") or submission.text).strip()
+        if not text:
+            names = ", ".join(Path(a.path).name for a in submission.attachments)
+            text = f"(Aucun texte lisible. Pièces jointes : {names or 'aucune'}.)"
+        sources.append({
+            "pitch_id": submission.submission_id,
+            "channel": submission.channel,
+            "pitch_text": text,
+            "submitted_at": submission.received_at,
+        })
+        if isinstance(payload.get("run"), dict):
+            runs.append(payload["run"])
+    return sources, runs
 
 
 @dataclass(frozen=True)
@@ -74,11 +112,17 @@ def load_dossiers(
     submissions_path: Path = SUBMISSIONS,
     intake_runs_path: Path = INTAKE_RUNS,
     assessments_path: Path = V1_ASSESSMENTS,
+    inbox_root: Optional[Path] = None,
 ) -> List[Dossier]:
-    """Priorité aux notes directes V1 du texte courant, puis aux appels locaux V2."""
-    sources = read_jsonl(corpus_path) + read_jsonl(submissions_path)
+    """Priorité aux notes directes V1 du texte courant, puis aux appels locaux V2.
+
+    Les pitchs de `inbox/` (Telegram, e-mail) rejoignent le corpus et le
+    formulaire manuel ; `inbox_root` sert aux tests.
+    """
+    inbox_sources, inbox_runs = load_inbox(INBOX if inbox_root is None else inbox_root)
+    sources = read_jsonl(corpus_path) + read_jsonl(submissions_path) + inbox_sources
     latest: Dict[str, Dict[str, Any]] = {}
-    for run in read_jsonl(corpus_runs_path) + read_jsonl(intake_runs_path):
+    for run in read_jsonl(corpus_runs_path) + read_jsonl(intake_runs_path) + inbox_runs:
         if (run.get("model") == MODELS["local"].name
                 and run.get("prompt_version") == "V2"
                 and run.get("prompt_fingerprint") in (None, fingerprint("V2"))):
