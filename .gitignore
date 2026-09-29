@@ -20,6 +20,7 @@ results/intake_*.jsonl
 .DS_Store
 
 results/intake_shortlist.json
+results/intake_followups.json
 # Soumissions reçues par Telegram et e-mail : données personnelles (§13)
 inbox/
 

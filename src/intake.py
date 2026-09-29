@@ -5,16 +5,18 @@ import json
 from dataclasses import asdict, dataclass, field
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Sequence
+from typing import Any, Dict, List, Optional, Sequence, Tuple
 
 from pydantic import ValidationError
 
 from .config import DATA, MODELS, RESULTS
 from .guard import scan
+from .ingest.normalize import INBOX, Submission
 from .metrics import rank_pitches, select
 from .prompts import fingerprint
 from .schemas import PitchScore
 from .score_pitch import RAW_RUNS
+from .triage import SCORE_FILE
 from .v1_assessments import V1_ASSESSMENTS, load_v1_assessments
 
 SUBMISSIONS = RESULTS / "intake_submissions.jsonl"
@@ -42,6 +44,46 @@ def append_jsonl(path: Path, row: Dict[str, Any]) -> None:
         handle.write(json.dumps(row, ensure_ascii=False) + "\n")
 
 
+def load_inbox(inbox_root: Path) -> Tuple[List[Dict[str, Any]], List[Dict[str, Any]]]:
+    """Les pitchs reçus par Telegram et e-mail, au format du corpus.
+
+    Renvoie (sources, appels de notation). Chaque `inbox/SUB-0001/` devient une
+    source ; son `score.json`, écrit par `src/triage.py`, fournit l'appel. Une
+    soumission pas encore notée, ou illisible, reste visible : elle attend dans
+    la file au lieu de disparaître.
+
+    L'expéditeur est repris (`sender_handle`), mais l'interface ne l'utilise que pour proposer de
+    donner suite (src/followup.py) : c'est un identifiant personnel, il n'apparaît ni dans les
+    cartes ni dans les tableaux.
+    """
+    sources: List[Dict[str, Any]] = []
+    runs: List[Dict[str, Any]] = []
+    for path in sorted(Path(inbox_root).glob("SUB-*/submission.json")):
+        try:
+            submission = Submission.model_validate_json(path.read_text(encoding="utf-8"))
+        except (OSError, ValueError):
+            continue    # une soumission abîmée ne doit pas bloquer les autres
+        payload: Dict[str, Any] = {}
+        try:
+            payload = json.loads((path.parent / SCORE_FILE).read_text(encoding="utf-8"))
+        except (OSError, ValueError):
+            pass
+        text = ((payload.get("extraction") or {}).get("text") or submission.text).strip()
+        if not text:
+            names = ", ".join(Path(a.path).name for a in submission.attachments)
+            text = f"(Aucun texte lisible. Pièces jointes : {names or 'aucune'}.)"
+        sources.append({
+            "pitch_id": submission.submission_id,
+            "channel": submission.channel,
+            "sender_handle": submission.sender_handle,
+            "pitch_text": text,
+            "submitted_at": submission.received_at,
+        })
+        if isinstance(payload.get("run"), dict):
+            runs.append(payload["run"])
+    return sources, runs
+
+
 @dataclass(frozen=True)
 class Dossier:
     pitch_id: str
@@ -63,6 +105,9 @@ class Dossier:
     error: Optional[str]
     assessment_source: str = ""
     criterion_reasons: Dict[str, str] = field(default_factory=dict)
+    # Comment joindre le fondateur : seulement pour un pitch reçu par Telegram ou e-mail.
+    contact_channel: str = ""
+    contact_handle: str = ""
 
     def to_dict(self) -> Dict[str, Any]:
         return asdict(self)
@@ -74,11 +119,17 @@ def load_dossiers(
     submissions_path: Path = SUBMISSIONS,
     intake_runs_path: Path = INTAKE_RUNS,
     assessments_path: Path = V1_ASSESSMENTS,
+    inbox_root: Optional[Path] = None,
 ) -> List[Dossier]:
-    """Priorité aux notes directes V1 du texte courant, puis aux appels locaux V2."""
-    sources = read_jsonl(corpus_path) + read_jsonl(submissions_path)
+    """Priorité aux notes directes V1 du texte courant, puis aux appels locaux V2.
+
+    Les pitchs de `inbox/` (Telegram, e-mail) rejoignent le corpus et le
+    formulaire manuel ; `inbox_root` sert aux tests.
+    """
+    inbox_sources, inbox_runs = load_inbox(INBOX if inbox_root is None else inbox_root)
+    sources = read_jsonl(corpus_path) + read_jsonl(submissions_path) + inbox_sources
     latest: Dict[str, Dict[str, Any]] = {}
-    for run in read_jsonl(corpus_runs_path) + read_jsonl(intake_runs_path):
+    for run in read_jsonl(corpus_runs_path) + read_jsonl(intake_runs_path) + inbox_runs:
         if (run.get("model") == MODELS["local"].name
                 and run.get("prompt_version") == "V2"
                 and run.get("prompt_fingerprint") in (None, fingerprint("V2"))):
@@ -124,6 +175,8 @@ def load_dossiers(
             error=None if assessment else run.get("error") if run else None,
             assessment_source=assessment["assessor"] + " · " + assessment["assessed_at"] if assessment else (MODELS["local"].name + " · V2" if parsed else ""),
             criterion_reasons=assessment["criterion_reasons"] if assessment else {},
+            contact_channel=source["channel"] if source.get("channel") in ("telegram", "email") else "",
+            contact_handle=source.get("sender_handle") or "",
         ))
     return dossiers
 
@@ -182,6 +235,35 @@ def save_shortlist(ids: Sequence[str], path: Path = SHORTLIST) -> None:
         with tempfile.NamedTemporaryFile(mode="w", encoding="utf-8", dir=path.parent, delete=False) as handle:
             temporary = Path(handle.name)
             json.dump(list(dict.fromkeys(ids)), handle, ensure_ascii=False)
+        os.replace(temporary, path)
+    finally:
+        if temporary is not None:
+            temporary.unlink(missing_ok=True)
+
+
+FOLLOWUPS = RESULTS / "intake_followups.json"
+
+
+def load_followups(path: Path = FOLLOWUPS) -> Dict[str, str]:
+    """Les dossiers auxquels le VC a donné suite : identifiant → date (UTC, ISO 8601)."""
+    if not path.exists():
+        return {}
+    rows = json.loads(path.read_text(encoding="utf-8"))
+    if not isinstance(rows, dict) or not all(isinstance(k, str) and isinstance(v, str) for k, v in rows.items()):
+        raise ValueError("Invalid follow-up format")
+    return rows
+
+
+def save_followups(rows: Dict[str, str], path: Path = FOLLOWUPS) -> None:
+    """Remplace le fichier d'un bloc : une écriture interrompue ne le tronque pas."""
+    import os
+    import tempfile
+    path.parent.mkdir(parents=True, exist_ok=True)
+    temporary = None
+    try:
+        with tempfile.NamedTemporaryFile(mode="w", encoding="utf-8", dir=path.parent, delete=False) as handle:
+            temporary = Path(handle.name)
+            json.dump(dict(rows), handle, ensure_ascii=False)
         os.replace(temporary, path)
     finally:
         if temporary is not None:
