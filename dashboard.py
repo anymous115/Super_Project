@@ -77,6 +77,11 @@ def render_overview(snapshot: ProjectSnapshot) -> None:
     cols[2].metric("Jalons restants", incomplete)
     cols[3].metric("Pitchs scorés", f"{snapshot.metrics['scored_pitches']} / 50")
     st.progress(snapshot.progress)
+    st.subheader("Benchmark des prompts")
+    benchmark_columns = st.columns(3)
+    for col, row in zip(benchmark_columns, snapshot.metrics["benchmark"]):
+        col.metric(row["prompt"], f"{row['pitchs']} / 50 pitchs")
+    st.caption("Couverture des résultats valides du modèle local, distincte des évaluations directes de l’application.")
 
     if snapshot.metrics["v1_mode"]:
         st.info("V1 : validation humaine obligatoire supprimée. Les notes directes IA alimentent l’application ; les appels du benchmark restent mesurés séparément.")
@@ -112,10 +117,13 @@ def render_data(snapshot: ProjectSnapshot) -> None:
 
 def render_pipeline(snapshot: ProjectSnapshot) -> None:
     cols = st.columns(4)
-    cols[0].metric("Tests écrits", snapshot.metrics["tests"])
+    cols[0].metric("Fichiers de tests", snapshot.metrics["tests"])
     cols[1].metric("Appels enregistrés", snapshot.metrics["engine_runs"])
     cols[2].metric("JSON valides", snapshot.metrics["valid_runs"])
     cols[3].metric("Injections contenues", snapshot.metrics["traps_contained"])
+    st.subheader("Qualité par version de prompt")
+    st.dataframe(snapshot.metrics["benchmark"], width="stretch", hide_index=True)
+    st.caption("RMSE en points sur 100 : plus elle est faible, plus les notes sont proches de la référence. Claude : cibles de calibration ; Codex : évaluations directes. Ces références sont des jugements IA. Les répétitions sont moyennées par pitch.")
     st.subheader("Filtre anti-injection · corpus courant")
     guard_cols = st.columns(2)
     guard_cols[0].metric(
@@ -132,6 +140,9 @@ def render_pipeline(snapshot: ProjectSnapshot) -> None:
 
 def render_deliverables(snapshot: ProjectSnapshot) -> None:
     st.subheader("Phase 5 · Produit")
+    if snapshot.metrics["listener_available"]:
+        st.success("Écouteur unifié disponible : Telegram + e-mail → PDF et dédoublonnage → inbox/ → notation.")
+        st.caption('La notation intégrée s’active avec "noter": true dans config.json. La présence du code ne signifie pas que le service est en cours d’exécution.')
     st.metric(
         "PDF extraits fidèlement",
         f"{snapshot.metrics['pdf_fidelity_passed']} / {snapshot.metrics['pdf_checked']}",

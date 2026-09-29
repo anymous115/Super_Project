@@ -17,6 +17,7 @@ from pathlib import Path
 from typing import Any, Dict, Iterable, List, Optional, Sequence
 
 from src.extract import ExtractionError, extract_pdf
+from src.config import MODELS, PROMPT_VERSIONS, WEIGHTS
 from src.guard import scan
 from src.v1_assessments import load_v1_assessments
 
@@ -225,12 +226,40 @@ def collect_project_status(root: Optional[Path] = None) -> ProjectSnapshot:
         contained.update(pid for pid in v1_assessments if pid in traps and guard_verdicts[pid].flagged)
     checks_written = (root / "docs/ENGINE_CHECKS.md").exists()
 
+    calibration = {row.get("pitch_id"): row.get("target_score")
+                   for row in _jsonl(root / "data/calibration.jsonl")}
+    codex_scores = {pid: sum(row["parsed_output"]["scores"][c] / 5 * w
+                              for c, w in WEIGHTS.items())
+                    for pid, row in v1_assessments.items()}
+    corpus_ids = {row.get("pitch_id") for row in pitches}
+    benchmark = []
+    for version in PROMPT_VERSIONS:
+        by_pitch = {}
+        for run in runs:
+            if (run.get("model") == MODELS["local"].name
+                    and run.get("prompt_version") == version
+                    and run.get("pitch_id") in corpus_ids
+                    and run.get("valid_json")
+                    and isinstance(run.get("total_computed"), (int, float))):
+                by_pitch.setdefault(run["pitch_id"], []).append(run["total_computed"])
+        scores = {pid: sum(values) / len(values) for pid, values in by_pitch.items()}
+        row = {"prompt": version, "pitchs": len(scores)}
+        for label, reference in (("Claude", calibration), ("Codex", codex_scores)):
+            errors = [score - reference[pid] for pid, score in scores.items()
+                      if isinstance(reference.get(pid), (int, float))]
+            row[f"RMSE vs {label}"] = round((sum(e * e for e in errors) / len(errors)) ** 0.5, 2) if errors else None
+            row[f"Comparaisons {label}"] = len(errors)
+        benchmark.append(row)
+    benchmark_scored = sum(row["pitchs"] for row in benchmark)
+
     ingestion_files = (
         "src/ingest/normalize.py",
         "src/ingest/telegram.py",
         "src/ingest/mail.py",
         "src/extract.py",
         "src/triage.py",
+        "Input_Telegram_Mail/input_listener.py",
+        "Input_Telegram_Mail/config.example.json",
     )
     ingestion_count = _count_existing(root, ingestion_files)
     product_app = (root / "app.py").exists()
@@ -269,6 +298,7 @@ def collect_project_status(root: Optional[Path] = None) -> ProjectSnapshot:
             TaskProgress("Notes V1 disponibles", float(bool(v1_assessments)), "Évaluations directes, hors benchmark", "Générer les notes V1", 1) if v1_mode else TaskProgress("Premier appel enregistré", float(bool(runs)), f"{len(runs)} appel(s) enregistré(s)", "Faire un smoke test local sur 3 pitchs", 1),
         )),
         PhaseProgress(4, "Moteur", (
+            TaskProgress("Benchmark V0 / V1 / V2", _ratio(benchmark_scored, 150), f"{benchmark_scored}/150 couples pitch-prompt valides", "Compléter le benchmark des 50 pitchs pour les trois prompts", 2),
             TaskProgress("Corpus noté pour la V1" if v1_mode else "Corpus scoré en V2", _ratio(len(scored), 50), f"{len(scored)}/50 pitchs scorés", "Compléter les évaluations directes V1" if v1_mode else "python3 -m src.benchmark --models local --prompts V2", 1),
             TaskProgress("Injections contenues", _ratio(len(contained), max(len(traps), 1)), f"{len(contained)}/{len(traps)} pitchs piégés contenus", "Scorer les pitchs piégés en V2 et vérifier la sélection", 2),
             TaskProgress("Contrôles consignés", float(checks_written), "docs/ENGINE_CHECKS.md présent" if checks_written else "Aucun compte rendu", "Consigner les contrôles du §11 dans docs/ENGINE_CHECKS.md", 2),
@@ -304,6 +334,9 @@ def collect_project_status(root: Optional[Path] = None) -> ProjectSnapshot:
         "pdf_checked": pdf_checked,
         "pdf_fidelity_passed": pdf_fidelity_passed,
         "tests": test_count,
+        "benchmark": benchmark,
+        "benchmark_scored": benchmark_scored,
+        "listener_available": (root / "Input_Telegram_Mail/input_listener.py").exists(),
     }
     return ProjectSnapshot(
         generated_at=datetime.now(timezone.utc).isoformat(timespec="seconds"),
