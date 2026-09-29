@@ -1,5 +1,7 @@
 import json
 
+import pytest
+
 from src.config import MODELS
 from src.intake import load_dossiers, queue
 
@@ -129,8 +131,32 @@ def test_soumission_abimee_ne_bloque_pas_les_autres(tmp_path):
     assert [d.pitch_id for d in charger(tmp_path, inbox)] == ["SUB-0001"]
 
 
-def test_l_expediteur_n_est_pas_expose(tmp_path):
+def test_l_expediteur_n_apparait_que_dans_son_champ_de_contact(tmp_path):
+    """Il sert à donner suite (src/followup.py), mais ne doit fuiter ni dans le nom, ni dans le texte."""
     inbox = Inbox(tmp_path / "inbox")
     deposer(inbox, "A pitch about logistics.", note=True, sender="@nom.secret")
 
-    assert "nom.secret" not in json.dumps([d.to_dict() for d in charger(tmp_path, inbox)])
+    dossier = charger(tmp_path, inbox)[0]
+    assert dossier.contact_handle == "@nom.secret" and dossier.contact_channel == "telegram"
+    ailleurs = {k: v for k, v in dossier.to_dict().items() if k != "contact_handle"}
+    assert "nom.secret" not in json.dumps(ailleurs)
+
+
+def test_un_pitch_du_corpus_n_a_aucun_contact(tmp_path):
+    corpus = tmp_path / "data/pitches.jsonl"
+    write_jsonl(corpus, [{"pitch_id": "P001", "company_name": "Fictive", "sector": "SaaS", "pitch_text": "A fictional pitch."}])
+
+    dossier = load_dossiers(corpus, tmp_path / "r", tmp_path / "s", tmp_path / "sr", inbox_root=tmp_path / "vide")[0]
+    assert dossier.contact_channel == "" and dossier.contact_handle == ""
+
+
+def test_suivi_des_contacts_aller_retour_et_contenu_invalide(tmp_path):
+    from src.intake import load_followups, save_followups
+
+    path = tmp_path / "followups.json"
+    assert load_followups(path) == {}
+    save_followups({"SUB-0001": "2026-09-29T09:00:00+00:00"}, path)
+    assert load_followups(path) == {"SUB-0001": "2026-09-29T09:00:00+00:00"}
+    path.write_text("[]")
+    with pytest.raises(ValueError):
+        load_followups(path)

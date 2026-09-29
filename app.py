@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import base64
 from collections import Counter
+from datetime import datetime, timezone
 from pathlib import Path
 import uuid
 
@@ -11,8 +12,9 @@ import streamlit.components.v1 as components
 
 from src import ui
 from src.extract import extract_submission
-from src.intake import (INTAKE_RUNS, SUBMISSIONS, append_jsonl, load_dossiers,
-                        load_shortlist, save_shortlist, new_submission, queue)
+from src.followup import follow_up
+from src.intake import (INTAKE_RUNS, SUBMISSIONS, append_jsonl, load_dossiers, load_followups,
+                        load_shortlist, save_followups, save_shortlist, new_submission, queue)
 from src.score_pitch import append_run, score_pitch
 from src.ui_copy import COPY
 from src.startup_ideas import startup_idea
@@ -79,6 +81,22 @@ def toggle(pid):
         st.session_state["save_error"] = tr("Impossible de sauvegarder la shortlist. Réessaie.", "Could not save the shortlist. Please retry.")
 
 
+def toggle_contacted(pid):
+    """Note (ou retire) le fait d'avoir donné suite à un dossier."""
+    try:
+        rows = load_followups()
+        if pid in rows:
+            del rows[pid]
+            notice = tr("Suivi retiré", "Follow-up removed")
+        else:
+            rows[pid] = datetime.now(timezone.utc).isoformat(timespec="seconds")
+            notice = tr("Dossier marqué comme contacté", "Marked as contacted")
+        save_followups(rows)
+        st.session_state["toast"] = notice
+    except (OSError, ValueError):
+        st.session_state["save_error"] = tr("Impossible d’enregistrer le suivi. Réessaie.", "Could not save the follow-up. Please retry.")
+
+
 def recommendation_label(value):
     return t[{"reject": "reject", "review": "review_rec", "shortlist": "shortlist"}[value]] if value else "—"
 
@@ -103,6 +121,47 @@ def save_button(d, key, kind="tertiary", width="stretch"):
               icon=":material/bookmark_remove:" if saved else ":material/bookmark_add:",
               disabled=shortlist_error,
               help=t["guard"] if d.flagged else None)
+
+
+def follow_up_panel(d):
+    """Donner suite à un dossier de la shortlist : répondre, écrire, appeler. L'app n'envoie rien."""
+    fu = follow_up(d.contact_channel, d.contact_handle, d.text, d.pitch_id, language)
+    done = followups.get(d.pitch_id)
+    channels = {"email": tr("E-mail", "Email"), "telegram": "Telegram"}
+    with st.container(key="panel_followup"):
+        st.html(ui.section_head(tr("Donner suite", "Follow up"),
+                                tr("Ce dossier est dans votre shortlist. Écrivez au fondateur là où il vous a contacté, ou appelez-le.",
+                                   "This pitch is on your shortlist. Write to the founder where they reached you, or call.")))
+        if d.contact_channel and d.contact_handle:
+            st.html(ui.contact_line(tr("Reçu par ", "Received via ") + channels[d.contact_channel], d.contact_handle))
+        a, b, c = st.columns(3)
+        with a:
+            if fu.reply_href:
+                st.link_button(tr("Répondre par e-mail", "Reply by email") if fu.reply_channel == "email" else tr("Répondre sur Telegram", "Reply on Telegram"),
+                               fu.reply_href, type="primary", icon=":material/reply:", width="stretch")
+            else:
+                st.button(tr("Répondre", "Reply"), key="reply_off", disabled=True, icon=":material/reply:", width="stretch")
+        with b:
+            if fu.email_href:
+                st.link_button(tr("Écrire un e-mail", "Send an email"), fu.email_href, icon=":material/mail:", width="stretch")
+            else:
+                st.button(tr("Écrire un e-mail", "Send an email"), key="email_off", disabled=True, icon=":material/mail:", width="stretch")
+        with c:
+            if fu.phone_href:
+                st.link_button(tr("Appeler ", "Call ") + fu.phone, fu.phone_href, icon=":material/call:", width="stretch")
+            else:
+                st.button(tr("Appeler", "Call"), key="call_off", disabled=True, icon=":material/call:", width="stretch")
+        if not d.contact_channel and not fu.any:
+            st.caption(tr("Dossier de démonstration : aucun contact réel n’est associé à cette entreprise fictive.",
+                          "Demo pitch: no real contact is attached to this fictional company."))
+        elif d.contact_channel and not fu.reply_href:
+            st.caption(tr("Impossible de répondre depuis un lien : ce fondateur n’a pas de pseudo Telegram public, ou son adresse est inutilisable.",
+                          "Cannot reply from a link: this founder has no public Telegram username, or their address is unusable."))
+        elif not fu.phone_href:
+            st.caption(tr("Aucun numéro de téléphone dans le dossier.", "No phone number in this pitch."))
+        st.button(tr(f"Contacté le {done[:10]} · annuler", f"Contacted on {done[:10]} · undo") if done else tr("Marquer comme contacté", "Mark as contacted"),
+                  key=f"contacted_{d.pitch_id}", on_click=toggle_contacted, args=(d.pitch_id,), type="tertiary",
+                  icon=":material/check_circle:" if done else ":material/radio_button_unchecked:", disabled=followup_error)
 
 
 def cards(items, prefix):
@@ -149,6 +208,13 @@ except (OSError, ValueError):
     saved_ids = []
     shortlist_error = True
     st.error(tr("Shortlist illisible. Le fichier local doit être restauré avant toute modification.", "Shortlist cannot be read. Restore the local file before editing."))
+followup_error = False
+try:
+    followups = load_followups()
+except (OSError, ValueError):
+    followups = {}
+    followup_error = True
+    st.error(tr("Fichier de suivi illisible. Il doit être restauré avant toute modification.", "Follow-up file cannot be read. Restore it before editing."))
 if "toast" in st.session_state:
     st.toast(st.session_state.pop("toast"))
 if "save_error" in st.session_state:
@@ -273,10 +339,18 @@ with st.container(key=f"page_{page}"):
                             on_click=go, args=(ids[min(len(ids)-1, position+1)],), width="stretch")
             d = lookup[pid]
             status, tone = status_of(d)
-            st.html(ui.profile_header(d.company_name, startup_idea(d), [d.sector, t.get(d.channel, d.channel), d.submitted_at],
+            contacted = followups.get(d.pitch_id)
+            st.html(ui.profile_header(d.company_name, startup_idea(d),
+                                      [d.sector, {"email": tr("E-mail", "Email"), "telegram": "Telegram"}.get(d.channel) or t.get(d.channel, d.channel), d.submitted_at[:10],
+                                       tr(f"Contacté le {contacted[:10]}", f"Contacted on {contacted[:10]}") if contacted else ""],
                                       d.score, status, tone, ring_label()))
             st.caption(tr("Source de la note : ", "Assessment source: ") + (d.assessment_source or "—"))
             save_button(d, "detail", kind="secondary", width="content")
+            if d.pitch_id in saved_ids:
+                follow_up_panel(d)
+            else:
+                st.caption(tr("Ce dossier vous plaît ? Ajoutez-le à la shortlist pour donner suite au fondateur.",
+                              "Like this pitch? Save it to your shortlist to follow up with the founder."))
             if d.flagged:
                 st.warning(t["guard"])
                 st.write(d.guard_reason)

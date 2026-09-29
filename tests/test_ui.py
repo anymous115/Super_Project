@@ -49,6 +49,7 @@ def test_aucune_primitive_ne_laisse_passer_une_balise():
         ui.page_header(PIEGE, PIEGE, PIEGE),
         ui.hero_title(PIEGE, PIEGE),
         ui.section_head(PIEGE, PIEGE),
+        ui.contact_line(PIEGE, PIEGE, PIEGE),
     ]
     for html in sorties:
         assert "<img" not in html and 'onerror="' not in html, html[:200]
@@ -114,3 +115,8 @@ def test_amorceur_du_champ_de_points_ne_casse_pas_sa_propre_page():
     assert "\n" not in html                                              # une seule ligne : la chaîne est échappée
     assert "unicornext-sonar-js" in html and "window.parent" in html     # garde contre le double lancement
     assert "</script>" not in ui.sonar_html("var x = '</script><b>';")[:-len("</script>")]
+
+
+def test_puces_de_la_fiche_ignorent_les_valeurs_vides():
+    html = ui.profile_header("Nom", "Idée", ["cyber", "—", "", "  — "], 70, "Analysé", "high")
+    assert html.count('class="profile__chip"') == 1 and "cyber" in html

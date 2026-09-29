@@ -139,11 +139,18 @@ def featured(kicker: str, name: str, idea: str, sector: str, score: Optional[flo
 
 def profile_header(name: str, idea: str, meta: Sequence[str], score: Optional[float],
                    status: str, status_tone: str, ring_label: str = "Score") -> str:
-    chips = "".join(f'<span class="profile__chip">{escape(item)}</span>' for item in meta if item)
+    chips = "".join(f'<span class="profile__chip">{escape(item)}</span>' for item in meta if item and item.strip(" —"))
     return (f'<div class="profile"><div class="profile__main">{tag(status, status_tone, dot=True)}'
             f'<h2 class="profile__name">{escape(name)}</h2>'
             f'<p class="profile__idea">{escape(idea)}</p><div class="profile__meta">{chips}</div></div>'
             f'{score_ring(score, "lg", label=ring_label)}</div>')
+
+
+def contact_line(channel_label: str, handle: str, note: str = "") -> str:
+    """Le canal d'origine du fondateur et son identifiant. À n'afficher que sur sa fiche."""
+    extra = f'<span class="contact__note">{escape(note)}</span>' if note else ""
+    return (f'<div class="contact"><span class="contact__channel">{escape(channel_label)}</span>'
+            f'<code class="contact__handle">{escape(handle)}</code>{extra}</div>')
 
 
 def bar_row(label: str, value: float, maximum: float, suffix: str = "", index: int = 0) -> str:

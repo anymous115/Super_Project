@@ -274,6 +274,13 @@ h1, h2, h3 { font-family: var(--font-display); font-weight: 600; letter-spacing:
 .profile__meta { display: flex; flex-wrap: wrap; gap: var(--space-2); }
 .profile__chip { font-size: 12px; color: var(--text-2); background: var(--surface-2); border: 1px solid var(--line); border-radius: var(--r-pill); padding: 4px 10px; }
 
+/* ---------- Donner suite ---------- */
+.contact { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2); margin: 0 0 var(--space-4); font-size: 13px; color: var(--text-2); }
+.contact__channel { font-weight: 600; color: var(--text); }
+.contact__handle { padding: 2px 8px; border-radius: var(--r-sm); background: var(--surface-2); border: 1px solid var(--line); font-family: var(--font); font-size: 13px; overflow-wrap: anywhere; }
+.contact__note { color: var(--text-3); }
+[class*="st-key-panel_followup"] { border-color: #6538E033; background: linear-gradient(180deg, var(--violet-100) 0%, var(--surface) 55%); }
+
 /* ---------- Boutons ---------- */
 .stButton button, [data-testid="stFormSubmitButton"] button, [data-testid="stDownloadButton"] button {
   min-height: 44px; border-radius: var(--r-sm); font-size: 14px; font-weight: 500;
@@ -286,7 +293,21 @@ h1, h2, h3 { font-family: var(--font-display); font-weight: 600; letter-spacing:
 [data-testid="stBaseButton-primary"]:hover:not(:disabled), [data-testid="stBaseButton-primaryFormSubmit"]:hover:not(:disabled) { background: var(--violet-600); border-color: var(--violet-600); }
 [data-testid="stBaseButton-primary"]:active:not(:disabled) { background: var(--violet-700); border-color: var(--violet-700); }
 [data-testid="stBaseButton-tertiary"] { background: transparent; color: var(--violet-600); border: 1px solid transparent; }
-[data-testid="stBaseButton-tertiary"]:hover:not(:disabled) { background: var(--violet-100); }
+[data-testid="stBaseButton-tertiary"]:hover:not(:disabled), [data-testid="stBaseButton-tertiary"]:focus:not(:disabled) { background: var(--violet-100); color: var(--violet-700); border-color: transparent; }
+[data-testid="stBaseButton-tertiary"]:active:not(:disabled) { background: var(--violet-100); color: var(--violet-700); }
+/* Boutons-liens (mailto:, tel:, t.me) : mêmes règles que les boutons. */
+[data-testid="stLinkButton"] a {
+  min-height: 44px; border-radius: var(--r-sm); font-size: 14px; font-weight: 500; text-decoration: none;
+  transition: transform var(--dur-micro) var(--ease-out), background var(--dur-micro) var(--ease-out), border-color var(--dur-micro) var(--ease-out);
+}
+[data-testid="stLinkButton"] a p { color: inherit; font-size: 14px; }
+[data-testid="stBaseLinkButton-primary"] { background: var(--violet-500); color: #fff; border: 1px solid var(--violet-500); }
+[data-testid="stBaseLinkButton-primary"]:hover { background: var(--violet-600); border-color: var(--violet-600); color: #fff; }
+[data-testid="stBaseLinkButton-primary"]:active { background: var(--violet-700); border-color: var(--violet-700); }
+[data-testid="stBaseLinkButton-secondary"] { background: var(--surface); color: var(--text); border: 1px solid var(--line-strong); }
+[data-testid="stBaseLinkButton-secondary"]:hover { background: var(--surface-2); border-color: var(--text-3); color: var(--text); }
+[data-testid="stLinkButton"] a:hover { transform: translateY(-1px); }
+[data-testid="stLinkButton"] a:active { transform: translateY(0) scale(.98); }
 .stButton button:hover:not(:disabled) { transform: translateY(-1px); }
 .stButton button:active:not(:disabled) { transform: translateY(0) scale(.98); }
 .stButton button:disabled, [data-testid="stFormSubmitButton"] button:disabled { opacity: .45; cursor: not-allowed; }
@@ -357,5 +378,5 @@ h1, h2, h3 { font-family: var(--font-display); font-weight: 600; letter-spacing:
 /* ---------- Mouvement réduit : les valeurs finales s'affichent tout de suite ---------- */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
-  .stButton button:hover:not(:disabled), .stat:hover, [class*="st-key-card_"]:hover { transform: none; }
+  .stButton button:hover:not(:disabled), [data-testid="stLinkButton"] a:hover, .stat:hover, [class*="st-key-card_"]:hover { transform: none; }
 }

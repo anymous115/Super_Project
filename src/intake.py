@@ -50,8 +50,11 @@ def load_inbox(inbox_root: Path) -> Tuple[List[Dict[str, Any]], List[Dict[str, A
     Renvoie (sources, appels de notation). Chaque `inbox/SUB-0001/` devient une
     source ; son `score.json`, écrit par `src/triage.py`, fournit l'appel. Une
     soumission pas encore notée, ou illisible, reste visible : elle attend dans
-    la file au lieu de disparaître. L'expéditeur n'est jamais repris : c'est un
-    identifiant personnel, et l'interface n'en a pas besoin.
+    la file au lieu de disparaître.
+
+    L'expéditeur est repris (`sender_handle`), mais l'interface ne l'utilise que pour proposer de
+    donner suite (src/followup.py) : c'est un identifiant personnel, il n'apparaît ni dans les
+    cartes ni dans les tableaux.
     """
     sources: List[Dict[str, Any]] = []
     runs: List[Dict[str, Any]] = []
@@ -72,6 +75,7 @@ def load_inbox(inbox_root: Path) -> Tuple[List[Dict[str, Any]], List[Dict[str, A
         sources.append({
             "pitch_id": submission.submission_id,
             "channel": submission.channel,
+            "sender_handle": submission.sender_handle,
             "pitch_text": text,
             "submitted_at": submission.received_at,
         })
@@ -101,6 +105,9 @@ class Dossier:
     error: Optional[str]
     assessment_source: str = ""
     criterion_reasons: Dict[str, str] = field(default_factory=dict)
+    # Comment joindre le fondateur : seulement pour un pitch reçu par Telegram ou e-mail.
+    contact_channel: str = ""
+    contact_handle: str = ""
 
     def to_dict(self) -> Dict[str, Any]:
         return asdict(self)
@@ -168,6 +175,8 @@ def load_dossiers(
             error=None if assessment else run.get("error") if run else None,
             assessment_source=assessment["assessor"] + " · " + assessment["assessed_at"] if assessment else (MODELS["local"].name + " · V2" if parsed else ""),
             criterion_reasons=assessment["criterion_reasons"] if assessment else {},
+            contact_channel=source["channel"] if source.get("channel") in ("telegram", "email") else "",
+            contact_handle=source.get("sender_handle") or "",
         ))
     return dossiers
 
@@ -226,6 +235,35 @@ def save_shortlist(ids: Sequence[str], path: Path = SHORTLIST) -> None:
         with tempfile.NamedTemporaryFile(mode="w", encoding="utf-8", dir=path.parent, delete=False) as handle:
             temporary = Path(handle.name)
             json.dump(list(dict.fromkeys(ids)), handle, ensure_ascii=False)
+        os.replace(temporary, path)
+    finally:
+        if temporary is not None:
+            temporary.unlink(missing_ok=True)
+
+
+FOLLOWUPS = RESULTS / "intake_followups.json"
+
+
+def load_followups(path: Path = FOLLOWUPS) -> Dict[str, str]:
+    """Les dossiers auxquels le VC a donné suite : identifiant → date (UTC, ISO 8601)."""
+    if not path.exists():
+        return {}
+    rows = json.loads(path.read_text(encoding="utf-8"))
+    if not isinstance(rows, dict) or not all(isinstance(k, str) and isinstance(v, str) for k, v in rows.items()):
+        raise ValueError("Invalid follow-up format")
+    return rows
+
+
+def save_followups(rows: Dict[str, str], path: Path = FOLLOWUPS) -> None:
+    """Remplace le fichier d'un bloc : une écriture interrompue ne le tronque pas."""
+    import os
+    import tempfile
+    path.parent.mkdir(parents=True, exist_ok=True)
+    temporary = None
+    try:
+        with tempfile.NamedTemporaryFile(mode="w", encoding="utf-8", dir=path.parent, delete=False) as handle:
+            temporary = Path(handle.name)
+            json.dump(dict(rows), handle, ensure_ascii=False)
         os.replace(temporary, path)
     finally:
         if temporary is not None:
