@@ -244,7 +244,7 @@ def collect_project_status(root: Optional[Path] = None) -> ProjectSnapshot:
                 by_pitch.setdefault(run["pitch_id"], []).append(run["total_computed"])
         scores = {pid: sum(values) / len(values) for pid, values in by_pitch.items()}
         row = {"prompt": version, "pitchs": len(scores)}
-        for label, reference in (("Claude", calibration), ("Codex", codex_scores)):
+        for label, reference in (("calibration", calibration), ("Codex", codex_scores)):
             errors = [score - reference[pid] for pid, score in scores.items()
                       if isinstance(reference.get(pid), (int, float))]
             row[f"RMSE vs {label}"] = round((sum(e * e for e in errors) / len(errors)) ** 0.5, 2) if errors else None
@@ -310,6 +310,7 @@ def collect_project_status(root: Optional[Path] = None) -> ProjectSnapshot:
         )),
         PhaseProgress(6, "Livraison", (
             TaskProgress("Notebook final", float(notebook_ready), "Notebook relié au pipeline" if notebook_ready else "Notebook structuré, cellules TODO restantes", "Compléter puis exécuter les cellules TODO du notebook", 3),
+            TaskProgress("Nettoyer et organiser GitHub pour le professeur", 0.0, "Revue de lisibilité du dépôt à faire", "Clarifier le README avec des liens vers le notebook, l’application, les résultats et la présentation ; archiver les fichiers obsolètes et vérifier les instructions de lancement", 3),
             TaskProgress("Présentation", float(presentation_count > 0), f"{presentation_count} présentation(s)", "Créer la présentation finale", 4),
             TaskProgress("Release v1.0", float("v1.0" in tags), "Tag v1.0 présent" if "v1.0" in tags else "Tag v1.0 absent", "Tester la démo puis créer le tag v1.0", 4),
         )),

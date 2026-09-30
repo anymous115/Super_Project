@@ -10,6 +10,7 @@ from pathlib import Path
 
 import streamlit as st
 
+from src.config import MODELS
 from src.project_status import PhaseProgress, ProjectSnapshot, collect_project_status
 
 
@@ -78,6 +79,7 @@ def render_overview(snapshot: ProjectSnapshot) -> None:
     cols[3].metric("Pitchs scorés", f"{snapshot.metrics['scored_pitches']} / 50")
     st.progress(snapshot.progress)
     st.subheader("Benchmark des prompts")
+    st.caption(f"Modèle évalué : {MODELS['local'].name}, exécuté localement via Ollama.")
     benchmark_columns = st.columns(3)
     for col, row in zip(benchmark_columns, snapshot.metrics["benchmark"]):
         col.metric(row["prompt"], f"{row['pitchs']} / 50 pitchs")
@@ -106,8 +108,15 @@ def render_data(snapshot: ProjectSnapshot) -> None:
     metrics = snapshot.metrics
     cols = st.columns(3)
     cols[0].metric("Pitchs rédigés", f"{metrics['drafted_pitches']} / 50")
-    cols[1].metric("Évaluations IA V1", f"{metrics['direct_assessments']} / 50")
+    cols[1].metric("Évaluations Codex V1", f"{metrics['direct_assessments']} / 50")
     cols[2].metric("PDF", f"{metrics['pdfs']} / 50")
+    st.subheader("Origine des notes")
+    st.dataframe([
+        {"Source": "Calibration", "Rôle": "Cibles fixées pour la rédaction des pitchs", "Utilisation": "Repère de comparaison du benchmark"},
+        {"Source": "Codex", "Rôle": "Évaluations directes des 50 pitchs avec justifications", "Utilisation": "Notes du corpus dans l’application et seconde référence du benchmark"},
+        {"Source": f"Qwen ({MODELS['local'].name}) via Ollama", "Rôle": "Scores mesurés avec les prompts V0, V1 et V2", "Utilisation": "Modèle évalué ; V2 pour les nouveaux dossiers"},
+    ], width="stretch", hide_index=True)
+    st.caption("Ollama exécute le modèle Qwen. Le benchmark lit les références enregistrées ; il ne lance pas d’appel à Claude ou Codex.")
     task_table(snapshot.phases[1])
     st.info(
         "Les scores de calibration guident la rédaction et servent de repère de cohérence "
@@ -123,7 +132,7 @@ def render_pipeline(snapshot: ProjectSnapshot) -> None:
     cols[3].metric("Injections contenues", snapshot.metrics["traps_contained"])
     st.subheader("Qualité par version de prompt")
     st.dataframe(snapshot.metrics["benchmark"], width="stretch", hide_index=True)
-    st.caption("RMSE en points sur 100 : plus elle est faible, plus les notes sont proches de la référence. Claude : cibles de calibration ; Codex : évaluations directes. Ces références sont des jugements IA. Les répétitions sont moyennées par pitch.")
+    st.caption("RMSE en points sur 100 : plus elle est faible, plus les notes sont proches de la référence. Calibration : cibles de rédaction ; Codex : évaluations directes. Aucune des deux références ne constitue une vérité validée par des experts humains. Les répétitions sont moyennées par pitch.")
     st.subheader("Filtre anti-injection · corpus courant")
     guard_cols = st.columns(2)
     guard_cols[0].metric(
